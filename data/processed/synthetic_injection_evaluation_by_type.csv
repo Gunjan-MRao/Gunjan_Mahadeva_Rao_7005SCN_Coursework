@@ -1,0 +1,13 @@
+method,injection_type,recall,n
+isolation_forest,invoice_inflation,0.125,136
+isolation_forest,ghost_vendor_burst,0.7313,134
+isolation_forest,round_number_kickback,0.0846,130
+local_outlier_factor,invoice_inflation,0.0368,136
+local_outlier_factor,ghost_vendor_burst,0.0,134
+local_outlier_factor,round_number_kickback,0.0154,130
+one_class_svm,invoice_inflation,0.0441,136
+one_class_svm,ghost_vendor_burst,0.0299,134
+one_class_svm,round_number_kickback,0.0462,130
+autoencoder,invoice_inflation,0.0662,136
+autoencoder,ghost_vendor_burst,0.0,134
+autoencoder,round_number_kickback,0.0385,130

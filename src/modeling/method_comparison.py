@@ -1,0 +1,191 @@
+"""
+Phase 3 extension — Multi-method anomaly detection comparison.
+
+Directly addresses supervisor feedback: "More detailed comparison between
+methods would improve it further."
+
+Trains four unsupervised anomaly detectors on the *same* pre-COVID feature
+matrix used by the primary Isolation Forest model (see
+`src.modeling.isolation_forest_shap.FEATURE_COLUMNS`), scores every
+trust-spend record, and reports:
+
+  1. Per-method flag rates by period/source (does the qualitative COVID
+     shock story replicate across methods, or is it an Isolation-Forest-
+     specific artefact?).
+  2. Pairwise agreement between methods (Jaccard index + Cohen's kappa on
+     the binary anomaly flags) — the standard way to report "detector
+     agreement" in comparative anomaly-detection studies (cf. the worked
+     multi-detector comparison in scikit-learn's own anomaly-detection
+     gallery, https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_anomaly_comparison.html).
+  3. A consensus score (fraction of methods flagging each record), which
+     forms the ensemble signal reused as an extra red-flag rule in
+     Phase 4 and as a feature in Phase 5 network analysis.
+
+Methods compared:
+  - Isolation Forest (Liu, Ting & Zhou, 2008)      — tree-partitioning
+  - Local Outlier Factor (Breunig et al., 2000)    — density-based
+  - One-Class SVM (Schölkopf et al., 2001)         — boundary/margin-based
+  - MLP Autoencoder (reconstruction-error based)   — representation-learning
+
+All four are trained ONLY on pre-COVID data (same as the primary model) so
+comparisons are apples-to-apples with the headline Isolation Forest result.
+"""
+from __future__ import annotations
+
+import logging
+import time
+
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import OneClassSVM
+
+from src import config
+from src.modeling.isolation_forest_shap import FEATURE_COLUMNS, engineer_features, load_trust_panel
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+logger = logging.getLogger(__name__)
+
+METHOD_NAMES = ["isolation_forest", "local_outlier_factor", "one_class_svm", "autoencoder"]
+
+
+def _flag_top_percentile(scores: np.ndarray, percentile: float) -> np.ndarray:
+    threshold = np.percentile(scores, percentile)
+    return scores >= threshold
+
+
+def fit_isolation_forest(X_train: pd.DataFrame, X: pd.DataFrame) -> np.ndarray:
+    model = IsolationForest(**config.ISOLATION_FOREST_PARAMS)
+    model.fit(X_train)
+    return -model.decision_function(X)  # higher = more anomalous
+
+
+def fit_lof(X_train: pd.DataFrame, X: pd.DataFrame) -> np.ndarray:
+    model = LocalOutlierFactor(**config.LOF_PARAMS)
+    model.fit(X_train)
+    return -model.decision_function(X)  # higher = more anomalous
+
+
+def fit_one_class_svm(X_train_scaled: np.ndarray, X_scaled: np.ndarray) -> np.ndarray:
+    model = OneClassSVM(**config.OCSVM_PARAMS)
+    model.fit(X_train_scaled)
+    return -model.decision_function(X_scaled)  # higher = more anomalous
+
+
+def fit_autoencoder(X_train_scaled: np.ndarray, X_scaled: np.ndarray) -> np.ndarray:
+    """Bottleneck MLP trained to reconstruct its own (scaled) input.
+    Anomaly score = per-record mean squared reconstruction error."""
+    model = MLPRegressor(**config.AUTOENCODER_PARAMS)
+    model.fit(X_train_scaled, X_train_scaled)
+    reconstruction = model.predict(X_scaled)
+    mse = np.mean((X_scaled - reconstruction) ** 2, axis=1)
+    return mse
+
+
+def run_method_comparison(panel: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    if panel is None:
+        panel = load_trust_panel()
+    df = engineer_features(panel)
+    X = df[FEATURE_COLUMNS].astype(float)
+    train_mask = df["period"] == "pre_covid"
+    X_train = X[train_mask]
+
+    scaler = StandardScaler().fit(X_train)
+    X_scaled = scaler.transform(X)
+    X_train_scaled = scaler.transform(X_train)
+
+    logger.info("Fitting 4 anomaly detectors on %d pre-COVID records, scoring %d total records...", len(X_train), len(X))
+
+    scores = {}
+    timings = {}
+
+    t0 = time.time()
+    scores["isolation_forest"] = fit_isolation_forest(X_train, X)
+    timings["isolation_forest"] = time.time() - t0
+
+    t0 = time.time()
+    scores["local_outlier_factor"] = fit_lof(X_train, X)
+    timings["local_outlier_factor"] = time.time() - t0
+
+    t0 = time.time()
+    n_svm_train = min(config.OCSVM_TRAIN_SAMPLE_SIZE, X_train_scaled.shape[0])
+    rng = np.random.RandomState(config.RANDOM_STATE)
+    svm_idx = rng.choice(X_train_scaled.shape[0], size=n_svm_train, replace=False)
+    logger.info("One-Class SVM: subsampling training set from %d to %d rows for tractability", X_train_scaled.shape[0], n_svm_train)
+    scores["one_class_svm"] = fit_one_class_svm(X_train_scaled[svm_idx], X_scaled)
+    timings["one_class_svm"] = time.time() - t0
+
+    t0 = time.time()
+    scores["autoencoder"] = fit_autoencoder(X_train_scaled, X_scaled)
+    timings["autoencoder"] = time.time() - t0
+
+    out = df[["record_id", "source", "entity", "supplier", "date", "amount", "category", "period"]].copy()
+    flags = {}
+    for method in METHOD_NAMES:
+        pct = config.AUTOENCODER_ANOMALY_PERCENTILE if method == "autoencoder" else config.ANOMALY_SCORE_PERCENTILE
+        out[f"{method}_score"] = scores[method]
+        flag = _flag_top_percentile(scores[method], pct)
+        out[f"{method}_flag"] = flag
+        flags[method] = flag
+        logger.info(
+            "%-22s fit+score in %.1fs | flagged %d/%d (%.2f%%)",
+            method, timings[method], flag.sum(), len(flag), flag.mean() * 100,
+        )
+
+    out["consensus_count"] = out[[f"{m}_flag" for m in METHOD_NAMES]].sum(axis=1)
+    out["consensus_flag_majority"] = out["consensus_count"] >= 2  # flagged by >=2 of 4 methods
+
+    out.to_csv(config.METHOD_COMPARISON_PATH, index=False)
+    logger.info("Saved per-record method comparison scores -> %s", config.METHOD_COMPARISON_PATH)
+
+    # --- Summary 1: flag rate by period, per method -------------------------------
+    rate_rows = []
+    for method in METHOD_NAMES:
+        by_period = out.groupby("period")[f"{method}_flag"].mean().mul(100).round(2)
+        for period, rate in by_period.items():
+            rate_rows.append({"method": method, "period": period, "flag_rate_pct": rate})
+    rate_df = pd.DataFrame(rate_rows)
+
+    # --- Summary 2: pairwise agreement (Jaccard + Cohen's kappa) -------------------
+    from sklearn.metrics import cohen_kappa_score
+
+    agreement_rows = []
+    for i, m1 in enumerate(METHOD_NAMES):
+        for m2 in METHOD_NAMES[i + 1:]:
+            f1, f2 = flags[m1], flags[m2]
+            intersection = np.logical_and(f1, f2).sum()
+            union = np.logical_or(f1, f2).sum()
+            jaccard = intersection / union if union else np.nan
+            kappa = cohen_kappa_score(f1, f2)
+            agreement_rows.append({
+                "method_a": m1, "method_b": m2,
+                "jaccard_index": round(jaccard, 4),
+                "cohens_kappa": round(kappa, 4),
+                "n_both_flag": int(intersection),
+            })
+    agreement_df = pd.DataFrame(agreement_rows)
+
+    logger.info("Flag rate by period per method:\n%s", rate_df.pivot(index="period", columns="method", values="flag_rate_pct").to_string())
+    logger.info("Pairwise method agreement:\n%s", agreement_df.to_string(index=False))
+    logger.info(
+        "Consensus (>=2/4 methods agree): %d/%d records (%.2f%%)",
+        out["consensus_flag_majority"].sum(), len(out), out["consensus_flag_majority"].mean() * 100,
+    )
+
+    summary = {
+        "flag_rate_by_period": rate_df,
+        "pairwise_agreement": agreement_df,
+        "timings_seconds": pd.DataFrame([timings]),
+    }
+    # persist a flattened summary CSV for the report
+    rate_df.to_csv(config.METHOD_COMPARISON_SUMMARY_PATH, index=False)
+    agreement_df.to_csv(str(config.METHOD_COMPARISON_SUMMARY_PATH).replace(".csv", "_agreement.csv"), index=False)
+
+    return out, summary
+
+
+if __name__ == "__main__":
+    run_method_comparison()

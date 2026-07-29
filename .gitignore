@@ -16,6 +16,11 @@ data/processed/master_procurement_panel.csv
 data/processed/anomaly_scores.csv
 data/processed/validation_redflags.csv
 
+# method_comparison_scores.csv (~59MB) is a per-record raw score dump from the
+# 4-detector comparison (Stage 5A) - same rationale as above. The derived
+# summary/agreement CSVs (<10KB each) are committed and drive the figures/tables.
+data/processed/method_comparison_scores.csv
+
 # --- Python ---
 __pycache__/
 *.py[cod]

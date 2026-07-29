@@ -67,3 +67,72 @@ ANOMALY_SCORE_PERCENTILE = 98
 
 # Random seed used across the project for reproducibility
 RANDOM_STATE = 42
+
+# ---------------------------------------------------------------------------
+# Multi-method anomaly detection comparison (Phase 3 extension)
+# ---------------------------------------------------------------------------
+LOF_PARAMS = {
+    "n_neighbors": 35,
+    "novelty": True,          # allows scoring records not used in fit()
+    "contamination": 0.02,
+    "n_jobs": -1,
+}
+
+OCSVM_PARAMS = {
+    "kernel": "rbf",
+    "nu": 0.02,                # analogous to expected contamination
+    "gamma": "scale",
+}
+# One-Class SVM training scales poorly (O(n^2)-O(n^3)) with sample size, so
+# fitting is subsampled to a manageable training set for computational
+# tractability -- standard practice for kernel-SVM methods on large datasets.
+# All records (not just the subsample) are still scored/flagged.
+OCSVM_TRAIN_SAMPLE_SIZE = 8000
+
+# "Autoencoder" implemented as a bottleneck MLP trained for input
+# reconstruction (scikit-learn MLPRegressor) rather than a full deep-learning
+# framework, to keep the pipeline dependency-light, CPU-only, and fully
+# reproducible without GPU requirements. Architecture: 7 -> 4 -> 2 -> 4 -> 7,
+# i.e. a genuine bottleneck (compression to 2 latent units) as in a standard
+# autoencoder; anomaly score = reconstruction error (MSE).
+AUTOENCODER_PARAMS = {
+    "hidden_layer_sizes": (4, 2, 4),
+    "activation": "tanh",
+    "solver": "adam",
+    "max_iter": 500,
+    "random_state": RANDOM_STATE,
+    "early_stopping": True,
+    "n_iter_no_change": 15,
+}
+AUTOENCODER_ANOMALY_PERCENTILE = 98  # reconstruction-error percentile used to flag
+
+METHOD_COMPARISON_PATH = DATA_PROCESSED_DIR / "method_comparison_scores.csv"
+METHOD_COMPARISON_SUMMARY_PATH = DATA_PROCESSED_DIR / "method_comparison_summary.csv"
+
+# ---------------------------------------------------------------------------
+# Synthetic anomaly injection (quantitative precision/recall/F1 evaluation)
+# ---------------------------------------------------------------------------
+# Confidential audit ground truth is unavailable (see validation/audit_validation.py),
+# so detector performance is additionally benchmarked against synthetic anomalies
+# with known, literature-motivated fraud/error signatures injected into a held-out
+# evaluation sample. This gives genuine precision/recall/F1/PR-AUC numbers,
+# standard practice for evaluating unsupervised anomaly detectors absent labels.
+SYNTHETIC_INJECTION_RATE = 0.02       # fraction of eval sample replaced with synthetic anomalies
+SYNTHETIC_EVAL_SAMPLE_SIZE = 20000    # size of the (post-COVID) evaluation sample
+SYNTHETIC_AMOUNT_INFLATION_RANGE = (5.0, 15.0)   # x-normal-amount multiplier for inflated invoices
+SYNTHETIC_RESULTS_PATH = DATA_PROCESSED_DIR / "synthetic_injection_evaluation.csv"
+
+# ---------------------------------------------------------------------------
+# Statistical significance testing
+# ---------------------------------------------------------------------------
+N_PERMUTATIONS = 5000
+N_BOOTSTRAP = 2000
+STATS_RESULTS_PATH = DATA_PROCESSED_DIR / "statistical_tests_summary.csv"
+
+# ---------------------------------------------------------------------------
+# Supplier-buyer network analysis
+# ---------------------------------------------------------------------------
+NETWORK_MIN_TRANSACTIONS = 2   # minimum trust-supplier transactions to include an edge
+NETWORK_HUB_PERCENTILE = 95    # betweenness-centrality percentile defining a "hub" supplier
+NETWORK_NODE_METRICS_PATH = DATA_PROCESSED_DIR / "network_supplier_metrics.csv"
+NETWORK_COMMUNITY_PATH = DATA_PROCESSED_DIR / "network_communities.csv"

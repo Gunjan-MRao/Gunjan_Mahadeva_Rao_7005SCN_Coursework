@@ -28,10 +28,16 @@ src/
     make_figures.py         generates all docs/figures/*.png
   modeling/
     isolation_forest_shap.py   Isolation Forest training/scoring + SHAP explainability
+    method_comparison.py       multi-method anomaly detector comparison (IF, LOF, One-Class SVM, MLP-Autoencoder)
+    synthetic_evaluation.py    synthetic anomaly injection + precision/recall/F1/PR-AUC evaluation
+  network/
+    supplier_network.py        bipartite buyer-supplier graph, centrality, co-occurrence community detection
   validation/
     audit_validation.py    rule-based red-flag validation + ML/rule triangulation
+  analysis/
+    statistical_tests.py    hypergeometric exact test, bootstrap CIs, Mann-Whitney U
   run_pipeline.py           orchestrates all phases end-to-end
-tests/                      pytest unit tests (schema, cleaning logic, feature/rule correctness)
+tests/                      pytest unit tests (schema, cleaning logic, feature/rule correctness, Phase 5 modules)
 requirements.txt
 ```
 
@@ -68,6 +74,14 @@ Records are flagged as anomalous at the 98th percentile of anomaly score. Result
 
 **Stage 5 — Validation.** Confidential NAO / NHS Counter Fraud Authority case-level audit data is not publicly accessible, so this project uses a defensible literature-derived proxy: four explicit rule-based red flags (direct-award COVID contracts, >3× historical-median price spikes, new-supplier + large COVID contract, suspiciously round invoice amounts). These map onto the corruption-risk indicators published in Transparency International UK's [Track and Trace](https://www.transparency.org.uk/sites/default/files/2024-11/Track%20and%20Trace%20-%20Transparency%20International%20UK.pdf) (2021) — which found over 20% of £18bn UK pandemic procurement contracts raised at least one red flag, predominantly single-source/direct-award and no-track-record-supplier signals — and the NHS Counter Fraud Authority's published fraud-risk quick guides, including [Preventing procurement fraud in the NHS](https://cfa.nhs.uk/resources/downloads/documents/fraud-reports/Preventing_procurement.pdf) (2022) and [Buying goods and services](https://cfa.nhs.uk/resources/downloads/guidance/fraud-awareness/quick-reference-guides/Buying_goods-and-services.pdf) (2026), which list invoice manipulation, high-risk/no-track-record suppliers, and non-PO spend as key vulnerability areas. **62.7% of ML-flagged anomalies are corroborated by at least one independent rule** (vs. an 18.9% base rate if rule-flags were randomly distributed), providing triangulated construct validity for the unsupervised model without needing access to confidential audit case data.
 
+**Stage 5A — Multi-method comparison.** Isolation Forest is benchmarked against three alternative unsupervised detectors trained on the same pre-COVID feature set: Local Outlier Factor (Breunig et al., 2000), One-Class SVM (Schölkopf et al., 2001), and an MLP-Autoencoder (reconstruction-error based), each calibrated to flag ~2% of records for a like-for-like comparison (`src/modeling/method_comparison.py`). Pairwise Jaccard agreement shows Isolation Forest is a clear outlier relative to the other three: IF vs. LOF = 0.060, IF vs. One-Class SVM = 0.058, IF vs. Autoencoder = 0.050, while LOF/One-Class SVM/Autoencoder cluster tightly together (pairwise Jaccard 0.45–0.70). This indicates Isolation Forest's random-partitioning mechanism captures a qualitatively different notion of anomaly (isolable via few feature splits) than the density-, boundary-, and reconstruction-based methods, which instead agree with each other on which records look unusual relative to the bulk distribution. A consensus flag (≥2 of 4 methods agreeing) identifies 5,410/257,095 records (2.10%) as anomalous by multiple independent detection paradigms.
+
+**Stage 5B — Synthetic anomaly injection evaluation.** Because no ground-truth fraud labels exist, detector sensitivity is additionally benchmarked using a synthetic-injection design (following the simulation-study approach in [Anomaly Detection Using Unsupervised ML Algorithms: A Simulation Study](https://scholarworks.utrgv.edu/mss_fac/560/)): 400 synthetic anomalies (136 invoice-inflation, 134 ghost-vendor-burst, 130 round-number-kickback) are injected into a 20,000-record held-out sample, and each method's ability to recover the known injected records is measured (`src/modeling/synthetic_evaluation.py`). Isolation Forest substantially outperforms the alternatives — precision/recall/F1 = 0.315 vs. 0.018–0.040 for LOF/One-Class SVM/Autoencoder, and PR-AUC = 0.182 vs. 0.025–0.049. The advantage is most dramatic for the ghost-vendor-burst injection type (a new supplier with zero transaction recency and an unusually large amount): Isolation Forest recalls 73.1% of injected cases vs. 0–3.0% for the other three methods, showing its random-partitioning mechanism is far better suited to isolating a small number of jointly-extreme feature values than boundary/density/reconstruction-based approaches.
+
+**Stage 5C — Statistical significance testing.** Three tests quantify whether the Stage 2/3 findings are statistically robust rather than sampling noise (`src/analysis/statistical_tests.py`): (i) an exact hypergeometric test on the ML/rule-based triangulation overlap (N=288,071, K=54,425 rule-flagged, n=5,142 ML-flagged, observed overlap=3,226 vs. 971.5 expected by chance) gives log(p) ≈ −2,445 — the overlap is astronomically unlikely to be chance; (ii) 2,000-resample bootstrap 95% confidence intervals around the Isolation Forest anomaly rate and new-supplier rate by period (e.g. COVID anomaly rate 1.82% [1.73%, 1.91%] vs. pre-COVID 0.37% [0.32%, 0.43%] — non-overlapping intervals); (iii) Mann-Whitney U tests on the full anomaly-score distributions between periods, all highly significant (p≈0), with rank-biserial effect sizes of 0.44 (pre-COVID vs. COVID), 0.61 (pre-COVID vs. post-COVID), and 0.22 (COVID vs. post-COVID) — a large, durable shift in the score distribution that persists after the acute pandemic period.
+
+**Stage 5D — Supplier-buyer network analysis.** A bipartite buyer-supplier graph (8 buyer trusts, 5,286 suppliers, 5,691 edges with ≥2 transactions) is built to test whether anomalies concentrate among well-connected "hub" suppliers, a pattern associated with collusive/incumbent-favouring behaviour in procurement-fraud network literature ([Graph Data Mining for Detecting Collusions in Bidding](https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602); [Public Procurement Fraud Detection: A Review Using Network Analysis](https://www.academia.edu/125244008/Public_Procurement_Fraud_Detection_A_Review_Using_Network_Analysis)). Hub suppliers (multi-trust suppliers, degree≥2, OR top-5%-by-transaction-volume suppliers; n=476) are identified via degree and betweenness centrality (Freeman, 1977) on the bipartite projection (Borgatti & Everett, 1997), and a same-side co-occurrence projection graph (suppliers linked when they share a buyer+category+month pool) is partitioned into communities using greedy modularity maximisation (Clauset, Newman & Moore, 2004; modularity=0.635, 32 communities). Contrary to the collusion-hypothesis expectation, **hub suppliers show a markedly LOWER anomaly rate (1.16%, n=315) than non-hub suppliers (3.64%, n=3,535)** — Mann-Whitney p=5.4×10⁻²² — suggesting the anomalies detected in this dataset concentrate among smaller, newer, single-relationship suppliers rather than large, well-established incumbents. Community-level anomaly rates vary more than 5-fold (community 7: 8.25% vs. community 0: 1.48%, against an overall rate of 2.00%), indicating that certain buyer/category/month supplier pools carry disproportionate anomaly risk even though the top-level hub/non-hub split does not.
+
 ## Key results at a glance
 
 | Metric | Pre-COVID | COVID | Post-COVID |
@@ -76,7 +90,17 @@ Records are flagged as anomalous at the 98th percentile of anomaly score. Result
 | New-supplier rate (% of transactions) | 1.32% | **3.21%** | 1.71% |
 | Isolation Forest anomaly rate | 0.37% | 1.82% | **2.64%** |
 
-ML/rule-based triangulation: **3,226 / 5,142 (62.7%)** ML-flagged anomalies corroborated by ≥1 independent audit red-flag rule.
+ML/rule-based triangulation: **3,226 / 5,142 (62.7%)** ML-flagged anomalies corroborated by ≥1 independent audit red-flag rule (hypergeometric exact test log(p) ≈ −2,445 — not attributable to chance).
+
+| Advanced-methods metric | Result |
+|---|---|
+| Method agreement (pairwise Jaccard), Isolation Forest vs. others | 0.05–0.06 (outlier) |
+| Method agreement (pairwise Jaccard), LOF / One-Class SVM / Autoencoder | 0.45–0.70 (cluster together) |
+| Consensus anomalies (≥2 of 4 methods agree) | 5,410 / 257,095 (2.10%) |
+| Synthetic injection F1 — Isolation Forest vs. best alternative | 0.315 vs. 0.040 (One-Class SVM) |
+| Synthetic recall, ghost-vendor-burst type — Isolation Forest vs. others | 73.1% vs. 0–3.0% |
+| Hub-supplier anomaly rate vs. non-hub | 1.16% (n=315) vs. **3.64%** (n=3,535), p=5.4×10⁻²² |
+| Network communities detected (modularity) | 32 communities, Q=0.635 |
 
 Figures (see `docs/figures/`):
 - `stl_decomposition.png` — observed/trend/seasonal/residual monthly spend with COVID period shaded
@@ -84,6 +108,10 @@ Figures (see `docs/figures/`):
 - `new_supplier_rate.png` — new-supplier onboarding rate, COVID spike clearly visible
 - `anomaly_timeline.png` — monthly Isolation Forest anomaly rate
 - `shap_top_feature_summary.png` — dominant SHAP feature across top anomalies
+- `method_agreement_heatmap.png` — pairwise Jaccard agreement between the four anomaly detectors
+- `synthetic_precision_recall.png` — precision/recall/F1 on the synthetic injection benchmark, by method
+- `network_hub_comparison.png` — hub vs. non-hub supplier anomaly rate, and transaction-volume vs. anomaly-rate scatter
+- `community_anomaly_rate.png` — top 10 supplier co-occurrence communities ranked by mean anomaly rate
 
 ## Reproducing the results
 
@@ -93,7 +121,7 @@ pip install -r requirements.txt
 # 1. Place the 4 raw source CSVs in data/raw/ (see "Reproducing the data" below)
 #    bradford_clean.csv, lincolnshire_clean.csv, nhs_england_clean.csv, contracts_clean.csv
 
-# 2. Run the full pipeline end-to-end (~40s on 2 vCPU / 8GB RAM)
+# 2. Run the full pipeline end-to-end (~105s on 2 vCPU / 8GB RAM, incl. Phases 5A-5D)
 python -m src.run_pipeline
 
 # 3. Generate report figures
@@ -117,6 +145,9 @@ Place the 4 cleaned CSVs directly in `data/raw/` with the filenames referenced i
 - UK Contracts Finder `awards.csv`/`awards_suppliers.csv` sub-files (award-level supplier names) are sparse and were not incorporated into the anomaly-detection panel; only the `main.csv` buyer/tender-notice level is used.
 - The rule-based validation in Stage 5 is a literature-derived **proxy** for genuine audit ground truth, not a substitute for it — the overlap statistic indicates triangulated plausibility, not confirmed fraud/error.
 - Amount caps (>£50m trust spend, >£2bn contract notices treated as data artefacts) are a modelling judgement call; see `src/data_engineering/clean_merge.py` for the exact thresholds and rationale.
+- The synthetic injection benchmark (Stage 5B) evaluates detectors against three specific, hand-designed anomaly archetypes; it demonstrates relative sensitivity to those archetypes, not a general-purpose fraud-detection accuracy estimate. Real anomalies may take forms not represented by the three injection types.
+- The network hub/non-hub finding (Stage 5D) is descriptive, not causal — a lower anomaly rate among hub suppliers could reflect genuinely cleaner large-incumbent behaviour, or could reflect the Isolation Forest model's features (e.g. transaction recency, new-supplier flag) being structurally less likely to fire for high-frequency, long-established suppliers. This is flagged explicitly as a direction for further work rather than presented as evidence against a collusion hypothesis.
+- Bootstrap confidence intervals on the STL % deviation figures are indicative rather than exact, since monthly time series values are autocorrelated and the naive bootstrap assumes independent observations.
 
 ## References
 
@@ -128,3 +159,11 @@ Place the 4 cleaned CSVs directly in `data/raw/` with the filenames referenced i
 - Transparency International UK. (2024). *Landmark investigation finds corruption red flags in £15.3 billion of UK COVID contracts*. https://www.transparency.org.uk/news/report-landmark-investigation-finds-corruption-red-flags-ps153-billion-uk-covid-contracts
 - NHS Counter Fraud Authority. (2022). *Preventing Procurement Fraud in the NHS*. https://cfa.nhs.uk/resources/downloads/documents/fraud-reports/Preventing_procurement.pdf
 - NHS Counter Fraud Authority. (2026). *Buying Goods and Services (Quick Reference Guide)*. https://cfa.nhs.uk/resources/downloads/guidance/fraud-awareness/quick-reference-guides/Buying_goods-and-services.pdf
+- Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying Density-Based Local Outliers. *Proceedings of the 2000 ACM SIGMOD International Conference on Management of Data*, 93–104. https://doi.org/10.1145/335191.335388
+- Schölkopf, B., Platt, J. C., Shawe-Taylor, J., Smola, A. J., & Williamson, R. C. (2001). Estimating the Support of a High-Dimensional Distribution. *Neural Computation*, 13(7), 1443–1471. https://is.mpg.de/publications/970
+- Borgatti, S. P., & Everett, M. G. (1997). Network Analysis of 2-Mode Data. *Social Networks*, 19(3), 243–269. https://works.bepress.com/steveborgatti/17/
+- Clauset, A., Newman, M. E. J., & Moore, C. (2004). Finding Community Structure in Very Large Networks. *Physical Review E*, 70, 066111. https://arxiv.org/abs/cond-mat/0408187
+- Freeman, L. C. (1977). A Set of Measures of Centrality Based on Betweenness. *Sociometry*, 40(1), 35–41. https://doi.org/10.2307/3033543
+- Agyemang, E. F. (2024). Anomaly Detection Using Unsupervised Machine Learning Algorithms: A Simulation Study. *Scientific African*. https://scholarworks.utrgv.edu/mss_fac/560/
+- Victor, A. O., Sales, L. A. M., Moreira, R. S., de Moraes, C. E. C., Lima, L. G., Rocha, J. F., Contursi, B. S. N., & Meirelles, T. (2024). Graph Data Mining for Detecting Collusions in Bidding Processes: A Case Study. *Anais Estendidos do XXXIX Simpósio Brasileiro de Bancos de Dados (SBBD 2024)*. https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602
+- Lyra, M. (2024). Public Procurement Fraud Detection: A Review Using Network Analysis. https://www.academia.edu/125244008/Public_Procurement_Fraud_Detection_A_Review_Using_Network_Analysis

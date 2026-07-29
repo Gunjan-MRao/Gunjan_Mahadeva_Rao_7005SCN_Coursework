@@ -25,6 +25,10 @@ from src.analysis.hhi import compute_hhi
 from src.analysis.stl_shock import run_stl_shock_analysis
 from src.modeling.isolation_forest_shap import run_modeling_pipeline
 from src.validation.audit_validation import run_validation
+from src.modeling.method_comparison import run_method_comparison
+from src.modeling.synthetic_evaluation import run_synthetic_evaluation
+from src.analysis.statistical_tests import run_statistical_tests
+from src.network.supplier_network import run_network_analysis
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -55,6 +59,32 @@ def main():
     logger.info("=" * 70)
     validation_df = run_validation()
 
+    logger.info("=" * 70)
+    logger.info("PHASE 5A — Multi-Method Anomaly Detection Comparison")
+    logger.info("=" * 70)
+    # NOTE: `panel` here is the FULL merged panel (trust_spend + contract_notice).
+    # method_comparison / synthetic_evaluation require the trust_spend-only view
+    # (same as Phase 3's Isolation Forest), so we deliberately do NOT pass `panel`
+    # through -- each function loads and filters its own trust-only copy via
+    # `load_trust_panel()` to avoid silently scoring contract_notice rows (which
+    # have null supplier/amount-derived features) as if they were spend records.
+    method_comparison_df, method_comparison_summary = run_method_comparison()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 5B — Synthetic Anomaly Injection Evaluation")
+    logger.info("=" * 70)
+    synthetic_results_df, synthetic_by_type_df = run_synthetic_evaluation()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 5C — Statistical Significance Testing")
+    logger.info("=" * 70)
+    bootstrap_df, mwu_df, hyper_result = run_statistical_tests()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 5D — Supplier-Buyer Network / Collusion-Indicator Analysis")
+    logger.info("=" * 70)
+    network_node_df, hub_comparison, community_df, top_communities = run_network_analysis()
+
     elapsed = time.time() - t0
     logger.info("=" * 70)
     logger.info("PIPELINE COMPLETE in %.1fs", elapsed)
@@ -78,6 +108,11 @@ def main():
     print(new_supplier.groupby("period")["new_supplier_rate_pct"].mean().round(2).to_string())
     if n_overlap is not None and n_ml:
         print(f"\nML/rule-based triangulation overlap: {n_overlap:,}/{n_ml:,} ({n_overlap/n_ml*100:.1f}% of ML flags corroborated by >=1 independent rule)")
+        print(f"Hypergeometric significance test on this overlap: log(p)={hyper_result['log_p_value']:.1f} (p underflows float64 to 0; astronomically significant)")
+    print("\nMulti-method consensus (>=2/4 detectors agree):", f"{method_comparison_df['consensus_flag_majority'].sum():,}/{len(method_comparison_df):,} records")
+    print("\nSynthetic-injection evaluation (precision/recall/F1 vs known injected anomalies):")
+    print(synthetic_results_df.to_string(index=False))
+    print(f"\nHub vs non-hub supplier anomaly rate: {hub_comparison['mean_anomaly_rate_hub_pct']:.2f}% vs {hub_comparison['mean_anomaly_rate_nonhub_pct']:.2f}% (Mann-Whitney p={hub_comparison['p_value']:.3g})")
     print(f"\nAll outputs saved under: {config.DATA_PROCESSED_DIR}")
     print("=" * 70)
 

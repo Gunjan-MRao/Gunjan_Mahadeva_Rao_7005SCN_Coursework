@@ -1,0 +1,10 @@
+metric,period,point_estimate_pct,ci_lower_pct,ci_upper_pct,n_months
+isolation_forest_anomaly_rate_pct,covid,1.815,1.725,1.908,
+isolation_forest_anomaly_rate_pct,post_covid,2.643,2.566,2.728,
+isolation_forest_anomaly_rate_pct,pre_covid,0.371,0.315,0.428,
+new_supplier_rate_pct,covid,3.358,3.239,3.489,
+new_supplier_rate_pct,post_covid,1.717,1.65,1.788,
+new_supplier_rate_pct,pre_covid,1.241,1.139,1.347,
+stl_pct_deviation_from_baseline,pre_covid,-0.03,-5.22,5.23,15.0
+stl_pct_deviation_from_baseline,covid,32.98,23.37,42.39,23.0
+stl_pct_deviation_from_baseline,post_covid,38.63,27.93,51.85,34.0
