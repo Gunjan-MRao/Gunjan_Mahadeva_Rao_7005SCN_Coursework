@@ -36,9 +36,17 @@ src/
     audit_validation.py    rule-based red-flag validation + ML/rule triangulation
   analysis/
     statistical_tests.py    hypergeometric exact test, bootstrap CIs, Mann-Whitney U
+    supplier_risk_score.py  composite supplier risk score (Phase 6A)
+    category_deep_dive.py   category x period deep dive + COVID-shock ranking (Phase 6B)
+    robustness_checks.py    threshold / period-boundary / feature-ablation sensitivity (Phase 6C)
+    bi_export.py            BI-ready star-schema CSV export (Phase 6D)
+    dashboard.py            interactive Plotly dashboard (Phase 6E)
   run_pipeline.py           orchestrates all phases end-to-end
-tests/                      pytest unit tests (schema, cleaning logic, feature/rule correctness, Phase 5 modules)
+tests/                      pytest unit tests (schema, cleaning logic, feature/rule correctness, Phase 5 & 6 modules)
 requirements.txt
+docs/
+  bi_dashboard_guide.md   Tableau/Power BI build guide for the BI export CSVs
+  dissertation_sections.md  drop-in methodology/results sections for the dissertation write-up
 ```
 
 ## Methodology (mapped to the original proposal's 5-stage design)
@@ -82,6 +90,18 @@ Records are flagged as anomalous at the 98th percentile of anomaly score. Result
 
 **Stage 5D — Supplier-buyer network analysis.** A bipartite buyer-supplier graph (8 buyer trusts, 5,286 suppliers, 5,691 edges with ≥2 transactions) is built to test whether anomalies concentrate among well-connected "hub" suppliers, a pattern associated with collusive/incumbent-favouring behaviour in procurement-fraud network literature ([Graph Data Mining for Detecting Collusions in Bidding](https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602); [Public Procurement Fraud Detection: A Review Using Network Analysis](https://www.academia.edu/125244008/Public_Procurement_Fraud_Detection_A_Review_Using_Network_Analysis)). Hub suppliers (multi-trust suppliers, degree≥2, OR top-5%-by-transaction-volume suppliers; n=476) are identified via degree and betweenness centrality (Freeman, 1977) on the bipartite projection (Borgatti & Everett, 1997), and a same-side co-occurrence projection graph (suppliers linked when they share a buyer+category+month pool) is partitioned into communities using greedy modularity maximisation (Clauset, Newman & Moore, 2004; modularity=0.635, 32 communities). Contrary to the collusion-hypothesis expectation, **hub suppliers show a markedly LOWER anomaly rate (1.16%, n=315) than non-hub suppliers (3.64%, n=3,535)** — Mann-Whitney p=5.4×10⁻²² — suggesting the anomalies detected in this dataset concentrate among smaller, newer, single-relationship suppliers rather than large, well-established incumbents. Community-level anomaly rates vary more than 5-fold (community 7: 8.25% vs. community 0: 1.48%, against an overall rate of 2.00%), indicating that certain buyer/category/month supplier pools carry disproportionate anomaly risk even though the top-level hub/non-hub split does not.
 
+## Phase 6 — Composite risk scoring, category deep dive, robustness, BI delivery
+
+Four further analyses were added on top of the Phase 5 advanced-methods work, answering "what else can we do with this dataset, and how do we hand it to a non-technical stakeholder":
+
+**6A — Composite supplier risk score.** Blends anomaly rate, mean anomaly-score magnitude, and rule-flag rate (each percentile-ranked 0–100, following the composite-indicator approach in Fazekas, Tóth & King, 2016, and IMF WP 2022/094) into a single ranked score per supplier. 3,456 of 7,244 suppliers had enough transactions to be scored: **Low = 2,073, Medium = 864, High = 346, Critical = 173**. Network hub status is deliberately excluded from the score (Stage 5D showed hubs have a *lower* raw anomaly rate) and reported only descriptively — yet on the *composite* score, hub suppliers actually rank **higher** (64.80 vs. 48.54, p=4.9×10⁻⁵⁸), because the composite also captures accumulated rule-flag exposure across a supplier's full (much larger) transaction history, not just per-transaction anomaly propensity. Both findings are correct and are discussed together, not treated as a contradiction.
+
+**6B — Category-level deep dive.** Disaggregates spend, anomaly rate, new-supplier rate, and HHI by `category × period`. Top COVID-shock growth categories: "Computer Hardware Purch" (+47,553.6% — flagged as a small-base artefact, pre-COVID spend was only £556.80), "Med & Surg Equip General" (+2,302.4%, a genuinely large absolute increase consistent with the NAO's documented PPE/medical-equipment procurement surge), and "CompSwrPrch Additions" (+2,259.8%).
+
+**6C — Robustness checks.** Threshold sensitivity (95th/98th/99th percentile), COVID period-boundary sensitivity (±1 month), and feature-set ablation (drop `is_new_supplier`) all confirm the pre-COVID < COVID < post-COVID anomaly-rate ordering is stable, and that the model's overall record ranking survives feature ablation (Spearman ρ=0.919) even though the specific flagged set shifts somewhat (Jaccard=0.624).
+
+**6D/6E — BI-ready export and interactive dashboard.** A star-schema CSV export (`data/processed/bi_export/`: 1 fact + 4 dimension tables) and a self-contained interactive Plotly dashboard (`reports/nhs_procurement_dashboard.html`) deliver the pipeline's results in a business-intelligence-style, non-technical format. **Honest limitation, stated explicitly:** a genuine `.pbix` (Power BI) file cannot be reliably hand-generated (proprietary binary format, no Python library can write one), and a `.twbx` (Tableau) file, while theoretically constructible, cannot be verified to actually open without Tableau installed. Rather than risk a broken or fabricated binary, this project ships clean CSVs, a working interactive HTML dashboard, and a field-by-field [Tableau/Power BI build guide](docs/bi_dashboard_guide.md) instead. Implementation: `src/analysis/supplier_risk_score.py`, `category_deep_dive.py`, `robustness_checks.py`, `bi_export.py`, `dashboard.py`. Full methodology and results write-up: `docs/dissertation_sections.md`.
+
 ## Key results at a glance
 
 | Metric | Pre-COVID | COVID | Post-COVID |
@@ -102,6 +122,16 @@ ML/rule-based triangulation: **3,226 / 5,142 (62.7%)** ML-flagged anomalies corr
 | Hub-supplier anomaly rate vs. non-hub | 1.16% (n=315) vs. **3.64%** (n=3,535), p=5.4×10⁻²² |
 | Network communities detected (modularity) | 32 communities, Q=0.635 |
 
+| Phase 6 metric | Result |
+|---|---|
+| Supplier risk tiers (of 3,456 scored suppliers) | Low=2,073, Medium=864, High=346, Critical=173 |
+| Hub vs. non-hub, composite risk score (contrast with raw anomaly rate above) | 64.80 (n=313) vs. 48.54 (n=3,143), p=4.9×10⁻⁵⁸ |
+| Top COVID-shock category by % growth | "Computer Hardware Purch" +47,553.6% (small-base artefact, pre-COVID spend only £556.80) |
+| Largest genuine absolute-spend COVID-shock category | "Med & Surg Equip General" +2,302.4% (£276k → £6.64m) |
+| Robustness — period ordering stable across thresholds | 95th/98th/99th percentile all preserve pre<COVID<post |
+| Robustness — feature ablation (drop `is_new_supplier`) | Jaccard=0.624, Spearman ρ=0.919 |
+| BI export | 1 fact table (288,071 rows) + 4 dimension tables, star schema |
+
 Figures (see `docs/figures/`):
 - `stl_decomposition.png` — observed/trend/seasonal/residual monthly spend with COVID period shaded
 - `hhi_trend.png` — supplier concentration by source over time
@@ -112,6 +142,15 @@ Figures (see `docs/figures/`):
 - `synthetic_precision_recall.png` — precision/recall/F1 on the synthetic injection benchmark, by method
 - `network_hub_comparison.png` — hub vs. non-hub supplier anomaly rate, and transaction-volume vs. anomaly-rate scatter
 - `community_anomaly_rate.png` — top 10 supplier co-occurrence communities ranked by mean anomaly rate
+- `supplier_risk_score.png` — composite supplier risk tier distribution and top-ranked suppliers
+- `category_covid_shock.png` — top categories by pre-COVID → COVID spend growth (absolute and % framing)
+- `robustness_sensitivity.png` — threshold, period-boundary, and feature-ablation sensitivity results
+
+## Data representation / BI dashboard
+
+Alongside the CSV/figure outputs above, this project delivers a BI-style data representation: a star-schema CSV export (`data/processed/bi_export/`: `fact_transactions.csv` plus `dim_supplier.csv`, `dim_category.csv`, `dim_period.csv`, `dim_month.csv`) and a self-contained interactive dashboard (`reports/nhs_procurement_dashboard.html`) that mimics a Tableau/Power BI multi-panel layout in the browser, no BI software required.
+
+**Stated limitation:** a genuine Power BI `.pbix` file is a proprietary binary that no Python library can generate, and a Tableau `.twbx` file, while technically a buildable zip archive, cannot be verified to open correctly without Tableau installed to check it. Rather than submit an unverifiable or fabricated binary, this project ships the CSV export, the working HTML dashboard, and [`docs/bi_dashboard_guide.md`](docs/bi_dashboard_guide.md) — a field-by-field guide for rebuilding the same dashboard natively in Power BI Desktop or Tableau Desktop from the exported CSVs in a few minutes.
 
 ## Reproducing the results
 
@@ -130,6 +169,8 @@ python -m src.analysis.make_figures
 # 4. Run the test suite
 pytest tests/ -v
 ```
+
+The pipeline (step 2) now also runs Phase 6A-6E and writes the BI-ready CSV export to `data/processed/bi_export/` and the interactive dashboard to `reports/nhs_procurement_dashboard.html`.
 
 ### Reproducing the data
 
@@ -167,3 +208,9 @@ Place the 4 cleaned CSVs directly in `data/raw/` with the filenames referenced i
 - Agyemang, E. F. (2024). Anomaly Detection Using Unsupervised Machine Learning Algorithms: A Simulation Study. *Scientific African*. https://scholarworks.utrgv.edu/mss_fac/560/
 - Victor, A. O., Sales, L. A. M., Moreira, R. S., de Moraes, C. E. C., Lima, L. G., Rocha, J. F., Contursi, B. S. N., & Meirelles, T. (2024). Graph Data Mining for Detecting Collusions in Bidding Processes: A Case Study. *Anais Estendidos do XXXIX Simpósio Brasileiro de Bancos de Dados (SBBD 2024)*. https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602
 - Lyra, M. (2024). Public Procurement Fraud Detection: A Review Using Network Analysis. https://www.academia.edu/125244008/Public_Procurement_Fraud_Detection_A_Review_Using_Network_Analysis
+- Fazekas, M., Tóth, I. J., & King, L. P. (2016). An Objective Corruption Risk Index Using Public Procurement Data. *European Journal on Criminal Policy and Research*, 22(3), 369–397. https://doi.org/10.1007/s10610-016-9308-z
+- Abdou, A., Basdevant, O., Dávid-Barrett, E., & Fazekas, M. (2022). Assessing Vulnerabilities to Corruption in Public Procurement and Their Price Impact. IMF Working Paper No. 2022/094. https://www.imf.org/en/publications/wp/issues/2022/05/20/assessing-vulnerabilities-to-corruption-in-public-procurement-and-their-price-impact-518197
+- National Audit Office. (2020). Investigation into Government Procurement during the COVID-19 Pandemic. HC 959, Session 2019–2021. https://www.nao.org.uk/wp-content/uploads/2020/11/Investigation-into-government-procurement-during-the-COVID-19-pandemic.pdf
+- Rhoades, S. A. (1993). The Herfindahl-Hirschman Index. *Federal Reserve Bulletin*, 79(3), 188–189.
+- Aggarwal, C. C. (2017). *Outlier Analysis* (2nd ed.). Springer. https://doi.org/10.1007/978-3-319-47578-3
+- Emmott, A., Das, S., Dietterich, T., Fern, A., & Wong, W.-K. (2015). A Meta-Analysis of the Anomaly Detection Problem. arXiv:1503.01158. https://arxiv.org/abs/1503.01158

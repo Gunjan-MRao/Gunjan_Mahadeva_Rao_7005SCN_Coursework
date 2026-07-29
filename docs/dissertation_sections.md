@@ -102,3 +102,92 @@ The co-occurrence projection graph (2,230 suppliers, 50,209 edges, derived from 
 - NHS Counter Fraud Authority. (2022). *Preventing Procurement Fraud in the NHS*. https://cfa.nhs.uk/resources/downloads/documents/fraud-reports/Preventing_procurement.pdf
 - Schölkopf, B., Platt, J. C., Shawe-Taylor, J., Smola, A. J., & Williamson, R. C. (2001). Estimating the Support of a High-Dimensional Distribution. *Neural Computation*, 13(7), 1443–1471. https://is.mpg.de/publications/970
 - Victor, A. O., Sales, L. A. M., Moreira, R. S., de Moraes, C. E. C., Lima, L. G., Rocha, J. F., Contursi, B. S. N., & Meirelles, T. (2024). Graph Data Mining for Detecting Collusions in Bidding Processes: A Case Study. *Anais Estendidos do XXXIX Simpósio Brasileiro de Bancos de Dados (SBBD 2024)*. https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602
+
+---
+
+## Methodology — Phase 6: Composite Risk Scoring, Category Deep Dive, Robustness Checks, and BI Delivery
+
+The Phase 5 additions established that the anomaly signal is method-robust, statistically significant, sensitive to synthetically injected fraud patterns, and inversely associated with supplier network centrality. Phase 6 extends the project from *detection and validation* to *actionable delivery*: which individual suppliers and spend categories should an auditor look at first, how sensitive are the headline findings to modelling choices a marker might reasonably question, and how can the results be handed to a non-technical stakeholder in a business-intelligence format they can explore themselves.
+
+### Phase 6A — Composite supplier risk score
+
+Individual anomaly-detection outputs (Isolation Forest flag, audit red-flag rule, network hub status) each capture a different facet of supplier risk but none alone is a complete risk ranking. Following the "composite risk index" approach used in the public-procurement corruption-risk literature — Fazekas, Tóth & King (2016), *An Objective Corruption Risk Index Using Public Procurement Data*, *European Journal on Criminal Policy and Research*, 22(3), 369–397, and Abdou, Basdevant, Dávid-Barrett & Fazekas (2022), *Assessing Vulnerabilities to Corruption in Public Procurement and Their Price Impact*, IMF Working Paper No. 2022/094 — three independent per-supplier signals are percentile-ranked (0–100) and blended with equal weights into a single composite score:
+
+1. **Anomaly rate** — share of the supplier's own transactions flagged by the Phase 3 Isolation Forest.
+2. **Mean anomaly score** — the supplier's average *continuous* anomaly score, capturing magnitude (a supplier barely over the 98th-percentile cut and one far beyond it both score identically on signal 1 alone).
+3. **Rule-flag rate** — share of transactions matching ≥1 literature-derived audit red flag (Phase 4).
+
+Percentile-ranking each signal before blending is a standard composite-indicator normalisation step (OECD/JRC *Handbook on Constructing Composite Indicators*, 2008), needed because the three raw signals live on very different natural scales. Network hub status (Phase 5D) is deliberately **excluded** from the score itself — since hub suppliers were already found to have a *lower* raw anomaly rate, folding centrality into the composite score would bias it in the wrong direction — and is instead retained only as a descriptive column for cross-referencing. Suppliers with fewer than `config.SUPPLIER_RISK_MIN_TRANSACTIONS` transactions are excluded from ranking, since a single anomalous transaction out of one or two total is too thin a basis for a supplier-level judgement. Risk tiers (Low/Medium/High/Critical) are assigned from empirical percentile cut-points of the composite score. Implementation: `src/analysis/supplier_risk_score.py`.
+
+### Phase 6B — Category-level deep dive
+
+The headline STL/HHI/anomaly results (Phases 2–4) are reported at the whole-panel level, which conceals which specific spend categories actually drove the aggregate COVID-19 shock. This module disaggregates every metric (total spend, anomaly rate, new-supplier rate, HHI, share of period spend) by `category × period`, and separately ranks categories by pre-COVID → COVID spend growth, directly testing the a-priori expectation — drawn from the National Audit Office's *Investigation into government procurement during the COVID-19 pandemic* (HC 959, Session 2019–2021, 26 November 2020), which found PPE accounted for 80% of pandemic-contract volume and 68% of contract value — that medical/PPE-adjacent categories would show the sharpest COVID-period spend growth and supplier churn. Categories are only ranked by growth if they have ≥20 transactions total, to avoid a handful of pre-COVID pounds producing an uninterpretably large percentage swing. HHI within each category × period cell uses the same definition as the project-wide Phase 2 HHI (sum of squared supplier spend shares × 10,000; Rhoades, 1993, *The Herfindahl-Hirschman Index*, *Federal Reserve Bulletin*, 79, 188–189). Implementation: `src/analysis/category_deep_dive.py`.
+
+### Phase 6C — Robustness checks
+
+Every headline result up to Phase 5 rests on three modelling choices that are each, to some degree, a judgement call: the 98th-percentile anomaly-score cut-off, the exact calendar dates used to split pre/COVID/post periods, and the feature set fed to Isolation Forest. Reporting sensitivity of headline findings to reasonable variation in each is standard practice for unsupervised anomaly-detection studies that lack ground-truth labels (Aggarwal, 2017, *Outlier Analysis*, 2nd ed., Springer, ch. 12; Emmott, Das, Dietterich, Fern & Wong, 2015, *A Meta-Analysis of the Anomaly Detection Problem*, arXiv:1503.01158). Three checks were run, each re-using artefacts already produced earlier in the pipeline rather than duplicating expensive model retraining where avoidable:
+
+- **(a) Threshold sensitivity** — re-flag anomalies at the 95th/98th/99th percentile of the *same* already-computed anomaly score, and recompute the period-level anomaly rate and ML/rule triangulation hypergeometric test at each cut-off.
+- **(b) Period-boundary sensitivity** — shift the COVID start/end boundaries ±1 calendar month (applied symmetrically) and recompute period-level anomaly rates under each shifted definition, using the same per-record scores.
+- **(c) Feature-set ablation** — retrain Isolation Forest with `is_new_supplier` (the single most policy-salient engineered feature) removed, and compare the resulting flags against the full-feature baseline via Jaccard index (flag-set overlap) and Spearman rank correlation (continuous-score agreement).
+
+Implementation: `src/analysis/robustness_checks.py`.
+
+### Phase 6D/6E — BI-ready data export and interactive dashboard
+
+To make the pipeline's outputs usable by a non-technical stakeholder without requiring them to run Python, all Phase 1–6C outputs were consolidated into a clean, denormalised **star schema** (one fact table of 288,071 transactions plus four dimension tables — supplier, category, period, and month) and exported as plain CSVs (`src/analysis/bi_export.py`), together with a self-contained interactive Plotly dashboard mirroring a Tableau/Power BI-style multi-panel layout (`src/analysis/dashboard.py`).
+
+**A note on the deliverable format, in the interest of transparency.** A genuine Power BI (`.pbix`) file is a proprietary binary format that no Python library, open-source tool, or LLM-authorable process can reliably produce — only Power BI Desktop itself can write one. A Tableau (`.twbx`) workbook is technically a zip of XML plus a data extract and is *theoretically* hand-constructible, but doing so without Tableau installed to open and validate the result is unverifiable and likely to yield a file that silently fails to open. Rather than risk submitting a fabricated binary that cannot be checked, this project instead ships the CSV star-schema export plus a working interactive HTML dashboard (viewable in any browser, no BI software required) plus a build guide (`docs/bi_dashboard_guide.md`) that maps every dashboard panel to the exact fields and chart types needed to reconstruct it in Tableau Desktop or Power BI Desktop in a few minutes. This is a deliberate, disclosed trade-off, not a silent substitution.
+
+---
+
+## Results — Phase 6: Composite Risk Scoring, Category Deep Dive, Robustness Checks
+
+### Composite supplier risk score
+
+Of 7,244 total distinct suppliers, 3,456 had ≥`SUPPLIER_RISK_MIN_TRANSACTIONS` transactions and were scored. The resulting risk-tier distribution is Low = 2,073, Medium = 864, High = 346, Critical = 173. Figure X (`supplier_risk_score.png`) visualises the tier distribution and the top-ranked suppliers. Comparing hub vs. non-hub suppliers on the *composite* score (rather than the raw anomaly rate examined in Phase 5D) shows hub suppliers actually score **higher** on average (64.80, n=313) than non-hub suppliers (48.54, n=3,143), a difference confirmed by Mann-Whitney U test (p = 4.88 × 10⁻⁵⁸). This is the opposite direction from the Phase 5D raw-anomaly-rate finding and is worth flagging explicitly rather than glossing over: it arises because the composite score also incorporates rule-flag rate and mean anomaly-score *magnitude*, not just the binary anomaly flag rate that Phase 5D examined, and high-volume hub suppliers accumulate more total transactions in which at least one audit red flag can fire even while their *per-transaction* anomaly rate stays comparatively low. The two findings are not contradictory but measure genuinely different things — raw per-transaction anomaly propensity (Phase 5D, where hubs look safer) versus accumulated audit-flag exposure across a supplier's full transaction history (Phase 6A, where hubs look riskier because they simply transact far more) — and this nuance should be discussed explicitly in the dissertation's discussion chapter as a reason composite indices need careful specification, not treated as a contradiction to be hidden.
+
+### Category-level deep dive
+
+Ranking categories by pre-COVID → COVID spend growth (categories with ≥20 transactions only) surfaces "Computer Hardware Purch" as the largest percentage grower (+47,553.6%), followed by "Med & Surg Equip General" (+2,302.4%) and "CompSwrPrch Additions" (+2,259.8%). The Computer Hardware Purch figure should be read with caution and is flagged here explicitly as a limitation: its pre-COVID base spend was only £556.80 across the category, so a modest absolute increase produces an extreme percentage swing — this is a "small base effect," not evidence the category was itself a major driver of the aggregate COVID shock in absolute-pound terms. "Med & Surg Equip General," by contrast, grew from £276,373 to £6.64 million (a genuinely large absolute increase, not just a small-base artefact) and is consistent a priori with the PPE/medical-equipment procurement surge documented in the NAO's HC 959 investigation. Figure X (`category_covid_shock.png`) shows the top categories by growth with both absolute and percentage framing to make this distinction visible.
+
+### Robustness checks
+
+**Threshold sensitivity**: the period ordering (pre-COVID < COVID < post-COVID anomaly rate) is stable across all three thresholds tested — at the 95th percentile, rates are 1.13% / 5.27% / 6.11%; at 98th (baseline), 0.37% / 1.82% / 2.64%; at 99th, 0.14% / 0.71% / 1.45%. The ML/rule overlap rate *increases* as the threshold tightens (44.3% at 95th → 62.7% at 98th → 77.3% at 99th), indicating that the most extreme anomalies by Isolation Forest score are progressively more likely to be independently corroborated by a rule-based red flag — a reassuring robustness property, since it means the model's highest-confidence flags are also its most externally validated ones.
+
+**Period-boundary sensitivity**: shifting the COVID start/end boundaries by ±1 calendar month leaves the qualitative period ordering unchanged (pre-COVID rate 0.37–0.39% across all three boundary definitions; COVID rate 1.57–2.05%; post-COVID rate 2.57–2.72%), confirming the headline finding is not an artefact of the exact boundary dates chosen.
+
+**Feature-set ablation**: removing `is_new_supplier` from the Isolation Forest feature set and retraining yields a Jaccard overlap of 0.624 between the ablated and full-feature flag sets, and a Spearman rank correlation of 0.919 (p ≈ 0) between the two continuous anomaly-score vectors. This indicates the model's overall ranking of "how anomalous" a record is remains highly stable without this one feature, though roughly 38% of specific flagged records do change — showing `is_new_supplier` meaningfully contributes to *which* records cross the flagging threshold at the margin, even though it is not solely responsible for the model's overall discriminative signal.
+
+Implementation and full sensitivity tables: `src/analysis/robustness_checks.py`, `data/processed/robustness_*.csv`.
+
+---
+
+## Additional discussion points for the dissertation's Discussion/Conclusion chapter (Phase 6)
+
+- The divergent hub-supplier finding between Phase 5D (raw anomaly rate: hubs lower-risk) and Phase 6A (composite risk score: hubs higher-risk) is itself a useful methodological lesson worth discussing: a single summary statistic (raw flag rate) and a multi-signal composite index can legitimately point in different directions when they aggregate different underlying quantities, and a dissertation reader should be shown this explicitly rather than have one number silently override the other.
+- The category deep dive's "Computer Hardware Purch" small-base artefact is a good worked example, in the dissertation's methodology or limitations section, of why percentage-growth rankings need an absolute-spend or minimum-transaction-count floor to avoid being dominated by noise in tiny categories — this project's ≥20-transaction floor is a direct, disclosed mitigation, not a claim that the problem is fully solved.
+- The robustness checks collectively answer the most likely marker challenge to an unsupervised, threshold-dependent pipeline like this one ("why 98th percentile and not some other number, why these exact COVID dates, why this feature set") with concrete sensitivity evidence rather than an unsupported assertion that the choices are reasonable.
+- The BI export and dashboard (Phase 6D/6E) demonstrate the pipeline's outputs are not just analytically valid but operationally deliverable — a genuinely novel MSc dissertation contribution beyond the core detection methodology, provided the .pbix/.twbx trade-off is stated plainly rather than presented as if a native BI file had been produced.
+
+---
+
+## Limitations of the Phase 6 additions (for the dissertation's Limitations section)
+
+- The composite risk score's equal-weighting scheme (1/3 each to anomaly rate, mean anomaly score, rule-flag rate) is a simplifying assumption common in the composite-indicator literature (OECD/JRC, 2008) but not empirically optimised; a weighted or model-learned combination (e.g. via PCA or a supervised proxy target) is a natural extension if ground-truth labels ever become available.
+- The category-level pre-COVID → COVID percentage-growth ranking is highly sensitive to the size of the pre-COVID base for small categories, as shown explicitly by the Computer Hardware Purch result; the ≥20-transaction floor mitigates but does not eliminate this, and an absolute-spend-based secondary ranking should be read alongside the percentage-based one.
+- The Phase 6A hub-vs-non-hub composite-score finding and the Phase 5D hub-vs-non-hub raw-anomaly-rate finding measure genuinely different constructs and should not be conflated in the write-up; presenting only one without the other would be misleading.
+- The BI-ready CSV/dashboard deliverable is a disclosed, deliberate substitute for a native `.pbix`/`.twbx` file, not a full replacement for one — a marker who specifically requires a native BI-tool file should be pointed to `docs/bi_dashboard_guide.md`, which provides exact field mappings for reconstructing the same dashboard in Tableau Desktop or Power BI Desktop in a few minutes given the exported CSVs.
+- The `dim_supplier.csv` community_id/community_size columns are `NaN` for suppliers that were not connected to any other supplier under the Phase 5D co-occurrence projection (2,657 of 3,456 risk-scored suppliers) — this is the expected behaviour for an isolated network node, not a data-join defect, but should not be misread as "missing data" when reviewing the export.
+
+---
+
+## References (Phase 6 — merge with the dissertation's consolidated reference list)
+
+- Abdou, A., Basdevant, O., Dávid-Barrett, E., & Fazekas, M. (2022). Assessing Vulnerabilities to Corruption in Public Procurement and Their Price Impact. IMF Working Paper No. 2022/094. https://www.imf.org/en/publications/wp/issues/2022/05/20/assessing-vulnerabilities-to-corruption-in-public-procurement-and-their-price-impact-518197
+- Aggarwal, C. C. (2017). *Outlier Analysis* (2nd ed.). Springer. https://doi.org/10.1007/978-3-319-47578-3
+- Emmott, A., Das, S., Dietterich, T., Fern, A., & Wong, W.-K. (2015). A Meta-Analysis of the Anomaly Detection Problem. arXiv:1503.01158. https://arxiv.org/abs/1503.01158
+- Fazekas, M., Tóth, I. J., & King, L. P. (2016). An Objective Corruption Risk Index Using Public Procurement Data. *European Journal on Criminal Policy and Research*, 22(3), 369–397. https://doi.org/10.1007/s10610-016-9308-z
+- National Audit Office. (2020). *Investigation into Government Procurement during the COVID-19 Pandemic*. HC 959, Session 2019–2021. https://www.nao.org.uk/wp-content/uploads/2020/11/Investigation-into-government-procurement-during-the-COVID-19-pandemic.pdf
+- OECD/European Commission Joint Research Centre. (2008). *Handbook on Constructing Composite Indicators: Methodology and User Guide*. OECD Publishing.
+- Rhoades, S. A. (1993). The Herfindahl-Hirschman Index. *Federal Reserve Bulletin*, 79(3), 188–189.

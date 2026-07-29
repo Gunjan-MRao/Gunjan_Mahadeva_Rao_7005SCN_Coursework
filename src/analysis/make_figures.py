@@ -254,6 +254,102 @@ def fig_community_anomaly_rate():
     return out
 
 
+# ---------------------------------------------------------------------------
+# Phase 6 (dataset-extension) figures
+# ---------------------------------------------------------------------------
+
+def fig_supplier_risk_score():
+    """Left: risk-tier distribution across scored suppliers. Right: the top 15
+    suppliers by composite risk score, colour-coded by hub status."""
+    df = pd.read_csv(config.SUPPLIER_RISK_SCORE_PATH)
+    tier_order = ["Low", "Medium", "High", "Critical"]
+    tier_colors = {"Low": "#94a3b8", "Medium": "#f4a259", "High": "#e07a5f", "Critical": "#c1272d"}
+    counts = df["risk_tier"].value_counts().reindex(tier_order).fillna(0)
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 6))
+    axes[0].bar(tier_order, counts.values, color=[tier_colors[t] for t in tier_order])
+    axes[0].set_ylabel("Number of suppliers")
+    axes[0].set_title(f"Composite Supplier Risk Score\nTier Distribution (n={len(df):,} scored suppliers)")
+    axes[0].grid(alpha=0.3, axis="y")
+    for i, v in enumerate(counts.values):
+        axes[0].text(i, v + max(counts.values) * 0.01, f"{int(v):,}", ha="center", fontsize=9)
+
+    top15 = df.sort_values("composite_risk_score", ascending=False).head(15).iloc[::-1]
+    bar_colors = top15["is_hub_supplier"].map({True: "#c1272d", False: "#1f5fae"})
+    labels = [s[:28] + ("..." if len(s) > 28 else "") for s in top15["supplier"]]
+    axes[1].barh(labels, top15["composite_risk_score"], color=bar_colors)
+    axes[1].set_xlabel("Composite risk score (0-100)")
+    axes[1].set_title("Top 15 Highest-Risk Suppliers\n(red = network hub supplier, blue = non-hub)")
+    axes[1].grid(alpha=0.3, axis="x")
+    fig.tight_layout()
+    out = config.FIGURES_DIR / "supplier_risk_score.png"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
+def fig_category_covid_shock():
+    """Horizontal bar chart of the categories with the largest pre-COVID ->
+    COVID spend growth, i.e. the categories that drove the aggregate STL
+    shock (Phase 2) most."""
+    df = pd.read_csv(config.CATEGORY_SHOCK_RANKING_PATH)
+    df = df.dropna(subset=["pct_change_pre_to_covid"])
+    top10 = df.sort_values("pct_change_pre_to_covid", ascending=False).head(10).iloc[::-1]
+    labels = [c[:30] + ("..." if len(c) > 30 else "") for c in top10["category"]]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.barh(labels, top10["pct_change_pre_to_covid"], color="#2a9d8f")
+    ax.set_xlabel("% change in total spend, pre-COVID -> COVID")
+    ax.set_title("Top 10 Spend Categories Driving the COVID-19 Shock\n(categories with >= 20 transactions)")
+    ax.grid(alpha=0.3, axis="x")
+    for i, v in enumerate(top10["pct_change_pre_to_covid"]):
+        ax.text(v, i, f" {v:,.0f}%", va="center", fontsize=8)
+    fig.tight_layout()
+    out = config.FIGURES_DIR / "category_covid_shock.png"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
+def fig_robustness_checks():
+    """Left: anomaly rate by period at 95th/98th/99th percentile thresholds
+    (threshold sensitivity). Right: anomaly rate by period under the baseline
+    vs +/-1-month-shifted COVID boundaries (period-boundary sensitivity)."""
+    thresh = pd.read_csv(config.ROBUSTNESS_THRESHOLD_PATH)
+    shift = pd.read_csv(config.ROBUSTNESS_PERIOD_SHIFT_PATH)
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+
+    periods = ["rate_pre_covid_pct", "rate_covid_pct", "rate_post_covid_pct"]
+    period_labels = ["Pre-COVID", "COVID", "Post-COVID"]
+    x = np.arange(len(period_labels))
+    width = 0.25
+    colors = ["#94a3b8", "#1f5fae", "#c1272d"]
+    for i, (_, row) in enumerate(thresh.iterrows()):
+        axes[0].bar(x + (i - 1) * width, [row[p] for p in periods], width,
+                    label=f"{int(row['threshold_percentile'])}th pct", color=colors[i])
+    axes[0].set_xticks(x)
+    axes[0].set_xticklabels(period_labels)
+    axes[0].set_ylabel("Anomaly rate (%)")
+    axes[0].set_title("Threshold Sensitivity:\nAnomaly Rate by Period")
+    axes[0].legend(fontsize=8, title="Score cutoff")
+    axes[0].grid(alpha=0.3, axis="y")
+
+    for i, (_, row) in enumerate(shift.iterrows()):
+        axes[1].plot(period_labels, [row[p] for p in periods], marker="o",
+                     label=row["boundary_variant"].replace("_", " "), linewidth=1.6)
+    axes[1].set_ylabel("Anomaly rate (%)")
+    axes[1].set_title("Period-Boundary Sensitivity:\nAnomaly Rate under Shifted COVID Boundaries")
+    axes[1].legend(fontsize=7)
+    axes[1].grid(alpha=0.3)
+
+    fig.tight_layout()
+    out = config.FIGURES_DIR / "robustness_sensitivity.png"
+    fig.savefig(out)
+    plt.close(fig)
+    return out
+
+
 def main():
     paths = [
         fig_stl_decomposition(),
@@ -265,6 +361,9 @@ def main():
         fig_synthetic_precision_recall(),
         fig_network_hub_comparison(),
         fig_community_anomaly_rate(),
+        fig_supplier_risk_score(),
+        fig_category_covid_shock(),
+        fig_robustness_checks(),
     ]
     for p in paths:
         print("Saved:", p)

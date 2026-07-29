@@ -14,3 +14,5 @@ shap>=0.44
 statsmodels>=0.14
 matplotlib>=3.7
 pytest>=7.4
+networkx>=3.0
+plotly>=5.20

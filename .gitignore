@@ -21,6 +21,15 @@ data/processed/validation_redflags.csv
 # summary/agreement CSVs (<10KB each) are committed and drive the figures/tables.
 data/processed/method_comparison_scores.csv
 
+# fact_transactions.csv (~74MB) is the Phase 6D BI-export per-record fact
+# table - same rationale as the other large per-record dumps above (close to
+# GitHub's 100MB limit, no review value as a raw dump, fully regenerable via
+# `python -m src.analysis.bi_export`). The dimension tables (dim_supplier,
+# dim_category, dim_period, dim_month - all <500KB) ARE committed since they
+# provide direct review value and are what docs/bi_dashboard_guide.md walks
+# through.
+data/processed/bi_export/fact_transactions.csv
+
 # --- Python ---
 __pycache__/
 *.py[cod]

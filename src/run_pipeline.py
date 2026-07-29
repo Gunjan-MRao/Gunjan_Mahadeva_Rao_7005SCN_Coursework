@@ -29,6 +29,11 @@ from src.modeling.method_comparison import run_method_comparison
 from src.modeling.synthetic_evaluation import run_synthetic_evaluation
 from src.analysis.statistical_tests import run_statistical_tests
 from src.network.supplier_network import run_network_analysis
+from src.analysis.supplier_risk_score import run_supplier_risk_score
+from src.analysis.category_deep_dive import run_category_deep_dive
+from src.analysis.robustness_checks import run_robustness_checks
+from src.analysis.bi_export import run_bi_export
+from src.analysis.dashboard import run_dashboard
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -85,6 +90,31 @@ def main():
     logger.info("=" * 70)
     network_node_df, hub_comparison, community_df, top_communities = run_network_analysis()
 
+    logger.info("=" * 70)
+    logger.info("PHASE 6A — Composite Supplier Risk Score")
+    logger.info("=" * 70)
+    risk_score_df, risk_hub_comparison = run_supplier_risk_score()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 6B — Category-Level Deep Dive")
+    logger.info("=" * 70)
+    category_table_df, category_shock_ranking_df = run_category_deep_dive()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 6C — Robustness Checks")
+    logger.info("=" * 70)
+    robustness_threshold_df, robustness_period_shift_df, robustness_ablation_df = run_robustness_checks()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 6D — BI-Ready Data Export (star schema)")
+    logger.info("=" * 70)
+    bi_tables = run_bi_export()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 6E — Interactive Plotly Dashboard")
+    logger.info("=" * 70)
+    dashboard_path = run_dashboard()
+
     elapsed = time.time() - t0
     logger.info("=" * 70)
     logger.info("PIPELINE COMPLETE in %.1fs", elapsed)
@@ -113,6 +143,17 @@ def main():
     print("\nSynthetic-injection evaluation (precision/recall/F1 vs known injected anomalies):")
     print(synthetic_results_df.to_string(index=False))
     print(f"\nHub vs non-hub supplier anomaly rate: {hub_comparison['mean_anomaly_rate_hub_pct']:.2f}% vs {hub_comparison['mean_anomaly_rate_nonhub_pct']:.2f}% (Mann-Whitney p={hub_comparison['p_value']:.3g})")
+    print("\nComposite supplier risk score — risk tier counts:")
+    print(risk_score_df["risk_tier"].value_counts().to_string())
+    print("\nTop 5 highest composite-risk suppliers:")
+    print(risk_score_df[["supplier", "n_transactions", "composite_risk_score", "risk_tier"]].head(5).to_string(index=False))
+    print("\nTop 3 categories by pre-COVID -> COVID spend growth:")
+    print(category_shock_ranking_df[["category", "spend_pre_covid", "spend_covid", "pct_change_pre_to_covid"]].head(3).to_string(index=False))
+    print("\nRobustness — threshold sensitivity (95/98/99th pct):")
+    print(robustness_threshold_df[["threshold_percentile", "flagged_rate_pct", "rate_covid_pct", "rule_overlap_rate_pct"]].to_string(index=False))
+    print("\nRobustness — feature ablation (drop is_new_supplier), Jaccard overlap vs baseline flags:", f"{robustness_ablation_df['jaccard_overlap'].iloc[0]:.3f}")
+    print(f"\nBI-ready star-schema export ({len(bi_tables)} tables): {config.BI_EXPORT_DIR}")
+    print(f"Interactive dashboard: {dashboard_path}")
     print(f"\nAll outputs saved under: {config.DATA_PROCESSED_DIR}")
     print("=" * 70)
 

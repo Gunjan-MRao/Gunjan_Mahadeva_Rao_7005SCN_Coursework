@@ -1,0 +1,4 @@
+boundary_variant,covid_start,covid_end,rate_pre_covid_pct,rate_covid_pct,rate_post_covid_pct
+baseline,2020-03-23,2022-02-23,0.371,1.815,2.643
+shifted_earlier_1m,2020-02-23,2022-01-23,0.387,1.572,2.719
+shifted_later_1m,2020-04-23,2022-03-23,0.388,2.046,2.572

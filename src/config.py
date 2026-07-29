@@ -136,3 +136,47 @@ NETWORK_MIN_TRANSACTIONS = 2   # minimum trust-supplier transactions to include 
 NETWORK_HUB_PERCENTILE = 95    # betweenness-centrality percentile defining a "hub" supplier
 NETWORK_NODE_METRICS_PATH = DATA_PROCESSED_DIR / "network_supplier_metrics.csv"
 NETWORK_COMMUNITY_PATH = DATA_PROCESSED_DIR / "network_communities.csv"
+
+# ---------------------------------------------------------------------------
+# Composite supplier risk score (Phase 6A)
+# ---------------------------------------------------------------------------
+# Suppliers with fewer transactions than this are excluded from scoring/ranking
+# (a single flagged transaction out of 1-2 total is too noisy a basis for a
+# supplier-level risk judgement).
+SUPPLIER_RISK_MIN_TRANSACTIONS = 5
+# Equal-weighted blend of: (i) share of the supplier's own transactions flagged
+# by Isolation Forest, (ii) the supplier's mean raw anomaly score (captures
+# magnitude, not just the binary flag), and (iii) share of transactions
+# matching >=1 literature-derived audit red-flag rule. Network centrality is
+# deliberately excluded from the score itself (kept as a separate descriptive
+# column) given the Stage 5D finding that hub suppliers are *less*, not more,
+# anomalous -- folding it in would bias the score in the wrong direction.
+SUPPLIER_RISK_WEIGHTS = {
+    "anomaly_rate": 1 / 3,
+    "mean_anomaly_score": 1 / 3,
+    "rule_flag_rate": 1 / 3,
+}
+SUPPLIER_RISK_TIER_THRESHOLDS = {"critical": 95, "high": 85, "medium": 60}  # percentile cut points
+SUPPLIER_RISK_SCORE_PATH = DATA_PROCESSED_DIR / "supplier_risk_score.csv"
+
+# ---------------------------------------------------------------------------
+# Category-level deep dive (Phase 6B)
+# ---------------------------------------------------------------------------
+CATEGORY_DEEP_DIVE_PATH = DATA_PROCESSED_DIR / "category_deep_dive.csv"
+CATEGORY_SHOCK_RANKING_PATH = DATA_PROCESSED_DIR / "category_covid_shock_ranking.csv"
+
+# ---------------------------------------------------------------------------
+# Robustness checks (Phase 6C)
+# ---------------------------------------------------------------------------
+ROBUSTNESS_THRESHOLD_PERCENTILES = [95, 98, 99]
+ROBUSTNESS_PERIOD_SHIFT_MONTHS = 1  # +/- shift applied to all three period boundaries
+ROBUSTNESS_THRESHOLD_PATH = DATA_PROCESSED_DIR / "robustness_threshold_sensitivity.csv"
+ROBUSTNESS_PERIOD_SHIFT_PATH = DATA_PROCESSED_DIR / "robustness_period_shift.csv"
+ROBUSTNESS_FEATURE_ABLATION_PATH = DATA_PROCESSED_DIR / "robustness_feature_ablation.csv"
+
+# ---------------------------------------------------------------------------
+# BI-ready export (Phase 6D)
+# ---------------------------------------------------------------------------
+BI_EXPORT_DIR = DATA_PROCESSED_DIR / "bi_export"
+BI_EXPORT_DIR.mkdir(parents=True, exist_ok=True)
+DASHBOARD_HTML_PATH = REPORTS_DIR / "nhs_procurement_dashboard.html"
