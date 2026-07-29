@@ -1,0 +1,86 @@
+"""
+End-to-end orchestrator for the NHS Procurement Anomaly Detection pipeline.
+
+Usage:
+    python -m src.run_pipeline
+
+Runs, in order:
+  Phase 1  Data engineering (load, clean, merge 4 sources -> master panel)
+  Phase 2  EDA (data quality report, spend distribution, new-supplier rate)
+           + HHI supplier concentration + STL COVID shock decomposition
+  Phase 3  Isolation Forest anomaly detection + SHAP explainability
+  Phase 4  Rule-based audit red-flag validation + ML/rule triangulation
+
+Prints a final summary of key headline statistics referenced in the report.
+"""
+from __future__ import annotations
+
+import logging
+import time
+
+from src import config
+from src.data_engineering.clean_merge import clean_and_merge
+from src.analysis.eda import run_eda
+from src.analysis.hhi import compute_hhi
+from src.analysis.stl_shock import run_stl_shock_analysis
+from src.modeling.isolation_forest_shap import run_modeling_pipeline
+from src.validation.audit_validation import run_validation
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+logger = logging.getLogger(__name__)
+
+
+def main():
+    t0 = time.time()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 1 — Data Engineering")
+    logger.info("=" * 70)
+    panel = clean_and_merge()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 2 — EDA, HHI, STL Shock Analysis")
+    logger.info("=" * 70)
+    dq, dist, new_supplier = run_eda()
+    hhi_monthly, hhi_period_source, top_suppliers = compute_hhi(panel)
+    stl_summary, stl_decomp = run_stl_shock_analysis(panel)
+
+    logger.info("=" * 70)
+    logger.info("PHASE 3 — Isolation Forest + SHAP")
+    logger.info("=" * 70)
+    scored_df, shap_df, top_anomalies = run_modeling_pipeline()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 4 — Audit Red-Flag Validation")
+    logger.info("=" * 70)
+    validation_df = run_validation()
+
+    elapsed = time.time() - t0
+    logger.info("=" * 70)
+    logger.info("PIPELINE COMPLETE in %.1fs", elapsed)
+    logger.info("=" * 70)
+
+    n_anomaly = scored_df["is_anomaly"].sum()
+    n_ml = int((validation_df["is_anomaly"]).sum()) if "is_anomaly" in validation_df else n_anomaly
+    n_overlap = int((validation_df["is_anomaly"] & validation_df["rule_flagged"]).sum()) if "rule_flagged" in validation_df else None
+
+    print("\n" + "=" * 70)
+    print("HEADLINE SUMMARY")
+    print("=" * 70)
+    print(f"Total merged panel rows:        {len(panel):,}")
+    print(f"Records scored by IsolationForest: {len(scored_df):,}")
+    print(f"Anomalies flagged (98th pct):    {n_anomaly:,} ({n_anomaly/len(scored_df)*100:.2f}%)")
+    print("\nAnomaly rate by period:")
+    print(scored_df.groupby("period")["is_anomaly"].mean().mul(100).round(2).to_string())
+    print("\nCOVID shock (STL decomposition), avg %% deviation from pre-COVID baseline:")
+    print(stl_summary[["period", "pct_deviation_from_baseline"]].to_string(index=False))
+    print("\nNew-supplier rate by period (%):")
+    print(new_supplier.groupby("period")["new_supplier_rate_pct"].mean().round(2).to_string())
+    if n_overlap is not None and n_ml:
+        print(f"\nML/rule-based triangulation overlap: {n_overlap:,}/{n_ml:,} ({n_overlap/n_ml*100:.1f}% of ML flags corroborated by >=1 independent rule)")
+    print(f"\nAll outputs saved under: {config.DATA_PROCESSED_DIR}")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    main()
