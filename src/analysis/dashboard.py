@@ -136,8 +136,9 @@ def _build_figure(t: dict) -> go.Figure:
         height=1400, width=1300,
         title={
             "text": "NHS Procurement Anomaly Detection — Interactive Dashboard"
-                    "<br><sup>Coursework 7005SCN | Data through "
-                    f"{month['year_month'].max()} | Generated from the BI export (Phase 7D) star schema</sup>",
+                    "<br><sup>Coursework 7005SCN | Data: "
+                    f"{month['year_month'].min()} to {month['year_month'].max()}"
+                    " | Generated from the BI export (Phase 7D) star schema</sup>",
             "x": 0.5, "xanchor": "center",
         },
         template="plotly_white",
