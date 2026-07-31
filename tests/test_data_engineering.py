@@ -1,5 +1,5 @@
 """
-Tests for the Phase 1 data-engineering pipeline. Uses small synthetic CSVs
+Tests for the Phase 2 data-engineering pipeline. Uses small synthetic CSVs
 (rather than the real 100MB+ raw files) so the suite runs in seconds and
 does not depend on data being present, per FOI/Contracts Finder provenance
 notes in the README.

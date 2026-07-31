@@ -1,7 +1,7 @@
 """
-Phase 6C — Robustness checks.
+Phase 7C — Robustness checks.
 
-Every headline result up to Stage 5 rests on three modelling choices that are
+Every headline result up to Stage 6 rests on three modelling choices that are
 each, to some degree, arbitrary: the 98th-percentile anomaly-score cut-off,
 the exact calendar boundaries used to split pre/COVID/post periods, and the
 feature set fed into Isolation Forest. Reporting sensitivity of the headline
@@ -16,9 +16,9 @@ Three checks, each re-using artefacts already produced earlier in the
 pipeline rather than duplicating expensive model training where avoidable:
 
   (a) Threshold sensitivity - re-flag anomalies at 95th/98th/99th percentile
-      cut-offs on the *same* already-computed anomaly_score column (Phase 3),
+      cut-offs on the *same* already-computed anomaly_score column (Phase 4),
       then recompute the period-level anomaly rate and the ML/rule
-      triangulation hypergeometric test (Phase 5C) at each threshold. Checks
+      triangulation hypergeometric test (Phase 6C) at each threshold. Checks
       whether the period ordering and ML/rule overlap significance survive a
       stricter or looser cut-off.
   (b) Period-boundary sensitivity - recompute period labels with the COVID

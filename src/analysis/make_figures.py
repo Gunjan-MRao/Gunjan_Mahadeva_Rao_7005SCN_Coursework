@@ -122,7 +122,7 @@ def fig_new_supplier_rate():
 
 
 # ---------------------------------------------------------------------------
-# Phase 5 (dissertation-advancement) figures
+# Phase 6 (dissertation-advancement) figures
 # ---------------------------------------------------------------------------
 
 def fig_method_agreement_heatmap():
@@ -255,7 +255,7 @@ def fig_community_anomaly_rate():
 
 
 # ---------------------------------------------------------------------------
-# Phase 6 (dataset-extension) figures
+# Phase 7 (dataset-extension) figures
 # ---------------------------------------------------------------------------
 
 def fig_supplier_risk_score():
@@ -291,7 +291,7 @@ def fig_supplier_risk_score():
 def fig_category_covid_shock():
     """Horizontal bar chart of the categories with the largest pre-COVID ->
     COVID spend growth, i.e. the categories that drove the aggregate STL
-    shock (Phase 2) most."""
+    shock (Phase 3) most."""
     df = pd.read_csv(config.CATEGORY_SHOCK_RANKING_PATH)
     df = df.dropna(subset=["pct_change_pre_to_covid"])
     top10 = df.sort_values("pct_change_pre_to_covid", ascending=False).head(10).iloc[::-1]

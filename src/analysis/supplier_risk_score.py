@@ -1,5 +1,5 @@
 """
-Phase 6A — Composite supplier risk score.
+Phase 7A — Composite supplier risk score.
 
 Combines three independent signals into a single, ranked supplier-level risk
 index, following the "composite risk index" approach used in the public
@@ -16,17 +16,17 @@ OECD/JRC Handbook on Constructing Composite Indicators, 2008).
 
 Signals blended (equal weights, see config.SUPPLIER_RISK_WEIGHTS):
   1. anomaly_rate       - share of the supplier's own trust_spend transactions
-                          flagged anomalous by the Phase 3 Isolation Forest.
+                          flagged anomalous by the Phase 4 Isolation Forest.
   2. mean_anomaly_score - supplier's mean raw (continuous) anomaly score,
                           capturing magnitude of anomalousness, not just the
                           binary flag (a supplier just over the 98th-percentile
                           cut and one far beyond it both score 1 on signal #1).
   3. rule_flag_rate     - share of the supplier's transactions matching >=1
-                          literature-derived audit red-flag rule (Phase 4).
+                          literature-derived audit red-flag rule (Phase 5).
 
-Network centrality (hub status, Phase 5D) is deliberately EXCLUDED from the
+Network centrality (hub status, Phase 6D) is deliberately EXCLUDED from the
 composite score itself and reported only as a separate descriptive column.
-Stage 5D found hub suppliers have a significantly LOWER anomaly rate than
+Stage 6D found hub suppliers have a significantly LOWER anomaly rate than
 non-hub suppliers (Mann-Whitney p=5.4e-22) -- large, established multi-trust
 suppliers are, if anything, under-represented among anomalies, likely because
 they have long transaction histories the model has learned as "normal".
@@ -54,8 +54,8 @@ logger = logging.getLogger(__name__)
 
 def load_supplier_signals() -> pd.DataFrame:
     """Aggregate the three raw per-supplier signals from existing pipeline
-    artefacts (anomaly_scores.csv from Phase 3, validation_redflags.csv from
-    Phase 4)."""
+    artefacts (anomaly_scores.csv from Phase 4, validation_redflags.csv from
+    Phase 5)."""
     scores = pd.read_csv(
         config.ANOMALY_SCORES_PATH, low_memory=False,
         usecols=["supplier", "amount", "anomaly_score", "is_anomaly"],
@@ -136,7 +136,7 @@ def compute_composite_score(supplier_df: pd.DataFrame) -> pd.DataFrame:
 def compare_hub_vs_nonhub_risk(scored_df: pd.DataFrame) -> dict:
     """Descriptive check (not used to build the score): do hub suppliers score
     higher or lower composite risk than non-hub suppliers? Reported for
-    consistency with -- and as an independent replication of -- the Stage 5D
+    consistency with -- and as an independent replication of -- the Stage 6D
     finding that hub status is inversely related to raw anomaly rate."""
     valid = scored_df.dropna(subset=["is_hub_supplier"])
     if valid.empty or valid["is_hub_supplier"].nunique() < 2:

@@ -5,11 +5,13 @@ Usage:
     python -m src.run_pipeline
 
 Runs, in order:
-  Phase 1  Data engineering (load, clean, merge 4 sources -> master panel)
-  Phase 2  EDA (data quality report, spend distribution, new-supplier rate)
+  Phase 1  Data acquisition (fetch + consolidate the raw Google Drive archive)
+           -- automatic, and only when data/raw/*_clean.csv are missing
+  Phase 2  Data engineering (load, clean, merge 4 sources -> master panel)
+  Phase 3  EDA (data quality report, spend distribution, new-supplier rate)
            + HHI supplier concentration + STL COVID shock decomposition
-  Phase 3  Isolation Forest anomaly detection + SHAP explainability
-  Phase 4  Rule-based audit red-flag validation + ML/rule triangulation
+  Phase 4  Isolation Forest anomaly detection + SHAP explainability
+  Phase 5  Rule-based audit red-flag validation + ML/rule triangulation
 
 Prints a final summary of key headline statistics referenced in the report.
 """
@@ -19,6 +21,7 @@ import logging
 import time
 
 from src import config
+from src.data_engineering import build_raw_from_drive
 from src.data_engineering.clean_merge import clean_and_merge
 from src.analysis.eda import run_eda
 from src.analysis.hhi import compute_hhi
@@ -42,76 +45,90 @@ logger = logging.getLogger(__name__)
 def main():
     t0 = time.time()
 
+    # Phase 1 — only runs when the consolidated raw files are absent, so an
+    # existing manual `data/raw/` setup is left exactly as-is.
+    missing = [k for k, p in config.RAW_FILES.items() if not p.exists()]
+    if missing:
+        logger.info(
+            "Consolidated raw file(s) missing (%s) — running Phase 1 to fetch and "
+            "consolidate the original per-month FOI/Contracts Finder exports from the "
+            "project's public Google Drive archive. This downloads ~500MB and takes a "
+            "few minutes; it is a one-off. To supply the files manually instead, see "
+            "the README's 'Reproducing raw data from Google Drive' section.",
+            ", ".join(missing),
+        )
+        build_raw_from_drive.build_all()
+
     logger.info("=" * 70)
-    logger.info("PHASE 1 — Data Engineering")
+    logger.info("PHASE 2 — Data Engineering")
     logger.info("=" * 70)
     panel = clean_and_merge()
 
     logger.info("=" * 70)
-    logger.info("PHASE 2 — EDA, HHI, STL Shock Analysis")
+    logger.info("PHASE 3 — EDA, HHI, STL Shock Analysis")
     logger.info("=" * 70)
     dq, dist, new_supplier = run_eda()
     hhi_monthly, hhi_period_source, top_suppliers = compute_hhi(panel)
     stl_summary, stl_decomp = run_stl_shock_analysis(panel)
 
     logger.info("=" * 70)
-    logger.info("PHASE 3 — Isolation Forest + SHAP")
+    logger.info("PHASE 4 — Isolation Forest + SHAP")
     logger.info("=" * 70)
     scored_df, shap_df, top_anomalies = run_modeling_pipeline()
 
     logger.info("=" * 70)
-    logger.info("PHASE 4 — Audit Red-Flag Validation")
+    logger.info("PHASE 5 — Audit Red-Flag Validation")
     logger.info("=" * 70)
     validation_df = run_validation()
 
     logger.info("=" * 70)
-    logger.info("PHASE 5A — Multi-Method Anomaly Detection Comparison")
+    logger.info("PHASE 6A — Multi-Method Anomaly Detection Comparison")
     logger.info("=" * 70)
     # NOTE: `panel` here is the FULL merged panel (trust_spend + contract_notice).
     # method_comparison / synthetic_evaluation require the trust_spend-only view
-    # (same as Phase 3's Isolation Forest), so we deliberately do NOT pass `panel`
+    # (same as Phase 4's Isolation Forest), so we deliberately do NOT pass `panel`
     # through -- each function loads and filters its own trust-only copy via
     # `load_trust_panel()` to avoid silently scoring contract_notice rows (which
     # have null supplier/amount-derived features) as if they were spend records.
     method_comparison_df, method_comparison_summary = run_method_comparison()
 
     logger.info("=" * 70)
-    logger.info("PHASE 5B — Synthetic Anomaly Injection Evaluation")
+    logger.info("PHASE 6B — Synthetic Anomaly Injection Evaluation")
     logger.info("=" * 70)
     synthetic_results_df, synthetic_by_type_df = run_synthetic_evaluation()
 
     logger.info("=" * 70)
-    logger.info("PHASE 5C — Statistical Significance Testing")
+    logger.info("PHASE 6C — Statistical Significance Testing")
     logger.info("=" * 70)
     bootstrap_df, mwu_df, hyper_result = run_statistical_tests()
 
     logger.info("=" * 70)
-    logger.info("PHASE 5D — Supplier-Buyer Network / Collusion-Indicator Analysis")
+    logger.info("PHASE 6D — Supplier-Buyer Network / Collusion-Indicator Analysis")
     logger.info("=" * 70)
     network_node_df, hub_comparison, community_df, top_communities = run_network_analysis()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6A — Composite Supplier Risk Score")
+    logger.info("PHASE 7A — Composite Supplier Risk Score")
     logger.info("=" * 70)
     risk_score_df, risk_hub_comparison = run_supplier_risk_score()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6B — Category-Level Deep Dive")
+    logger.info("PHASE 7B — Category-Level Deep Dive")
     logger.info("=" * 70)
     category_table_df, category_shock_ranking_df = run_category_deep_dive()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6C — Robustness Checks")
+    logger.info("PHASE 7C — Robustness Checks")
     logger.info("=" * 70)
     robustness_threshold_df, robustness_period_shift_df, robustness_ablation_df = run_robustness_checks()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6D — BI-Ready Data Export (star schema)")
+    logger.info("PHASE 7D — BI-Ready Data Export (star schema)")
     logger.info("=" * 70)
     bi_tables = run_bi_export()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6E — Interactive Plotly Dashboard")
+    logger.info("PHASE 7E — Interactive Plotly Dashboard")
     logger.info("=" * 70)
     dashboard_path = run_dashboard()
 

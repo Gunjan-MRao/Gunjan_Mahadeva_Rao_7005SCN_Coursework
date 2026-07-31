@@ -1,5 +1,5 @@
 """
-Tests for Phase 1 cleaning/feature logic and Phase 4 rule-based validation,
+Tests for Phase 2 cleaning/feature logic and Phase 5 rule-based validation,
 using small synthetic panels (not the real multi-hundred-MB dataset) so the
 suite is fast and self-contained.
 """

@@ -58,27 +58,27 @@ the fact table):
 | `is_ml_anomaly` | bool | Isolation Forest flag (98th-percentile cutoff); blank for `contract_notice` rows |
 | `ml_anomaly_score` | number | raw Isolation Forest anomaly score; blank for `contract_notice` rows |
 | `is_ml_scored` | bool | **filter on this** to restrict any ML-based visual to the 257,095 scored `trust_spend` records |
-| `supplier_is_network_hub` | bool | multi-trust hub supplier (Phase 5D network analysis) |
-| `composite_risk_score` | number 0-100 | Phase 6A composite risk score |
+| `supplier_is_network_hub` | bool | multi-trust hub supplier (Phase 6D network analysis) |
+| `composite_risk_score` | number 0-100 | Phase 7A composite risk score |
 | `risk_tier` | text | `Low` / `Medium` / `High` / `Critical` / `Not scored` |
 
 ### `dim_supplier.csv`
 `supplier`, `total_transactions`, `total_spend`, `mean_transaction_amount`,
 `ml_anomaly_rate`, `mean_ml_anomaly_score`, `rule_flag_rate`,
 `is_network_hub`, `composite_risk_score`, `risk_tier`, `community_id`,
-`community_size` (co-occurrence network community from Phase 5D).
+`community_size` (co-occurrence network community from Phase 6D).
 
 ### `dim_category.csv`
 `category`, `total_spend`, `n_transactions`, `n_periods_active`,
 `mean_anomaly_rate_pct`, `mean_new_supplier_rate_pct`, `mean_hhi`,
 `share_of_total_spend_pct`, `pct_change_pre_to_covid`,
 `pct_change_covid_to_post` (the last two are `NaN` for categories with
-fewer than 20 transactions — Phase 6B's noise-reduction cutoff).
+fewer than 20 transactions — Phase 7B's noise-reduction cutoff).
 
 ### `dim_period.csv`
 `period`, `period_label`, `months`, `avg_monthly_spend`,
 `baseline_avg_monthly_spend`, `pct_deviation_from_baseline`, `avg_residual`,
-`max_abs_residual` (all from the Phase 2 STL decomposition),
+`max_abs_residual` (all from the Phase 3 STL decomposition),
 `ml_anomaly_rate_pct`.
 
 ### `dim_month.csv`

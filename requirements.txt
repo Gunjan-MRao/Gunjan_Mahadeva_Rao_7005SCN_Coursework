@@ -16,3 +16,8 @@ matplotlib>=3.7
 pytest>=7.4
 networkx>=3.0
 plotly>=5.20
+# Phase 1 only (src/data_engineering/build_raw_from_drive.py): fetches the raw
+# FOI / Contracts Finder archive from the project's public Google Drive folder.
+# Tested with gdown 6.1.0. Not required if you place the four
+# data/raw/*_clean.csv files manually.
+gdown>=5.1

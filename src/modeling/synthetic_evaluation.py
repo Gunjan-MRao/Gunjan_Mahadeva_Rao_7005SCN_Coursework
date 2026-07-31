@@ -1,5 +1,5 @@
 """
-Phase 3 extension — Synthetic anomaly injection evaluation.
+Phase 4 extension — Synthetic anomaly injection evaluation.
 
 Confidential NAO / NHSCFA case-level audit labels are not publicly available
 (see `src/validation/audit_validation.py`), so this module provides a

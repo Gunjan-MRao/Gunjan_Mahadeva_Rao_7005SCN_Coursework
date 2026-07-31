@@ -1,10 +1,10 @@
 """
-Phase 6E — Interactive Plotly HTML dashboard.
+Phase 7E — Interactive Plotly HTML dashboard.
 
 As explained in bi_export.py's module docstring, a genuine .pbix/.twbx file
 cannot be reliably produced without the desktop BI application itself. This
 module builds a self-contained, single-file HTML dashboard from the same
-star-schema CSVs exported by bi_export.py (Phase 6D), laid out to mimic a
+star-schema CSVs exported by bi_export.py (Phase 7D), laid out to mimic a
 typical Power BI / Tableau report page: a row of headline KPI cards, trend
 lines across the study period, and category/supplier/risk breakdown panels.
 The output requires no server and no installed BI software -- open the .html
@@ -137,7 +137,7 @@ def _build_figure(t: dict) -> go.Figure:
         title={
             "text": "NHS Procurement Anomaly Detection — Interactive Dashboard"
                     "<br><sup>Coursework 7005SCN | Data through "
-                    f"{month['year_month'].max()} | Generated from the BI export (Phase 6D) star schema</sup>",
+                    f"{month['year_month'].max()} | Generated from the BI export (Phase 7D) star schema</sup>",
             "x": 0.5, "xanchor": "center",
         },
         template="plotly_white",

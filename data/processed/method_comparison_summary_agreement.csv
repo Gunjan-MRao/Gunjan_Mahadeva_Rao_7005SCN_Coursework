@@ -1,7 +1,7 @@
 method_a,method_b,jaccard_index,cohens_kappa,n_both_flag
-isolation_forest,local_outlier_factor,0.0603,0.0957,585
-isolation_forest,one_class_svm,0.0579,0.0913,563
-isolation_forest,autoencoder,0.0499,0.0766,489
-local_outlier_factor,one_class_svm,0.6687,0.7974,4121
-local_outlier_factor,autoencoder,0.4527,0.6156,3205
-one_class_svm,autoencoder,0.6973,0.818,4225
+isolation_forest,local_outlier_factor,0.122,0.2014,1180
+isolation_forest,one_class_svm,0.1096,0.1811,1072
+isolation_forest,autoencoder,0.0859,0.1411,859
+local_outlier_factor,one_class_svm,0.6742,0.8014,4371
+local_outlier_factor,autoencoder,0.4252,0.5884,3238
+one_class_svm,autoencoder,0.6536,0.7862,4290

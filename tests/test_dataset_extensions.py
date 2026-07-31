@@ -1,5 +1,5 @@
 """
-Tests for the Phase 6 dataset-extension modules: composite supplier risk
+Tests for the Phase 7 dataset-extension modules: composite supplier risk
 score, category-level deep dive, and robustness checks. Mirrors the style of
 tests/test_advanced_modules.py -- small synthetic inputs, config paths
 monkeypatched to tmp_path CSVs, no dependency on the full dataset.

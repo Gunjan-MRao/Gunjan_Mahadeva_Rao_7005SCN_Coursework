@@ -1,5 +1,5 @@
 """
-Phase 1 (continued) — cleaning, quality filtering, feature-ready merge.
+Phase 2 (continued) — cleaning, quality filtering, feature-ready merge.
 
 Takes the standardised panel from `loaders.load_all_sources()` and:
   1. restricts to the 2019-01-01 -> 2024-12-31 study window

@@ -1,5 +1,5 @@
 method,precision,recall,f1,average_precision_pr_auc,n_flagged,n_true_anomalies
-isolation_forest,0.315,0.315,0.315,0.1819,400,400
-local_outlier_factor,0.0175,0.0175,0.0175,0.0352,400,400
-one_class_svm,0.04,0.04,0.04,0.0493,400,400
-autoencoder,0.035,0.035,0.035,0.0247,400,400
+isolation_forest,0.2075,0.2075,0.2075,0.1172,400,400
+local_outlier_factor,0.0225,0.0225,0.0225,0.0337,400,400
+one_class_svm,0.0225,0.0225,0.0225,0.0558,400,400
+autoencoder,0.02,0.02,0.02,0.0313,400,400

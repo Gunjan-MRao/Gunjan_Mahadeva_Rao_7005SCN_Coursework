@@ -1,5 +1,5 @@
 """
-Tests for the Phase 5 dissertation-advancement modules: multi-method
+Tests for the Phase 6 dissertation-advancement modules: multi-method
 comparison, synthetic anomaly injection, statistical significance testing,
 and supplier-buyer network analysis. Uses small synthetic inputs so the
 suite is fast and self-contained (no dependency on the full multi-hundred-MB

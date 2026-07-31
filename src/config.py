@@ -27,6 +27,19 @@ RAW_FILES = {
     "contracts_finder": DATA_RAW_DIR / "contracts_clean.csv",
 }
 
+# ---------------------------------------------------------------------------
+# Phase 1 — raw data acquisition (see src/data_engineering/build_raw_from_drive.py)
+# ---------------------------------------------------------------------------
+# The original per-month FOI exports and Contracts Finder bulk extracts are too
+# large / third-party-licensed to commit, so they are hosted in a public
+# "anyone with the link" Google Drive folder and fetched on demand. RAW_FILES
+# above are the *consolidated* outputs Phase 2 reads; RAW_STAGING_DIR holds the
+# downloaded originals and is gitignored.
+GOOGLE_DRIVE_RAW_FOLDER_URL = (
+    "https://drive.google.com/drive/folders/1giZvxWA-uqWj8n8DcqOcOwKWh6ZFxVtS?usp=sharing"
+)
+RAW_STAGING_DIR = ROOT_DIR / "data" / "_raw_staging"
+
 MASTER_PANEL_PATH = DATA_PROCESSED_DIR / "master_procurement_panel.csv"
 ANOMALY_SCORES_PATH = DATA_PROCESSED_DIR / "anomaly_scores.csv"
 SHAP_VALUES_PATH = DATA_PROCESSED_DIR / "shap_top_anomalies.csv"
@@ -69,7 +82,7 @@ ANOMALY_SCORE_PERCENTILE = 98
 RANDOM_STATE = 42
 
 # ---------------------------------------------------------------------------
-# Multi-method anomaly detection comparison (Phase 3 extension)
+# Multi-method anomaly detection comparison (Phase 4 extension)
 # ---------------------------------------------------------------------------
 LOF_PARAMS = {
     "n_neighbors": 35,
@@ -138,7 +151,7 @@ NETWORK_NODE_METRICS_PATH = DATA_PROCESSED_DIR / "network_supplier_metrics.csv"
 NETWORK_COMMUNITY_PATH = DATA_PROCESSED_DIR / "network_communities.csv"
 
 # ---------------------------------------------------------------------------
-# Composite supplier risk score (Phase 6A)
+# Composite supplier risk score (Phase 7A)
 # ---------------------------------------------------------------------------
 # Suppliers with fewer transactions than this are excluded from scoring/ranking
 # (a single flagged transaction out of 1-2 total is too noisy a basis for a
@@ -149,7 +162,7 @@ SUPPLIER_RISK_MIN_TRANSACTIONS = 5
 # magnitude, not just the binary flag), and (iii) share of transactions
 # matching >=1 literature-derived audit red-flag rule. Network centrality is
 # deliberately excluded from the score itself (kept as a separate descriptive
-# column) given the Stage 5D finding that hub suppliers are *less*, not more,
+# column) given the Stage 6D finding that hub suppliers are *less*, not more,
 # anomalous -- folding it in would bias the score in the wrong direction.
 SUPPLIER_RISK_WEIGHTS = {
     "anomaly_rate": 1 / 3,
@@ -160,13 +173,13 @@ SUPPLIER_RISK_TIER_THRESHOLDS = {"critical": 95, "high": 85, "medium": 60}  # pe
 SUPPLIER_RISK_SCORE_PATH = DATA_PROCESSED_DIR / "supplier_risk_score.csv"
 
 # ---------------------------------------------------------------------------
-# Category-level deep dive (Phase 6B)
+# Category-level deep dive (Phase 7B)
 # ---------------------------------------------------------------------------
 CATEGORY_DEEP_DIVE_PATH = DATA_PROCESSED_DIR / "category_deep_dive.csv"
 CATEGORY_SHOCK_RANKING_PATH = DATA_PROCESSED_DIR / "category_covid_shock_ranking.csv"
 
 # ---------------------------------------------------------------------------
-# Robustness checks (Phase 6C)
+# Robustness checks (Phase 7C)
 # ---------------------------------------------------------------------------
 ROBUSTNESS_THRESHOLD_PERCENTILES = [95, 98, 99]
 ROBUSTNESS_PERIOD_SHIFT_MONTHS = 1  # +/- shift applied to all three period boundaries
@@ -175,7 +188,7 @@ ROBUSTNESS_PERIOD_SHIFT_PATH = DATA_PROCESSED_DIR / "robustness_period_shift.csv
 ROBUSTNESS_FEATURE_ABLATION_PATH = DATA_PROCESSED_DIR / "robustness_feature_ablation.csv"
 
 # ---------------------------------------------------------------------------
-# BI-ready export (Phase 6D)
+# BI-ready export (Phase 7D)
 # ---------------------------------------------------------------------------
 BI_EXPORT_DIR = DATA_PROCESSED_DIR / "bi_export"
 BI_EXPORT_DIR.mkdir(parents=True, exist_ok=True)

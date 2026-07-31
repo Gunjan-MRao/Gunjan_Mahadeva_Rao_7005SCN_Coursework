@@ -1,5 +1,5 @@
 """
-Phase 2 — Exploratory Spend Intelligence: supplier concentration (HHI).
+Phase 3 — Exploratory Spend Intelligence: supplier concentration (HHI).
 
 Herfindahl-Hirschman Index (Hirschman, 1945) computed monthly and by period,
 per source, on trust_spend records only (contract notices are buyer-side and

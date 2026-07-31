@@ -1,5 +1,5 @@
 """
-Phase 2 — Exploratory Data Analysis.
+Phase 3 — Exploratory Data Analysis.
 
 Produces:
   * data quality report (row counts, null rates, date coverage per source)

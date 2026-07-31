@@ -1,5 +1,5 @@
 """
-Phase 3 extension — Multi-method anomaly detection comparison.
+Phase 4 extension — Multi-method anomaly detection comparison.
 
 Directly addresses supervisor feedback: "More detailed comparison between
 methods would improve it further."
@@ -19,7 +19,7 @@ trust-spend record, and reports:
      gallery, https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_anomaly_comparison.html).
   3. A consensus score (fraction of methods flagging each record), which
      forms the ensemble signal reused as an extra red-flag rule in
-     Phase 4 and as a feature in Phase 5 network analysis.
+     Phase 5 and as a feature in Phase 6 network analysis.
 
 Methods compared:
   - Isolation Forest (Liu, Ting & Zhou, 2008)      — tree-partitioning

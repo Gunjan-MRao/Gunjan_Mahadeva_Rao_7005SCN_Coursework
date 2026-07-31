@@ -1,5 +1,5 @@
 """
-Phase 2/3/4 extension — Statistical significance testing.
+Phase 3/4/5 extension — Statistical significance testing.
 
 The original pipeline reported headline percentages (STL shock %, new-supplier
 rate, anomaly rate by period, ML/rule triangulation overlap) as point

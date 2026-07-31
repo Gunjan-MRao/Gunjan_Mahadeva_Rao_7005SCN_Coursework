@@ -1,7 +1,7 @@
 """
-Phase 6B — Category-level deep dive.
+Phase 7B — Category-level deep dive.
 
-The headline STL/HHI/anomaly results (Phases 2-4) are reported at the
+The headline STL/HHI/anomaly results (Phases 3-5) are reported at the
 whole-panel level. This module disaggregates by spend `category` x `period`
 to answer: which categories actually drove the aggregate COVID-19 spend
 shock, and do anomaly/new-supplier/concentration patterns differ materially
@@ -19,14 +19,14 @@ For each (category, period) cell over trust_spend records, this computes:
   - new_supplier_rate_pct : is_new_supplier flag rate within the cell
   - hhi                : Herfindahl-Hirschman Index of supplier concentration
                           within the cell (same HHI definition used
-                          project-wide in Phase 2, i.e. sum of squared supplier
+                          project-wide in Phase 3, i.e. sum of squared supplier
                           spend shares x 10,000; see Rhoades, 1993, "The
                           Herfindahl-Hirschman Index", Federal Reserve
                           Bulletin, 79, 188-189)
 
 A companion ranking table (category_covid_shock_ranking.csv) sorts categories
 by pre-COVID -> COVID spend growth, to directly identify the categories that
-drove the aggregate STL shock (Phase 2) most.
+drove the aggregate STL shock (Phase 3) most.
 
 Reference:
   National Audit Office (2020). "Investigation into government procurement
@@ -102,7 +102,7 @@ def build_category_period_table(trust: pd.DataFrame) -> pd.DataFrame:
 
 def build_covid_shock_ranking(table: pd.DataFrame) -> pd.DataFrame:
     """Rank categories by pre-COVID -> COVID spend growth to identify which
-    categories drove the aggregate STL shock (Phase 2) most."""
+    categories drove the aggregate STL shock (Phase 3) most."""
     pivot = table.pivot(index="category", columns="period", values="total_spend").fillna(0.0)
     n_txn = table.groupby("category")["n_transactions"].sum()
 

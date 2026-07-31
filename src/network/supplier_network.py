@@ -1,5 +1,5 @@
 """
-Phase 3 extension (D) — Supplier-buyer network / collusion-indicator analysis.
+Phase 4 extension (D) — Supplier-buyer network / collusion-indicator analysis.
 
 Two complementary graphs are built from `trust_spend` records:
 

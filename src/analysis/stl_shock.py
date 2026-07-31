@@ -1,5 +1,5 @@
 """
-Phase 2 (continued) — COVID-19 Shock Analysis via STL decomposition.
+Phase 3 (continued) — COVID-19 Shock Analysis via STL decomposition.
 
 Implements Cleveland et al. (1990) STL (Seasonal-Trend decomposition using
 Loess) on the monthly aggregated NHS spend series. A baseline trend+seasonal

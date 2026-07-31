@@ -1,432 +1,843 @@
 category,period,n_transactions,n_suppliers,total_spend,spend_share_within_period_pct,anomaly_rate_pct,new_supplier_rate_pct,hhi
-ACCOMMODATION,pre_covid,1,1,64800.0,0.0,0.0,100.0,10000.0
-AGENCY ADMIN CLERICAL,covid,1,1,50776.99,0.0,0.0,100.0,10000.0
-AGENCY HCA  OTHER SUPP STAFF,covid,1,1,73128.0,0.0,0.0,100.0,10000.0
-AGENCY OTHER STT QUALIFIED,covid,2,1,953004.22,0.002,0.0,0.0,10000.0
-APPRENTICE LEVY (HMRC),covid,2,1,18202.0,0.0,0.0,0.0,10000.0
-APPRENTICE LEVY (HMRC),pre_covid,7,1,54620.0,0.0,0.0,0.0,10000.0
+78H BLOCK CONTRACT,covid,1,1,29200.0,0.0,0.0,100.0,10000.0
+ACCOMMODATION,covid,2,1,118800.0,0.0,0.0,0.0,10000.0
+ACCOMMODATION,pre_covid,2,1,129600.0,0.0,0.0,50.0,10000.0
+AGENCY ADMIN CLERICAL,covid,4,3,187371.37,0.0,0.0,25.0,4217.4
+AGENCY AHP QUALIFIED,covid,1,1,23000.0,0.0,0.0,0.0,10000.0
+AGENCY HCA  OTHER SUPP STAFF,covid,22,2,861297.04,0.001,0.0,4.545,5679.5
+AGENCY OTHER STT QUALIFIED,covid,22,1,11625036.77,0.019,0.0,0.0,10000.0
+AGENCY SENIOR MANAGER,pre_covid,2,2,103551.0,0.0,0.0,0.0,5464.2
+APPRENTICE LEVY (HMRC),covid,3,1,25366.0,0.0,0.0,0.0,10000.0
+APPRENTICE LEVY (HMRC),pre_covid,13,1,99306.0,0.0,0.0,0.0,10000.0
 AUC Additions,covid,6,4,500367.89999999997,0.001,0.0,16.667,5696.8
+AUC Additions,post_covid,2,2,78889.0,0.0,0.0,0.0,5004.6
 AUC Additions,pre_covid,3,2,403676.29000000004,0.001,0.0,0.0,8362.2
+Admin & Clerical Band 8A,post_covid,2,1,33420.6,0.0,0.0,0.0,10000.0
 Admin & Clerical Band 8B,covid,8,1,31749.75,0.0,0.0,0.0,10000.0
 Advertising,covid,2,1,35493.6,0.0,50.0,0.0,10000.0
 Advertising,post_covid,1,1,29578.0,0.0,0.0,0.0,10000.0
+Agency Admin & Clerical,post_covid,3,1,124270.0,0.0,0.0,0.0,10000.0
+Agency Ahp Qualified,post_covid,1,1,60000.0,0.0,0.0,0.0,10000.0
+Agency Hca Unregistered,covid,2,1,133941.6,0.0,0.0,0.0,10000.0
+Agency Hca Unregistered,post_covid,3,1,158012.16,0.0,0.0,0.0,10000.0
 Agency Healthcare Asst,covid,1,1,306.0,0.0,0.0,0.0,10000.0
-Agency Nursing Qualified,covid,1009,4,1289373.01,0.002,3.568,0.198,7850.8
-Agency Nursing Qualified,post_covid,43,1,72002.20999999999,0.0,25.581,0.0,10000.0
-Agency Nursing Qualified,pre_covid,313,5,505693.35,0.002,0.958,0.639,3950.7
+Agency M&D Consultant,post_covid,31,3,1160807.04,0.001,0.0,0.0,4581.1
+Agency Maint & Works,post_covid,4,1,382657.36,0.0,0.0,0.0,10000.0
+Agency Nursing Qualified,covid,1009,4,1289373.01,0.002,2.676,0.198,7850.8
+Agency Nursing Qualified,post_covid,751,1,1142121.11,0.001,21.305,0.0,10000.0
+Agency Nursing Qualified,pre_covid,313,5,505693.35,0.002,0.319,0.319,3950.7
+Agency Nursing Registered,covid,12,2,2119248.17,0.003,0.0,0.0,9096.5
+Agency Nursing Registered,post_covid,139,5,15664501.01,0.016,0.0,0.719,6947.6
 Agency Nursing:Op Dept Pr,covid,3,1,3189.9700000000003,0.0,0.0,0.0,10000.0
-Agency Nursing:Op Dept Pr,pre_covid,6,1,5961.9,0.0,0.0,0.0,10000.0
+Agency Nursing:Op Dept Pr,post_covid,42,2,52482.00000000001,0.0,52.381,2.381,5000.0
+Agency Nursing:Op Dept Pr,pre_covid,6,1,5961.900000000001,0.0,16.667,16.667,10000.0
+Agency Other Stt,post_covid,1,1,80884.8,0.0,0.0,100.0,10000.0
 Agency Prof & Tech,covid,1,1,35000.0,0.0,0.0,0.0,10000.0
+Ahp B8d,post_covid,1,1,47952.59,0.0,0.0,100.0,10000.0
+Ambulance Services,covid,3,1,141120.0,0.0,0.0,33.333,10000.0
+Ambulance Services,post_covid,16,3,639999.98,0.001,0.0,6.25,3388.5
 Anaesthetics Accessories,covid,2,1,174803.04,0.0,0.0,50.0,10000.0
+Anaesthetics Accessories,post_covid,2,1,42623.380000000005,0.0,0.0,0.0,10000.0
+Appentice Levy - Trust,covid,3,1,391034.0,0.001,0.0,0.0,10000.0
+Appentice Levy - Trust,post_covid,27,1,4537803.12,0.005,0.0,0.0,10000.0
+Archiving Data,post_covid,1,1,38482.73,0.0,0.0,0.0,10000.0
+Ascribe Control: Boston,covid,6,3,298225.7,0.0,0.0,16.667,4387.5
+Ascribe Control: Boston,post_covid,77,7,3593695.42,0.004,0.0,1.299,3691.2
+Ascribe Control: Lincoln,covid,16,6,611992.85,0.001,0.0,0.0,2325.5
+Ascribe Control: Lincoln,post_covid,415,19,19210473.819999997,0.02,0.241,0.964,1383.4
+Aseptic Unit,post_covid,1,1,50610.0,0.0,0.0,100.0,10000.0
+Assistant Medical Director,post_covid,2,2,85221.65,0.0,0.0,100.0,5404.4
+Audit Fees Statutory,post_covid,6,1,345912.0,0.0,0.0,0.0,10000.0
 Audit Fees: Ext non-stat,pre_covid,2,1,88015.0,0.0,0.0,0.0,10000.0
 Audit Fees: Internal,covid,8,1,388783.0,0.001,0.0,0.0,10000.0
-Audit Fees: Internal,pre_covid,2,1,88450.0,0.0,0.0,0.0,10000.0
-Audit Fees: Statutory,covid,3,1,122845.45000000001,0.0,33.333,0.0,10000.0
+Audit Fees: Internal,post_covid,9,2,514370.0,0.001,0.0,11.111,8211.4
+Audit Fees: Internal,pre_covid,3,1,132240.0,0.0,0.0,0.0,10000.0
+Audit Fees: Statutory,covid,3,1,122845.45000000001,0.0,0.0,0.0,10000.0
+Audit Fees: Statutory,post_covid,7,1,426621.4,0.0,0.0,0.0,10000.0
 Audit Fees: Statutory,pre_covid,1,1,56000.0,0.0,0.0,0.0,10000.0
-BLOOD PRODUCTS,covid,2,1,162700.39,0.0,0.0,0.0,10000.0
-BLOOD PRODUCTS,pre_covid,9,1,713096.07,0.003,0.0,11.111,10000.0
-BUILD MAINT DAY TO DAY,pre_covid,2,1,80408.0,0.0,0.0,0.0,10000.0
-BUILD MAINT EXT CONTRACTS,covid,3,2,416549.63,0.001,33.333,33.333,7180.6
-BUILD MAINT EXT CONTRACTS,pre_covid,4,2,120288.3,0.0,0.0,0.0,7444.3
+BEDDING AND LINEN,covid,1,1,51737.0,0.0,0.0,0.0,10000.0
+BIKE INITIATIVE,covid,1,1,22733.33,0.0,0.0,100.0,10000.0
+BLOOD PRODUCTS,covid,40,1,3064485.56,0.005,0.0,0.0,10000.0
+BLOOD PRODUCTS,pre_covid,16,1,1292695.3399999999,0.005,0.0,0.0,10000.0
+BUILD MAINT DAY TO DAY,pre_covid,3,1,122588.0,0.0,0.0,0.0,10000.0
+BUILD MAINT EXT CONTRACTS,covid,13,6,1464109.7300000002,0.002,0.0,7.692,2951.5
+BUILD MAINT EXT CONTRACTS,pre_covid,5,3,153140.7,0.001,0.0,20.0,5053.1
+Bank Consultant,covid,2,1,69608.3,0.0,0.0,0.0,10000.0
+Bank Consultant,post_covid,23,3,1281351.36,0.001,0.0,0.0,4400.2
+Bed Hire,post_covid,25,1,3638619.2700000005,0.004,0.0,0.0,10000.0
 Bldg/Eng Equip Maint Cont,pre_covid,1,1,23787.56,0.0,0.0,0.0,10000.0
-Bldg/Eng Equip Maint/Rep,post_covid,1,1,37650.0,0.0,100.0,0.0,10000.0
+Bldg/Eng Equip Maint/Rep,post_covid,4,3,119934.06,0.0,25.0,50.0,3865.7
 Bldg/Eng Equip Maint/Rep,pre_covid,1,1,36532.0,0.0,0.0,0.0,10000.0
-Blood Products,covid,77,6,6761745.379999999,0.011,0.0,0.0,4362.7
-Blood Products,post_covid,4,2,397950.86,0.0,0.0,0.0,5255.4
-Blood Products,pre_covid,36,5,3724414.48,0.014,0.0,5.556,4425.4
-"Books, Journals & Subscr",covid,10,6,285489.1879024,0.0,0.0,30.0,1973.8
-"Books, Journals & Subscr",pre_covid,4,2,136800.0,0.001,0.0,0.0,6675.9
-Building Works,covid,3,2,280427.05,0.0,0.0,33.333,5002.6
-CHILDCARE VOUCHERS,pre_covid,5,1,153620.11000000002,0.001,0.0,0.0,10000.0
-CLINICAL SERVICE CONTRACT,covid,5,2,218309.49,0.0,0.0,0.0,5440.8
-CLINICAL SERVICE CONTRACT,pre_covid,9,2,297080.83999999997,0.001,0.0,0.0,5834.0
-CLINICAL SERVICES FROM NON-NHS,covid,1,1,285565.92,0.0,0.0,0.0,10000.0
-CLINICAL SERVICES OTHER NHS,covid,1,1,28474.87,0.0,0.0,0.0,10000.0
-CNST - NHS Resolution,covid,19,2,31652941.2,0.053,0.0,5.263,9049.8
+Blood Products,covid,82,8,7903409.600000001,0.013,0.0,0.0,3325.1
+Blood Products,post_covid,162,10,17584664.020000003,0.018,0.617,1.852,2904.0
+Blood Products,pre_covid,40,6,4049612.15,0.015,0.0,5.0,4314.0
+Blood Transfusion Contract,post_covid,12,2,892350.78,0.001,0.0,0.0,5555.6
+"Books, Journals & Subscr",covid,10,6,285489.1879024,0.0,10.0,30.0,1973.8
+"Books, Journals & Subscr",post_covid,26,5,621484.56,0.001,3.846,0.0,2652.3
+"Books, Journals & Subscr",pre_covid,5,2,169200.0,0.001,0.0,0.0,5382.5
+"Books, Journals & Subscription",post_covid,3,1,192190.06,0.0,0.0,0.0,10000.0
+Bostonian Other,post_covid,32,1,2208294.73,0.002,0.0,0.0,10000.0
+Breast Care Prosthesis,post_covid,2,1,44268.880000000005,0.0,0.0,50.0,10000.0
+Breast Screening,post_covid,4,1,211586.89,0.0,0.0,0.0,10000.0
+Build Maint Day To Day,post_covid,2,1,63221.1,0.0,0.0,50.0,10000.0
+Build Maint Equip And Mats,post_covid,1,1,47217.6,0.0,0.0,100.0,10000.0
+Building Contracts,post_covid,12,5,801978.98,0.001,8.333,8.333,2971.8
+Building Works,covid,79,15,11337706.360000001,0.019,0.0,7.595,1837.7
+Building Works,post_covid,5,3,760903.6900000002,0.001,0.0,20.0,7045.3
+Building Works - Auc Pur,covid,18,5,3147716.96,0.005,0.0,11.111,2147.8
+Building Works - Auc Pur,post_covid,101,19,40486163.279999994,0.042,0.99,4.95,4425.6
+Bureau Soft/W,post_covid,3,1,410184.13,0.0,0.0,33.333,10000.0
+Business & Property Management,post_covid,1,1,60565.24,0.0,0.0,0.0,10000.0
+CHILDCARE VOUCHERS,pre_covid,8,1,246996.30000000002,0.001,0.0,0.0,10000.0
+CLINICAL SERVICE CONTRACT,covid,42,6,2283764.27,0.004,0.0,7.143,3140.4
+CLINICAL SERVICE CONTRACT,pre_covid,23,2,771415.59,0.003,0.0,0.0,6436.0
+CLINICAL SERVICES FROM NON-NHS,covid,29,2,5325902.140000001,0.009,0.0,0.0,7475.6
+CLINICAL SERVICES OTHER NHS,covid,13,2,407743.75,0.001,0.0,0.0,5192.9
+CNST - NHS ResolutioNHS Litigation Authority,post_covid,1,1,1583448.0,0.002,0.0,0.0,10000.0
+CNST - NHS Resolution,covid,19,2,31652941.2,0.052,0.0,5.263,9049.8
+CNST - NHS Resolution,post_covid,27,1,46533870.3,0.048,0.0,0.0,10000.0
 CNST - NHS Resolution,pre_covid,2,1,2895187.2,0.011,0.0,0.0,10000.0
-CNST CONTRIBUTIONS,covid,4,1,4217415.2,0.007,0.0,0.0,10000.0
-CNST CONTRIBUTIONS,pre_covid,28,2,16733470.800000003,0.061,0.0,3.571,7815.0
-CNST contributions,pre_covid,8,1,11445252.6,0.042,0.0,0.0,10000.0
-COMP SOFTWARE LICENCE FEES,covid,1,1,38799.6,0.0,0.0,100.0,10000.0
-COMP SOFTWARE LICENCE FEES,pre_covid,1,1,10323.0,0.0,0.0,0.0,10000.0
-COMPUTER HARDWARE,covid,10,5,551801.9,0.001,0.0,20.0,3191.3
-COMPUTER HARDWARE,pre_covid,14,3,778383.5499999998,0.003,0.0,7.143,3942.9
-COMPUTER PURCHASE ACCESSORIES,pre_covid,3,3,456557.56,0.002,0.0,33.333,7745.4
-COMPUTER SOFTWARE,covid,1,1,140088.0,0.0,0.0,0.0,10000.0
-CONSULTANCY DELIVERY,covid,1,1,31104.0,0.0,0.0,100.0,10000.0
-CONSULTANCY DELIVERY,pre_covid,11,5,973681.69,0.004,0.0,9.091,5564.4
+CNST CONTRIBUTIONS,covid,36,1,39914207.60000001,0.066,0.0,0.0,10000.0
+CNST CONTRIBUTIONS,pre_covid,44,2,25076829.2,0.091,0.0,2.273,8472.8
+CNST contributions,pre_covid,9,2,12746546.9,0.046,0.0,0.0,8166.6
+COMP SOFTWARE LICENCE FEES,covid,14,6,1174506.24,0.002,0.0,28.571,3627.1
+COMP SOFTWARE LICENCE FEES,pre_covid,2,2,97091.62,0.0,50.0,50.0,8099.6
+COMPUTER HARDWARE,covid,65,14,4291727.74,0.007,0.0,10.769,3384.1
+COMPUTER HARDWARE,pre_covid,26,8,1788983.9200000002,0.007,0.0,3.846,2150.0
+COMPUTER MAINTENANCE,covid,1,1,28500.0,0.0,0.0,0.0,10000.0
+COMPUTER PURCHASE ACCESSORIES,covid,7,4,633510.03,0.001,0.0,42.857,5930.2
+COMPUTER PURCHASE ACCESSORIES,pre_covid,6,5,669791.2699999999,0.002,0.0,0.0,4283.9
+COMPUTER SOFTWARE,covid,3,3,278402.4,0.0,0.0,33.333,3767.1
+CONSULTANCY DELIVERY,covid,49,11,3001044.4000000004,0.005,0.0,14.286,3275.9
+CONSULTANCY DELIVERY,pre_covid,17,7,1181431.69,0.004,0.0,5.882,4118.3
 CONSULTANCY STRATEGY,pre_covid,2,2,87674.62,0.0,0.0,50.0,5768.0
-CONSULTANTS FEES,covid,2,2,319300.27,0.001,0.0,0.0,8612.8
-CONSULTANTS FEES,pre_covid,17,4,693020.1,0.003,0.0,0.0,4230.3
+CONSULTANTS BANK,covid,4,1,113600.34,0.0,0.0,0.0,10000.0
+CONSULTANTS FEES,covid,15,9,888359.38,0.001,0.0,20.0,2468.6
+CONSULTANTS FEES,pre_covid,21,4,838200.7699999999,0.003,0.0,0.0,4210.8
+CONTINUING MEDICAL EDUCATION,pre_covid,1,1,14762.32,0.0,0.0,0.0,10000.0
+CORE TRAINEE,pre_covid,2,1,135000.0,0.0,0.0,50.0,10000.0
 COST OF FP 10 PRESCRIPTIONS,covid,1,1,26701.41,0.0,0.0,0.0,10000.0
-COST OF FP 10 PRESCRIPTIONS,pre_covid,1,1,25702.26,0.0,0.0,100.0,10000.0
-COURSE FEES,pre_covid,2,2,119326.0,0.0,0.0,50.0,6675.4
-CPAP MACHINES,covid,9,1,375864.92000000004,0.001,0.0,0.0,10000.0
-CPAP MACHINES,pre_covid,22,1,846472.0499999998,0.003,0.0,0.0,10000.0
+COST OF FP 10 PRESCRIPTIONS,pre_covid,2,1,50708.979999999996,0.0,0.0,0.0,10000.0
+COURSE FEES,covid,10,7,768348.64,0.001,0.0,40.0,2490.9
+COURSE FEES,pre_covid,5,5,272656.0,0.001,0.0,60.0,2634.1
+CPAP MACHINES,covid,57,1,2462160.19,0.004,0.0,0.0,10000.0
+CPAP MACHINES,pre_covid,47,1,1839463.8500000003,0.007,0.0,0.0,10000.0
 CTRL Prepayments <1Yr,covid,23,1,3886332.1399999997,0.006,0.0,0.0,10000.0
-CTRL Prepayments <1Yr,post_covid,1,1,229550.6,0.0,0.0,0.0,10000.0
+CTRL Prepayments <1Yr,post_covid,37,1,12169750.17,0.013,0.0,0.0,10000.0
 CTRL Prepayments <1Yr,pre_covid,14,1,1089824.35,0.004,0.0,0.0,10000.0
-Capital,covid,2121,464,542104024.41,0.901,2.122,8.157,111.1
-Capital,post_covid,2123,500,652398638.6700001,0.682,2.167,7.207,135.3
-Capital,pre_covid,1429,397,246748497.89,0.902,0.49,3.009,97.8
+Cancer Centre,post_covid,1,1,30871.0,0.0,0.0,100.0,10000.0
+Capital,covid,2121,464,542104024.4100001,0.894,0.849,8.157,111.1
+Capital,post_covid,2213,514,695255084.0799999,0.715,1.22,7.546,136.8
+Capital,pre_covid,1429,397,246748497.89,0.899,0.21,3.009,97.8
+Cardiac Catheter Lab,post_covid,1,1,79808.64,0.0,0.0,0.0,10000.0
 Catering Equip Purchase,covid,2,1,81220.75,0.0,0.0,50.0,10000.0
+Central Accruals,post_covid,2,2,313770.0,0.0,0.0,50.0,6027.4
+Chief Executive,post_covid,7,5,312698.13,0.0,14.286,42.857,2253.7
+Chief Operating Officer,post_covid,9,4,1358602.01,0.001,0.0,22.222,7151.3
 Cleaning Equipment,covid,13,2,153239.98,0.0,7.692,7.692,6451.3
+Cleaning Equipment,post_covid,7,2,115160.0,0.0,0.0,14.286,5672.2
 Cleaning Equipment,pre_covid,1,1,145824.01,0.001,0.0,0.0,10000.0
 Cleaning Materials,covid,3,1,33750.0,0.0,33.333,33.333,10000.0
+Clin Support Pan Trust Mgmt,post_covid,1,1,36828.0,0.0,0.0,100.0,10000.0
+Clinical Equip Maint Contracts,post_covid,59,16,8960121.08,0.009,0.0,3.39,3185.0
+Clinical Equipment,post_covid,6,5,378489.9,0.0,16.667,16.667,2724.1
+Clinical Equipment Hire,covid,3,1,394314.12,0.001,0.0,0.0,10000.0
+Clinical Service Contract,covid,9,4,359169.24,0.001,0.0,11.111,4319.2
+Clinical Service Contract,post_covid,41,7,2312480.71,0.002,2.439,2.439,2298.1
+Clinical Training,post_covid,1,1,77400.0,0.0,0.0,0.0,10000.0
+Clinical Waste,post_covid,23,1,893674.2999999999,0.001,0.0,0.0,10000.0
 Clinical excellence awards,covid,1,1,52310.33,0.0,0.0,100.0,10000.0
+Clinical excellence awards,post_covid,2,1,135891.0,0.0,0.0,50.0,10000.0
+Cnst Contributions,covid,6,1,4699580.0,0.008,0.0,0.0,10000.0
 Commercial Sector,covid,28,4,1422890.9100000004,0.002,0.0,3.571,3468.1
-Commercial Sector,post_covid,4,2,182218.0,0.0,0.0,0.0,5098.7
+Commercial Sector,post_covid,317,8,16329788.45,0.017,0.315,0.631,2940.2
 Commercial Sector,pre_covid,12,2,490922.08,0.002,0.0,0.0,5127.1
-CompSwrPrch Additions,covid,43,16,2936254.4,0.005,9.302,16.279,1546.9
-CompSwrPrch Additions,post_covid,1,1,24600.0,0.0,0.0,0.0,10000.0
-CompSwrPrch Additions,pre_covid,3,2,124429.0,0.0,0.0,33.333,5547.9
-Computer Hardware Purch,covid,16,2,265335.46,0.0,6.25,6.25,5451.3
-Computer Hardware Purch,pre_covid,4,1,556.8,0.0,0.0,0.0,10000.0
-Computer Maintenance,covid,174,28,5910130.040000001,0.01,3.448,2.874,1841.1
-Computer Maintenance,post_covid,4,2,135936.0,0.0,0.0,0.0,5431.5
-Computer Maintenance,pre_covid,55,24,3829382.97,0.014,5.455,14.545,1245.7
+CompSwrPrch Additions,covid,43,16,2936254.4000000004,0.005,2.326,13.953,1546.9
+CompSwrPrch Additions,post_covid,120,27,12579673.2,0.013,0.833,7.5,1576.3
+CompSwrPrch Additions,pre_covid,3,2,124429.0,0.0,0.0,0.0,5547.9
+Computer Hardware,post_covid,13,6,947379.7800000001,0.001,0.0,15.385,1972.6
+Computer Hardware - Auc Pur,covid,10,2,689481.97,0.001,0.0,0.0,7000.0
+Computer Hardware - Auc Pur,post_covid,106,17,12541402.420000002,0.013,0.943,3.774,2311.3
+Computer Hardware Purch,covid,16,2,265335.46,0.0,0.0,6.25,5451.3
+Computer Hardware Purch,post_covid,28,5,1798246.4600000004,0.002,3.571,7.143,5046.2
+Computer Hardware Purch,pre_covid,5,1,26300.590000000004,0.0,0.0,0.0,10000.0
+Computer Maintenance,covid,174,28,5910130.04,0.01,2.299,2.299,1841.1
+Computer Maintenance,post_covid,140,22,4925705.5,0.005,1.429,2.857,1336.4
+Computer Maintenance,pre_covid,58,24,4090277.3300000005,0.015,0.0,12.069,1257.4
 Computer Network Costs,covid,2,1,81774.32,0.0,0.0,0.0,10000.0
-Computer Software/License,covid,75,19,4011760.64,0.007,0.0,12.0,2955.8
-Computer Software/License,post_covid,8,5,234933.24,0.0,12.5,12.5,2530.9
-Computer Software/License,pre_covid,10,6,478803.72,0.002,0.0,10.0,2707.0
-Consultancy services,covid,321,117,37983091.0093973,0.063,1.558,13.707,520.7
-Consultancy services,post_covid,1216,234,240850249.4243508,0.252,0.905,8.388,856.0
-Consultancy services,pre_covid,134,56,12041599.14,0.044,1.493,8.209,446.0
+Computer Network Costs,post_covid,5,4,212998.0,0.0,0.0,0.0,2611.5
+Computer Recharges,post_covid,4,3,502067.83999999997,0.001,0.0,0.0,4966.0
+Computer Softw - Auc Pur,covid,2,2,600779.6900000001,0.001,0.0,100.0,7993.4
+Computer Softw - Auc Pur,post_covid,53,20,11939192.590000004,0.012,1.887,18.868,2246.9
+Computer Software/License,covid,75,19,4011760.64,0.007,4.0,12.0,2955.8
+Computer Software/License,post_covid,435,59,52550643.51731741,0.054,1.149,3.218,3638.0
+Computer Software/License,pre_covid,11,6,547174.92,0.002,0.0,0.0,3165.7
+Conferences And Seminars,post_covid,1,1,84000.0,0.0,0.0,0.0,10000.0
+Consultancy services,covid,321,117,37983091.0093973,0.063,0.312,13.707,520.7
+Consultancy services,post_covid,1366,238,278280541.30435073,0.286,0.878,7.467,964.1
+Consultancy services,pre_covid,134,56,12041599.14,0.044,0.0,8.955,446.0
 Consultant,covid,6,3,357543.77,0.001,0.0,0.0,5130.0
-Consultant,pre_covid,6,4,493645.74,0.002,0.0,0.0,4462.9
+Consultant,post_covid,18,2,660055.9,0.001,0.0,0.0,6582.0
+Consultant,pre_covid,9,4,611366.8,0.002,0.0,0.0,4378.9
+Consultants Fees - Auc Pur,covid,6,1,255330.19,0.0,0.0,16.667,10000.0
+Consultants Fees - Auc Pur,post_covid,36,15,12791415.14,0.013,0.0,30.556,7731.6
 Contr Estate Management,covid,8,1,314100.79000000004,0.001,0.0,0.0,10000.0
+Contr Estate Management,post_covid,2,1,53609.18,0.0,0.0,0.0,10000.0
 Contr Other External,covid,102,11,4830714.13,0.008,0.98,2.941,1905.6
-Contr Other External,post_covid,3,2,119012.48,0.0,0.0,0.0,5746.8
-Contr Other External,pre_covid,70,11,4000497.61,0.015,1.429,2.857,1934.2
+Contr Other External,post_covid,144,15,8907555.18,0.009,3.472,2.083,1978.7
+Contr Other External,pre_covid,77,11,4430443.449999999,0.016,0.0,2.597,1936.6
 Contr Pest Control,pre_covid,1,1,48816.0,0.0,0.0,100.0,10000.0
 Contr Photocopier Rental,covid,2,1,106532.81,0.0,0.0,0.0,10000.0
-Contr Premises Security,pre_covid,1,1,33448.0,0.0,100.0,100.0,10000.0
-Contr Refuse & Clin Waste,covid,28,2,1645872.66,0.003,0.0,3.571,6068.6
-Contr Refuse & Clin Waste,post_covid,2,1,82507.87,0.0,0.0,0.0,10000.0
+Contr Photocopier Rental,post_covid,14,1,624287.68,0.001,0.0,0.0,10000.0
+Contr Premises Security,post_covid,3,1,304966.14,0.0,0.0,0.0,10000.0
+Contr Premises Security,pre_covid,1,1,33448.0,0.0,0.0,100.0,10000.0
+Contr Refuse & Clin Waste,covid,28,2,1645872.6600000001,0.003,0.0,3.571,6068.6
+Contr Refuse & Clin Waste,post_covid,46,2,1693870.8,0.002,0.0,2.174,9749.3
 Contr Refuse & Clin Waste,pre_covid,19,1,1208027.6500000001,0.004,0.0,0.0,10000.0
-Contractual Clinical Srv,post_covid,1,1,25560.0,0.0,0.0,0.0,10000.0
-Course Fees,covid,2,2,150000.0,0.0,0.0,50.0,5000.0
-DESKTOP HARD/W,covid,3,3,236358.80000000002,0.0,0.0,0.0,5415.0
+Contract Photocopier Lease,post_covid,8,1,584430.6,0.001,0.0,0.0,10000.0
+Contracting,post_covid,7,1,799863.5399999999,0.001,0.0,0.0,10000.0
+Contractual Clinical Srv,post_covid,24,3,1009364.0,0.001,0.0,4.167,8857.1
+Corporate Facilities,post_covid,1,1,38869.8,0.0,0.0,100.0,10000.0
+Corporate Nursing,post_covid,1,1,408372.0,0.0,0.0,0.0,10000.0
+Course Fees,covid,4,4,215343.8,0.0,0.0,75.0,2886.6
+Course Fees,post_covid,10,6,527332.2,0.001,10.0,30.0,2171.9
+Cpd Hee Funding,post_covid,2,1,100800.0,0.0,0.0,0.0,10000.0
+Creditor Suspense,post_covid,50,35,7825777.52,0.008,2.0,8.0,1001.8
+Creditor Suspense_Refunds,post_covid,1,1,64580.64,0.0,0.0,0.0,10000.0
+DESKTOP HARD/W,covid,11,5,687976.4500000001,0.001,0.0,9.091,3151.7
+DESKTOP SOFT/W,covid,1,1,51211.69,0.0,0.0,0.0,10000.0
+DESKTOP SOFT/W,pre_covid,3,3,148372.18,0.001,0.0,0.0,3614.5
+DIAGNOSTIC TESTS NON NHS,covid,31,4,1401338.8399999999,0.002,0.0,6.452,3123.5
 DIAGNOSTIC TESTS NON NHS,pre_covid,2,1,107255.0,0.0,0.0,0.0,10000.0
-DIAGNOSTIC TESTS OTHER NHS,covid,3,1,65721.34,0.0,33.333,33.333,10000.0
+DIAGNOSTIC TESTS OTHER NHS,covid,11,1,309982.37,0.001,0.0,0.0,10000.0
+Decontamination,post_covid,5,1,1825794.2200000002,0.002,0.0,0.0,10000.0
+Diabetic Retinopathy,post_covid,1,1,33714.11,0.0,0.0,0.0,10000.0
+Diag Tests Non Nhs,post_covid,99,2,6857234.0,0.007,1.01,1.01,7091.4
+Diag Tests Other Nhs,post_covid,13,2,513392.26000000007,0.001,0.0,0.0,7153.3
+Dietetic Products,post_covid,1,1,170116.96,0.0,0.0,0.0,10000.0
+Digital Aspirant Programme,post_covid,1,1,95880.0,0.0,0.0,100.0,10000.0
+Dir Improvement & Integration,post_covid,3,1,234139.18000000002,0.0,0.0,0.0,10000.0
 Dividend Payment,pre_covid,1,1,2674000.0,0.01,0.0,0.0,10000.0
-Drugs,covid,660,20,42557209.20999999,0.071,0.152,0.606,1973.2
-Drugs,post_covid,30,11,1217015.3099999998,0.001,0.0,0.0,1115.4
-Drugs,pre_covid,45,2,8503443.5,0.031,0.0,0.0,9538.6
-ELECTRICITY,covid,6,1,413958.0,0.001,0.0,0.0,10000.0
-ELECTRICITY,pre_covid,28,1,1820146.5700000003,0.007,0.0,0.0,10000.0
+Doctors Fees (Bd8'S Etc),post_covid,2,1,129225.57999999999,0.0,0.0,0.0,10000.0
+Drugs,covid,660,20,42557209.20999999,0.07,0.152,0.606,1973.2
+Drugs,post_covid,1161,28,67216922.11,0.069,0.0,0.689,1040.9
+Drugs,pre_covid,47,2,9056116.45,0.033,0.0,0.0,9566.1
+ELECTRICITY,covid,45,2,3025446.75,0.005,0.0,0.0,9467.2
+ELECTRICITY,pre_covid,44,1,2732201.52,0.01,0.0,0.0,10000.0
+ENGIN & MAINT DAY TO DAY,covid,2,1,48959.0,0.0,0.0,50.0,10000.0
 ENGIN & MAINT DAY TO DAY,pre_covid,1,1,33372.0,0.0,0.0,0.0,10000.0
-ENGIN AND MAINT EQUIP AND MATS,pre_covid,2,2,52934.0,0.0,0.0,100.0,5089.1
-ENGIN AND MAINT EXT CONTRACTS,covid,1,1,60613.24,0.0,0.0,100.0,10000.0
-ENGIN AND MAINT EXT CONTRACTS,pre_covid,3,3,98642.65,0.0,33.333,100.0,3495.5
-ENGINEERING SERVICES,covid,3,2,1594499.2000000002,0.003,0.0,33.333,9628.3
-ENGINEERING SERVICES,pre_covid,13,6,905332.48,0.003,0.0,15.385,3576.6
-EQUIPMENT,covid,1,1,55087.31,0.0,0.0,0.0,10000.0
-EQUIPMENT >5K,covid,24,10,3167288.09,0.005,0.0,25.0,3072.7
-EQUIPMENT >5K,pre_covid,18,9,1346220.98,0.005,5.556,27.778,1896.8
+ENGIN AND MAINT EQUIP AND MATS,covid,2,2,35676.71,0.0,0.0,0.0,6837.0
+ENGIN AND MAINT EQUIP AND MATS,pre_covid,3,2,101953.05,0.0,0.0,33.333,6513.1
+ENGIN AND MAINT EXT CONTRACTS,covid,9,7,680348.78,0.001,0.0,55.556,3319.8
+ENGIN AND MAINT EXT CONTRACTS,pre_covid,4,4,113642.65,0.0,0.0,75.0,2807.9
+ENGINEERING SERVICES,covid,63,18,9888916.639999999,0.016,0.0,14.286,2320.7
+ENGINEERING SERVICES,pre_covid,34,10,2317709.4699999997,0.008,2.941,8.824,1975.6
+EQUIPMENT,covid,87,37,14429738.770000001,0.024,0.0,26.437,1176.3
+EQUIPMENT >5K,covid,38,16,5796351.979999999,0.01,5.263,28.947,1561.3
+EQUIPMENT >5K,pre_covid,32,18,2022775.4100000001,0.007,0.0,12.5,1029.7
+EQUIPMENT REPAIRS _ MATERIALS,covid,6,5,140410.63,0.0,16.667,16.667,2439.9
 EQUIPMENT REPAIRS _ MATERIALS,pre_covid,1,1,24868.86,0.0,0.0,0.0,10000.0
-EXCLUDED DEVICES,covid,2,1,66426.0,0.0,0.0,0.0,10000.0
-EXCLUDED DEVICES,pre_covid,7,2,254026.32,0.001,14.286,14.286,8092.8
-EXTERNAL AUDIT,pre_covid,1,1,54884.4,0.0,0.0,0.0,10000.0
-EXTERNAL CONTRACTS,covid,3,3,122718.98,0.0,33.333,33.333,3968.9
-EXTERNAL CONTRACTS,pre_covid,8,2,478784.33999999997,0.002,0.0,0.0,7399.8
-EXTERNAL LAUNDRY CONTRACT,covid,7,1,325775.43,0.001,0.0,0.0,10000.0
-EXTERNAL LAUNDRY CONTRACT,pre_covid,18,1,820453.34,0.003,0.0,0.0,10000.0
-EXTERNAL PAYROLL CONTRACT,covid,1,1,35446.1,0.0,0.0,0.0,10000.0
-Education and training,covid,196,80,34641700.61227937,0.058,0.51,18.878,1684.1
-Education and training,post_covid,6210,860,8162100231.164673,8.535,2.834,5.072,70.9
-Education and training,pre_covid,113,44,23773586.990000002,0.087,1.77,5.31,2590.6
-Electricity,covid,57,2,6769547.069999999,0.011,0.0,1.754,6206.2
-Electricity,post_covid,2,1,165972.74,0.0,0.0,0.0,10000.0
-Electricity,pre_covid,13,1,1440423.1700000002,0.005,0.0,0.0,10000.0
+EXCLUDED DEVICES,covid,12,2,456318.0,0.001,0.0,8.333,6933.4
+EXCLUDED DEVICES,pre_covid,13,3,525169.92,0.002,0.0,7.692,7272.2
+EXTERNAL AUDIT,covid,7,2,279870.0,0.0,0.0,14.286,5134.3
+EXTERNAL AUDIT,pre_covid,3,1,109768.8,0.0,0.0,0.0,10000.0
+EXTERNAL CONTRACTS,covid,44,8,1437495.2400000002,0.002,0.0,6.818,2413.5
+EXTERNAL CONTRACTS,pre_covid,16,5,866947.01,0.003,0.0,6.25,5096.3
+EXTERNAL LAUNDRY CONTRACT,covid,41,1,1850591.54,0.003,0.0,0.0,10000.0
+EXTERNAL LAUNDRY CONTRACT,pre_covid,25,1,1134429.91,0.004,0.0,0.0,10000.0
+EXTERNAL PAYROLL CONTRACT,covid,8,1,283572.79,0.0,0.0,0.0,10000.0
+Ea Subs & Ict Capital Staffing,post_covid,2,1,1425737.91,0.001,0.0,0.0,10000.0
+Education and training,covid,196,80,34641700.61227937,0.057,0.0,18.878,1684.1
+Education and training,post_covid,6811,939,8314048872.694673,8.551,2.922,5.3,69.2
+Education and training,pre_covid,113,44,23773586.990000002,0.087,0.0,5.31,2590.6
+Ees Superannuation - Nest,post_covid,1,1,33038.97,0.0,0.0,0.0,10000.0
+Electrical Works,post_covid,1,1,37586.16,0.0,0.0,0.0,10000.0
+Electricity,covid,61,3,7022909.86,0.012,0.0,1.639,5779.5
+Electricity,post_covid,130,3,12909585.149999999,0.013,0.0,0.0,5034.6
+Electricity,pre_covid,14,1,1540819.5,0.006,0.0,0.0,10000.0
+Engin & Maint Equip And Mats,covid,1,1,171659.45,0.0,0.0,0.0,10000.0
+Engin & Maint Equip And Mats,post_covid,2,2,91073.11,0.0,0.0,0.0,5295.4
+Engineering Contracts,post_covid,24,2,171898.58000000002,0.0,4.167,4.167,7034.7
+Engineering Services - Auc Pur,covid,6,3,578683.73,0.001,0.0,0.0,5337.1
+Engineering Services - Auc Pur,post_covid,115,27,20298271.430000003,0.021,0.0,9.565,1864.7
+Equality & Diversity,post_covid,1,1,64488.0,0.0,0.0,100.0,10000.0
 Equip Maint Contracts,covid,24,3,924073.44,0.002,0.0,0.0,5361.0
-Equip Maint Contracts,post_covid,12,1,120394.55,0.0,0.0,0.0,10000.0
+Equip Maint Contracts,post_covid,77,3,1026928.7699999999,0.001,0.0,1.299,8954.7
 Equip Maint Contracts,pre_covid,15,5,1315384.34,0.005,0.0,0.0,4109.5
-Establishment,covid,2676,303,491452683.62350833,0.817,0.859,5.904,349.1
-Establishment,post_covid,5404,449,1206067678.2325287,1.261,0.629,3.923,293.4
-Establishment,pre_covid,1349,203,153368872.4,0.561,0.371,5.263,327.6
-Exclude,post_covid,59,52,30636.37,0.0,81.356,62.712,535.8
+Equipment Medical - Auc Pur,covid,1,1,101412.72,0.0,0.0,100.0,10000.0
+Equipment Medical - Auc Pur,post_covid,147,51,23981973.380000003,0.025,0.68,14.966,835.4
+Equipment Other - Auc Pur,covid,14,11,1447876.4699999997,0.002,7.143,35.714,1860.4
+Equipment Other - Auc Pur,post_covid,14,13,1157123.81,0.001,0.0,64.286,974.4
+Ers Superannuation - Nest,post_covid,1,1,31597.09,0.0,0.0,0.0,10000.0
+Esr & Health Roster System,post_covid,2,1,214983.36,0.0,0.0,0.0,10000.0
+Establishment,covid,2676,303,491452683.62350833,0.811,0.374,5.979,349.1
+Establishment,post_covid,5860,459,1335561091.8774686,1.374,0.427,3.823,295.2
+Establishment,pre_covid,1349,203,153368872.4,0.559,0.074,5.189,327.6
+Estates Restore,post_covid,3,1,288049.81,0.0,0.0,0.0,10000.0
+Exclude,post_covid,59,52,30636.37,0.0,62.712,62.712,535.8
+Excluded Devices Expenditure,covid,8,1,489784.27,0.001,0.0,0.0,10000.0
+Excluded Devices Expenditure,post_covid,39,2,3284506.0699999994,0.003,0.0,2.564,5061.7
+Ext Consultancy Strategy Fees,post_covid,3,2,228990.0,0.0,0.0,0.0,5332.0
 Ext Contr Domestics,pre_covid,1,1,25760.0,0.0,0.0,0.0,10000.0
 Ext Contr Laundry,covid,24,2,1836906.18,0.003,0.0,4.167,9694.4
-Ext Contr Laundry,post_covid,2,2,118856.92,0.0,50.0,0.0,6381.6
-Ext Contr Laundry,pre_covid,17,2,1143906.7199999997,0.004,0.0,0.0,7825.5
+Ext Contr Laundry,post_covid,61,2,4046132.8000000003,0.004,0.0,0.0,8369.9
+Ext Contr Laundry,pre_covid,22,2,1495251.1500000001,0.005,0.0,0.0,7696.1
+External Consultancy Delivery,post_covid,14,8,1967005.18,0.002,0.0,28.571,3112.0
 External Consultancy Fees,covid,113,10,1261579.3,0.002,0.885,3.54,5591.6
-External Consultancy Fees,post_covid,3,3,115326.53,0.0,66.667,0.0,4240.0
-External Consultancy Fees,pre_covid,17,7,1145489.74,0.004,0.0,5.882,3040.4
+External Consultancy Fees,post_covid,78,30,3827861.38,0.004,0.0,14.103,983.1
+External Consultancy Fees,pre_covid,19,7,1497489.74,0.005,0.0,5.263,3941.4
+External Contracts,covid,3,3,103113.97,0.0,0.0,0.0,3348.9
+External Contracts,post_covid,86,13,5000023.209999999,0.005,1.163,4.651,2670.6
 External Data Contracts,pre_covid,3,1,127200.0,0.0,0.0,0.0,10000.0
-FINANCIAL LEDGER,pre_covid,2,1,211174.86,0.001,0.0,50.0,10000.0
-FUEL - STEAM,covid,13,2,809719.08,0.001,0.0,0.0,5939.7
-FUEL - STEAM,pre_covid,22,2,984882.38,0.004,0.0,4.545,5695.6
+External Works - Auc Pur,post_covid,4,3,493744.62,0.001,0.0,50.0,4466.6
+FINANCIAL LEDGER,covid,7,2,957901.81,0.002,0.0,14.286,7360.9
+FINANCIAL LEDGER,pre_covid,2,1,211174.86,0.001,0.0,0.0,10000.0
+FUEL - STEAM,covid,62,2,2910124.3100000005,0.005,0.0,0.0,5009.0
+FUEL - STEAM,pre_covid,42,2,2104828.74,0.008,0.0,0.0,5575.7
+Finance Department,post_covid,16,7,1446360.88,0.001,0.0,18.75,1949.2
+Financial Ledger System,covid,1,1,55546.8,0.0,0.0,0.0,10000.0
+Financial Ledger System,post_covid,11,2,2413870.78,0.002,0.0,0.0,7428.1
+Financial Management,post_covid,5,1,292489.33,0.0,0.0,0.0,10000.0
+Financial Services,post_covid,4,1,218635.01999999996,0.0,0.0,0.0,10000.0
+Financial Services Contract,post_covid,2,2,76868.16,0.0,0.0,50.0,5000.0
+Fire Safety,post_covid,4,2,266802.6,0.0,0.0,25.0,7462.8
 Foundation Programme - F2,covid,2,1,26976.78,0.0,0.0,0.0,10000.0
 Foundation Programme - F2,pre_covid,6,1,79707.20999999999,0.0,0.0,0.0,10000.0
-Furniture & Fittings,covid,8,3,133047.18,0.0,12.5,12.5,3490.0
-GP SPECIALIST TRAINEE,covid,6,1,784004.49,0.001,0.0,0.0,10000.0
-GP SPECIALIST TRAINEE,pre_covid,10,1,1122250.3900000001,0.004,0.0,0.0,10000.0
+Fp10s,post_covid,1,1,29458.16,0.0,0.0,0.0,10000.0
+Francotyp Postalia,post_covid,1,1,30000.0,0.0,0.0,0.0,10000.0
+Fuel - Steam,covid,8,2,711918.61,0.001,0.0,0.0,6478.9
+Fuel - Steam,post_covid,89,5,5573029.08,0.006,0.0,1.124,2822.4
+Furniture & Fittings,covid,8,3,133047.18,0.0,0.0,12.5,3490.0
+Furniture & Fittings,post_covid,1,1,169478.4,0.0,0.0,100.0,10000.0
+GAS,covid,2,1,56410.86,0.0,0.0,0.0,10000.0
+GP SPECIALIST TRAINEE,covid,33,1,4525709.46,0.007,0.0,0.0,10000.0
+GP SPECIALIST TRAINEE,pre_covid,16,1,1815462.8199999998,0.007,0.0,0.0,10000.0
 GP Sessions / Staff Fund,covid,1,1,68891.16,0.0,0.0,100.0,10000.0
-GPMS/APMS and PCTMS,covid,12476,2224,1597513187.42,2.654,2.108,9.162,29.5
-GPMS/APMS and PCTMS,post_covid,7417,2045,697433556.8,0.729,1.968,5.838,117.6
-GPMS/APMS and PCTMS,pre_covid,6914,1251,479142080.64,1.752,0.853,2.271,27.7
+GP Sessions / Staff Fund,post_covid,2,2,120559.53,0.0,0.0,0.0,5102.0
+GPMS/APMS and PCTMS,covid,12476,2224,1597513187.42,2.636,0.729,9.146,29.5
+GPMS/APMS and PCTMS,post_covid,8419,2313,751464893.6099999,0.773,2.981,7.934,106.8
+GPMS/APMS and PCTMS,pre_covid,6914,1251,479142080.64,1.745,0.188,2.271,27.7
+GPTVS INCOME GENERATION,pre_covid,1,1,6679.36,0.0,0.0,0.0,10000.0
 GRANTHAM PHARMACY CREDITORS,pre_covid,2,2,54814.75,0.0,0.0,0.0,5001.1
-Gas,covid,28,2,1276688.9500000002,0.002,3.571,0.0,9586.2
-Gas,post_covid,1,1,72282.26,0.0,0.0,0.0,10000.0
-Gas,pre_covid,22,2,1406944.6199999996,0.005,0.0,4.545,5864.4
-General Dental services and personal dental services,covid,336,49,43860085.45,0.073,0.893,1.19,705.4
+Gas,covid,28,2,1276688.9500000002,0.002,0.0,0.0,9586.2
+Gas,post_covid,161,4,14936366.309999999,0.015,0.0,0.621,8543.6
+Gas,pre_covid,23,2,1463164.3199999996,0.005,0.0,4.348,5653.0
+General Dental services and personal dental services,covid,336,49,43860085.449999996,0.072,0.893,1.19,705.4
 General Dental services and personal dental services,post_covid,169,38,24942678.61,0.026,1.183,2.367,719.9
-General Dental services and personal dental services,pre_covid,745,67,118259111.88,0.432,0.268,0.671,386.5
-General Opthalmic services,covid,4008,142,146480576.7,0.243,11.751,2.919,7024.5
-General Opthalmic services,post_covid,2214,64,91299317.45,0.095,6.911,1.039,4376.3
-General Opthalmic services,pre_covid,1997,31,72501360.24000001,0.265,0.3,0.451,7314.5
-Grants Research Exp,covid,100,20,5527807.0,0.009,3.0,12.0,2118.5
-Grants Research Exp,post_covid,10,7,471476.95,0.0,0.0,0.0,2237.6
-Grants Research Exp,pre_covid,38,10,1954024.7987999998,0.007,5.263,7.895,2831.2
-Grants to Other public bodies,covid,152,60,159632730.45,0.265,9.868,5.921,6013.5
-Grants to Other public bodies,post_covid,81,38,145901613.0,0.153,9.877,1.235,4642.4
-Grants to Other public bodies,pre_covid,95,63,16359736.57,0.06,5.263,6.316,352.0
-HIRE OF CLINICAL EQUIPMENT,pre_covid,4,1,444318.96,0.002,0.0,0.0,10000.0
+General Dental services and personal dental services,pre_covid,745,67,118259111.88000001,0.431,0.403,0.671,386.5
+General Opthalmic services,covid,4008,142,146480576.7,0.242,17.415,2.919,7024.5
+General Opthalmic services,post_covid,2219,64,93723980.03999999,0.096,20.324,1.037,4240.0
+General Opthalmic services,pre_covid,1997,31,72501360.24,0.264,0.501,0.451,7314.5
+Gp Specialist Trainee,covid,2,1,500000.0,0.001,0.0,0.0,10000.0
+Gp Specialist Trainee,post_covid,32,2,5794322.23,0.006,0.0,3.125,5241.8
+Grantham Ct,post_covid,1,1,53632.31,0.0,0.0,0.0,10000.0
+Grantham Htm Compliance,post_covid,1,1,32975.64,0.0,0.0,0.0,10000.0
+Grantham Utilities/Waste,post_covid,4,2,190270.38,0.0,0.0,25.0,5894.6
+Grants Research Exp,covid,100,20,5527807.0,0.009,0.0,12.0,2118.5
+Grants Research Exp,post_covid,167,24,10959085.42,0.011,0.599,5.988,1165.3
+Grants Research Exp,pre_covid,41,10,2084593.9988000002,0.008,2.439,7.317,2695.7
+Grants to Other public bodies,covid,152,60,159632730.45,0.263,8.553,5.921,6013.5
+Grants to Other public bodies,post_covid,81,38,145901613.0,0.15,3.704,1.235,4642.4
+Grants to Other public bodies,pre_covid,95,63,16359736.57,0.06,0.0,6.316,352.0
+Grounds & Garden Expenses,post_covid,1,1,33367.0,0.0,0.0,0.0,10000.0
+HIRE OF CLINICAL EQUIPMENT,covid,19,1,2226105.23,0.004,0.0,0.0,10000.0
+HIRE OF CLINICAL EQUIPMENT,pre_covid,6,1,690019.5599999999,0.003,0.0,0.0,10000.0
+HIRE OF TRANSPORT,covid,2,1,58650.0,0.0,0.0,50.0,10000.0
+HOME ENTERAL FOODS,covid,1,1,25228.78,0.0,0.0,100.0,10000.0
+Head Of Governance,post_covid,2,1,3207767.6,0.003,0.0,0.0,10000.0
 Hearing Aids: Repairs,covid,3,1,130387.5,0.0,0.0,0.0,10000.0
+Heating Oil,post_covid,18,1,597671.71,0.001,0.0,0.0,10000.0
+Hr Senior Team,post_covid,3,3,141554.16,0.0,0.0,33.333,3780.3
+INSURANCE CHARGES,pre_covid,1,1,26576.51,0.0,0.0,100.0,10000.0
+INTERNAL AUDIT,covid,7,1,245369.2,0.0,0.0,0.0,10000.0
 INTERNAL AUDIT,pre_covid,2,2,120210.0,0.0,50.0,50.0,5041.9
-IT Additions,covid,200,20,7203166.33,0.012,1.5,3.0,4021.6
-IT Additions,post_covid,13,2,350007.16000000003,0.0,0.0,0.0,5892.8
-IT Additions,pre_covid,18,3,636003.8400000001,0.002,5.556,0.0,4419.9
-Income tax - Current,post_covid,1,1,3256431.09,0.003,0.0,0.0,10000.0
+IT Additions,covid,200,20,7203166.33,0.012,0.5,4.0,4021.6
+IT Additions,post_covid,290,25,12506870.559999999,0.013,0.69,1.724,1416.5
+IT Additions,pre_covid,19,3,690003.8400000001,0.003,5.263,0.0,4061.4
+IT Gross Book Val BF,post_covid,1,1,57074.38,0.0,0.0,0.0,10000.0
+Improvement Management,post_covid,1,1,32465.55,0.0,0.0,0.0,10000.0
+Income tax - Current,post_covid,4,1,13237068.27,0.014,25.0,25.0,10000.0
 Independent Sector,covid,31,4,2702868.6,0.004,3.226,0.0,4325.8
-Independent Sector,pre_covid,32,2,1194754.33,0.004,0.0,0.0,5020.0
+Independent Sector,pre_covid,34,2,1251964.3300000003,0.005,0.0,0.0,5001.1
+Insource Service From Non Nhs,post_covid,2,1,88603.51999999999,0.0,0.0,0.0,10000.0
 Insurance Costs,covid,2,1,361877.85,0.001,0.0,0.0,10000.0
+Insurance Costs,post_covid,9,1,831569.53,0.001,11.111,0.0,10000.0
 Insurance Costs,pre_covid,2,2,654005.0599999999,0.002,0.0,50.0,7794.3
+Int Recover Bus Activities Inp,post_covid,3,1,353037.54000000004,0.0,33.333,0.0,10000.0
+Integra Prl Control,covid,3,3,317191.77,0.001,33.333,33.333,6436.6
+Intensive Care Unit Med Lch,post_covid,1,1,57345.45,0.0,0.0,100.0,10000.0
 Interest Payable,pre_covid,4,1,464531.70999999996,0.002,0.0,0.0,10000.0
-Investments Govt Security,pre_covid,4,2,81500000.0,0.298,0.0,0.0,5031.8
+Internal Audit Fees,post_covid,12,3,541840.5,0.001,0.0,8.333,4588.9
+Internal Recharge: Rec,post_covid,2,2,70415.0,0.0,0.0,100.0,5005.9
+International Recruitment,post_covid,6,2,262273.0,0.0,0.0,0.0,5470.4
+Investments Govt Security,pre_covid,4,2,81500000.0,0.297,0.0,0.0,5031.8
+It Services Contract,post_covid,4,3,281469.11,0.0,0.0,0.0,4356.9
+LEGAL FEES - PROPERTY,covid,1,1,27387.7,0.0,0.0,0.0,10000.0
+LIBRARY RESOURCES,covid,3,2,138172.0,0.0,0.0,66.667,5006.5
+LIBRARY RESOURCES,pre_covid,1,1,27609.47,0.0,0.0,0.0,10000.0
+LICENCE FEES - GENERAL,covid,2,2,111079.5,0.0,0.0,50.0,5466.3
+LICENCE FEES - GENERAL,pre_covid,1,1,44366.4,0.0,0.0,0.0,10000.0
 LLOYDS PHARM DISPENSING COSTS,covid,2,1,139193.0,0.0,0.0,0.0,10000.0
-LLOYDS PHARM DISPENSING COSTS,pre_covid,3,1,194985.0,0.001,0.0,0.0,10000.0
-LLOYDS PHARMACY,covid,1,1,1022345.65,0.002,0.0,0.0,10000.0
-LLOYDS PHARMACY,pre_covid,8,1,7592502.16,0.028,0.0,0.0,10000.0
-LOSSES _ COMPENSATIONS,pre_covid,2,2,54694.740000000005,0.0,0.0,50.0,5004.0
+LLOYDS PHARM DISPENSING COSTS,pre_covid,5,1,346314.0,0.001,0.0,0.0,10000.0
+LLOYDS PHARMACY,covid,10,1,10937137.77,0.018,0.0,0.0,10000.0
+LLOYDS PHARMACY,pre_covid,13,1,12030113.96,0.044,0.0,0.0,10000.0
+LOSSES _ COMPENSATIONS,pre_covid,3,3,83686.74,0.0,0.0,33.333,3337.6
+Lab Equip Maintenance Contract,post_covid,2,1,158417.28,0.0,0.0,0.0,10000.0
 Laboratory Bottles & Cont,pre_covid,1,1,28926.18,0.0,0.0,0.0,10000.0
-Laboratory External Tests,covid,91,3,17618916.22,0.029,0.0,0.0,5518.9
+Laboratory External Tests,covid,97,4,20343164.669999998,0.034,0.0,1.031,4319.1
+Laboratory External Tests,post_covid,139,4,51585064.24,0.053,0.0,0.0,3994.6
 Laboratory External Tests,pre_covid,26,2,8691220.73,0.032,0.0,0.0,5032.2
+Laboratory Reagents,post_covid,5,1,29253.77,0.0,0.0,20.0,10000.0
+Laboratory Reagents,pre_covid,1,1,34105.85,0.0,0.0,0.0,10000.0
+Laundry Contract,covid,5,1,308984.08999999997,0.001,0.0,0.0,10000.0
+Laundry Contract,post_covid,55,2,4059195.6799999997,0.004,0.0,1.818,5256.9
+Lease Car Recharges,post_covid,1,1,32606.0,0.0,0.0,0.0,10000.0
 Lease Charges,covid,58,2,3060059.7800000003,0.005,0.0,0.0,5369.3
-Lease Charges,post_covid,8,2,154936.84,0.0,0.0,0.0,5561.6
-Lease Charges,pre_covid,42,3,2074723.2,0.008,0.0,2.381,5251.7
-Legal / Prof Fees,covid,2,1,35000.0,0.0,50.0,50.0,10000.0
+Lease Charges,post_covid,102,3,5353163.300000001,0.006,0.0,0.0,4795.4
+Lease Charges,pre_covid,45,3,2207344.0899999994,0.008,0.0,0.0,5288.2
+Lease Receipts as income - minimum lease receipts,post_covid,1,1,23800.0,0.0,0.0,100.0,10000.0
+Legal / Prof Fees,covid,2,1,35000.0,0.0,0.0,50.0,10000.0
+Legal / Prof Fees,post_covid,4,2,137151.5,0.0,0.0,25.0,5488.0
 Legal / Prof Fees,pre_covid,2,1,62548.39,0.0,0.0,0.0,10000.0
-Long Trm Loans - Non-Curr,pre_covid,4,1,3052000.0,0.011,0.0,0.0,10000.0
-MAINTENANCE CONTRACTS AND MATS,covid,3,3,87272.20999999999,0.0,0.0,66.667,4449.7
-MAINTENANCE CONTRACTS AND MATS,pre_covid,2,1,64665.46,0.0,0.0,0.0,10000.0
-MEDICAL LOCUMS,covid,2,1,52875.0,0.0,0.0,0.0,10000.0
-MEDICAL LOCUMS,pre_covid,7,2,207105.0,0.001,0.0,14.286,7695.2
-MEDICAL NEGLIGENCE,covid,1,1,30229.27,0.0,0.0,100.0,10000.0
-MEDICAL RECORD STORAGE,covid,2,1,89089.75,0.0,0.0,0.0,10000.0
-MEDICAL RECORD STORAGE,pre_covid,6,1,222871.09999999998,0.001,0.0,0.0,10000.0
-MINOR CLINICAL EQUIPMENT,covid,11,7,447282.87,0.001,0.0,27.273,1773.0
-MINOR CLINICAL EQUIPMENT,pre_covid,8,2,360847.68000000005,0.001,0.0,12.5,8410.0
-MSSE CONSUMABLES,covid,7,5,290690.71,0.0,0.0,28.571,3171.6
-MSSE CONSUMABLES,pre_covid,4,1,121442.0,0.0,0.0,0.0,10000.0
-Med & Surg Equip Disp,covid,31,6,779570.6799999999,0.001,3.226,6.452,4983.4
-Med & Surg Equip Disp,post_covid,1,1,33353.84,0.0,0.0,0.0,10000.0
+Legal Fees,post_covid,3,2,75563.0,0.0,0.0,66.667,5520.3
+Legal Fees Employment,post_covid,25,1,57857180.8,0.06,0.0,0.0,10000.0
+Legal Fees Other,post_covid,13,2,660611.2000000001,0.001,0.0,0.0,8141.8
+Legal Fees Property,post_covid,5,2,326412.2,0.0,20.0,20.0,5749.9
+Legal Services,post_covid,5,2,4594523.7,0.005,0.0,20.0,9470.3
+Licence Fees - General,post_covid,4,3,292720.88,0.0,0.0,50.0,4749.9
+Lin Car Parking And Security,post_covid,4,1,129224.39000000001,0.0,0.0,0.0,10000.0
+Lincoln  Obstetrics Ip,post_covid,3,1,3025332.68,0.003,0.0,0.0,10000.0
+Lincoln Clin Haematology Ip,post_covid,5,1,137440.05,0.0,0.0,0.0,10000.0
+Lincoln Clinical Eng Parts,post_covid,7,5,1060756.04,0.001,0.0,14.286,5761.4
+Lincoln Ct,post_covid,6,1,239910.0,0.0,0.0,0.0,10000.0
+Lincoln Endoscopy,post_covid,1,1,36165.82,0.0,0.0,0.0,10000.0
+Lincoln Estates Operations,post_covid,2,2,92382.36,0.0,0.0,50.0,5025.8
+Lincoln General Surgery Ip,post_covid,1,1,93796.19,0.0,0.0,0.0,10000.0
+Lincoln Linen,post_covid,7,1,477973.45999999996,0.0,0.0,0.0,10000.0
+Lincoln Management,post_covid,1,1,34086.0,0.0,0.0,100.0,10000.0
+Lincoln Max Facial Surgery Ip,post_covid,1,1,45246.51,0.0,0.0,0.0,10000.0
+Lincoln Nuclear Medicine,post_covid,1,1,51053.66,0.0,0.0,0.0,10000.0
+Lincoln Portering,post_covid,6,3,458659.24,0.0,0.0,16.667,4057.0
+Lincoln Radiology,post_covid,20,4,884318.1699999999,0.001,0.0,0.0,3592.8
+Lincoln Rates,post_covid,6,1,372243.2,0.0,0.0,0.0,10000.0
+Lincoln Site Maint Schemes,post_covid,10,4,733028.62,0.001,0.0,10.0,3703.1
+Lincoln Ultrasound,post_covid,1,1,33802.48,0.0,0.0,0.0,10000.0
+Lincoln Utilities/Waste,post_covid,19,5,2502069.24,0.003,0.0,0.0,4514.3
+Lincoln Ward Housekeeping,post_covid,6,2,207385.19,0.0,0.0,0.0,7319.2
+Lincolnshire Talent Academy,post_covid,1,1,160115.0,0.0,0.0,0.0,10000.0
+Lloyds Purchasing Cards,post_covid,1,1,227115.0,0.0,0.0,0.0,10000.0
+Long Trm Loans - Non-Curr,pre_covid,5,1,3552000.0,0.013,0.0,0.0,10000.0
+Losses And Compensation,post_covid,3,2,227644.0,0.0,0.0,66.667,5686.6
+Louth Endoscopy,post_covid,1,1,47233.2,0.0,0.0,0.0,10000.0
+Louth Radiology,post_covid,2,1,162384.72,0.0,0.0,0.0,10000.0
+MAINTENANCE CONTRACTS AND MATS,covid,26,10,3149212.15,0.005,0.0,3.846,3931.0
+MAINTENANCE CONTRACTS AND MATS,pre_covid,7,6,738638.85,0.003,0.0,71.429,5008.0
+MEDICAL LOCUMS,covid,5,1,138780.0,0.0,0.0,0.0,10000.0
+MEDICAL LOCUMS,pre_covid,12,2,352185.0,0.001,0.0,8.333,8559.1
+MEDICAL NEGLIGENCE,covid,3,1,116211.82,0.0,0.0,0.0,10000.0
+MEDICAL NEGLIGENCE,pre_covid,1,1,27461.42,0.0,0.0,0.0,10000.0
+MEDICAL RECORD STORAGE,covid,18,1,821558.3300000001,0.001,0.0,0.0,10000.0
+MEDICAL RECORD STORAGE,pre_covid,11,1,410082.39999999997,0.001,0.0,0.0,10000.0
+MINOR CLINICAL EQUIPMENT,covid,32,17,2251988.5500000003,0.004,0.0,31.25,910.4
+MINOR CLINICAL EQUIPMENT,pre_covid,13,2,606415.68,0.002,0.0,7.692,9017.3
+MISCELLANEOUS,covid,1,1,55002.49,0.0,0.0,0.0,10000.0
+MISCELLANEOUS,pre_covid,1,1,34650.0,0.0,0.0,0.0,10000.0
+MSSE CONSUMABLES,covid,60,16,2748594.65,0.005,3.333,10.0,2058.9
+MSSE CONSUMABLES,pre_covid,5,2,197929.41,0.001,0.0,0.0,5257.9
+Manager Recharge,post_covid,1,1,111496.67,0.0,0.0,0.0,10000.0
+Materials - Electrical,post_covid,1,1,30242.0,0.0,0.0,100.0,10000.0
+Mdg Revenue Items,post_covid,1,1,38760.0,0.0,0.0,0.0,10000.0
+Mechanical Works,post_covid,1,1,39445.62,0.0,0.0,100.0,10000.0
+Med & Surg Equip Disp,covid,31,6,779570.6799999998,0.001,3.226,6.452,4983.4
+Med & Surg Equip Disp,post_covid,65,4,2090174.1700000002,0.002,0.0,1.538,3414.6
 Med & Surg Equip Disp,pre_covid,12,2,378605.08999999997,0.001,0.0,0.0,7188.8
-Med & Surg Equip General,covid,199,32,6639532.89,0.011,2.513,8.543,1612.7
-Med & Surg Equip General,pre_covid,9,2,276373.2,0.001,0.0,0.0,6870.4
+Med & Surg Equip General,covid,199,32,6639532.89,0.011,1.508,8.04,1612.7
+Med & Surg Equip General,post_covid,267,24,7990099.9,0.008,1.498,4.12,1415.2
+Med & Surg Equip General,pre_covid,10,2,308125.2,0.001,0.0,0.0,7123.2
 Med & Surg Equip Hire,covid,38,6,1063802.3800000001,0.002,0.0,2.632,4308.4
-Med & Surg Equip Hire,post_covid,4,1,131931.6,0.0,0.0,0.0,10000.0
+Med & Surg Equip Hire,post_covid,16,3,1914932.7299999997,0.002,0.0,6.25,8173.4
 Med & Surg Equip Hire,pre_covid,14,1,401421.16000000003,0.001,0.0,0.0,10000.0
 Med & Surg Equip Leases,covid,2,2,64982.9,0.0,0.0,0.0,5001.1
-Med & Surg Equip Leases,post_covid,1,1,28830.0,0.0,0.0,0.0,10000.0
+Med & Surg Equip Leases,post_covid,36,3,1275119.2000000002,0.001,0.0,0.0,8222.8
 Med & Surg Equip Leases,pre_covid,7,2,262581.87,0.001,0.0,0.0,5074.0
+Med & Surg Equip Repair,post_covid,11,2,93411.66,0.0,0.0,0.0,5185.6
 Med & Surg Equip Repair,pre_covid,1,1,23322.36,0.0,0.0,0.0,10000.0
-Med & Surg Maint Contract,covid,48,6,2394110.7800000003,0.004,2.083,4.167,3874.5
-Med & Surg Maint Contract,post_covid,1,1,70078.07,0.0,0.0,0.0,10000.0
-Med & Surg Maint Contract,pre_covid,18,7,1296838.77,0.005,0.0,5.556,3150.8
-Med Equip Additions,covid,148,37,9370396.099557744,0.016,5.405,15.541,920.6
-Med Equip Additions,post_covid,4,2,83944.22,0.0,0.0,0.0,5361.7
-Med Equip Additions,pre_covid,28,18,2056150.6700000002,0.008,3.571,35.714,1833.3
-Meeting expense/Room Hire,post_covid,14,1,5446.370000000001,0.0,0.0,0.0,10000.0
+Med & Surg Maint Contract,covid,48,6,2394110.78,0.004,2.083,4.167,3874.5
+Med & Surg Maint Contract,post_covid,36,5,2535065.69,0.003,0.0,0.0,5667.2
+Med & Surg Maint Contract,pre_covid,20,8,1389717.5,0.005,0.0,5.0,2785.1
+Med Equip Additions,covid,148,37,9370396.099557742,0.015,2.703,16.216,920.6
+Med Equip Additions,post_covid,414,51,32392208.650000006,0.033,2.415,4.589,620.8
+Med Equip Additions,pre_covid,30,18,2134476.8200000003,0.008,0.0,33.333,1729.7
+Medical Education General,post_covid,7,1,1750000.0,0.002,0.0,0.0,10000.0
+Medical Record Storage,covid,1,1,54979.44,0.0,0.0,0.0,10000.0
+Medical Record Storage,post_covid,29,1,2065277.53,0.002,0.0,0.0,10000.0
+Meeting expense/Room Hire,post_covid,23,2,49746.95,0.0,4.348,4.348,7337.4
 Meeting expense/Room Hire,pre_covid,1,1,26844.2,0.0,100.0,100.0,10000.0
+Minor Clinical Equipment,post_covid,1,1,32050.52,0.0,0.0,0.0,10000.0
 Minor Works,covid,20,3,1980610.1600000001,0.003,0.0,5.0,8841.1
-Minor Works,post_covid,11,3,232891.97999999998,0.0,9.091,9.091,7592.9
-Minor Works,pre_covid,9,2,952191.3400000001,0.003,11.111,11.111,9427.3
+Minor Works,post_covid,72,17,6777033.0917059,0.007,0.0,9.722,7054.0
+Minor Works,pre_covid,10,2,1021344.6299999999,0.004,0.0,10.0,9465.0
+Miscellaneous - Auc Pur,post_covid,5,4,557136.0800000001,0.001,0.0,0.0,5589.4
 Miscellaneous Expenditure,covid,11,10,1275140.9,0.002,0.0,45.455,1557.9
+Miscellaneous Expenditure,post_covid,22,13,1784214.53,0.002,4.545,9.091,1962.7
 Miscellaneous Expenditure,pre_covid,3,3,272347.76,0.001,0.0,0.0,3869.8
-NETWORK HARD/W,pre_covid,2,2,107905.67,0.0,0.0,50.0,5440.1
-NETWORK SOFT/W,covid,1,1,146160.0,0.0,0.0,100.0,10000.0
-NETWORK SOFT/W,pre_covid,1,1,39443.6,0.0,0.0,0.0,10000.0
+Mobile Phones,post_covid,1,1,27495.05,0.0,0.0,0.0,10000.0
+Mri Gra,post_covid,4,1,239900.0,0.0,0.0,0.0,10000.0
+Mri Lch,post_covid,13,2,834029.92,0.001,0.0,0.0,8205.2
+Mri Pil,post_covid,1,1,79737.7,0.0,0.0,0.0,10000.0
+Msse Consumables,covid,6,5,255010.88,0.0,0.0,16.667,2191.8
+Msse Consumables,post_covid,7,5,436180.38,0.0,0.0,14.286,3936.4
+NETWORK HARD/W,covid,3,3,169764.81,0.0,0.0,33.333,3756.9
+NETWORK HARD/W,pre_covid,2,2,107905.67,0.0,0.0,0.0,5440.1
+NETWORK SOFT/W,covid,2,1,261360.0,0.0,0.0,50.0,10000.0
+NETWORK SOFT/W,pre_covid,2,1,88641.76000000001,0.0,0.0,0.0,10000.0
 NHS England Running Costs,post_covid,2,1,60367.869999999995,0.0,0.0,0.0,10000.0
+NHS Litigation Authority,post_covid,1,1,1794998.4,0.002,0.0,0.0,10000.0
 NHS Local Debtors Adj,covid,1,1,6365.0,0.0,0.0,0.0,10000.0
-NI EES,covid,2,1,159359.78999999998,0.0,0.0,0.0,10000.0
-NI EES,pre_covid,8,1,495853.17000000004,0.002,0.0,0.0,10000.0
-NI ERS,covid,2,1,471556.85,0.001,0.0,0.0,10000.0
-NI ERS,pre_covid,8,1,1616526.78,0.006,0.0,0.0,10000.0
-NURSE MANAGER BAND 8D,covid,1,1,95619.28,0.0,0.0,100.0,10000.0
-National Insurance - Curr,post_covid,1,1,3763595.44,0.004,100.0,100.0,10000.0
+NI EES,covid,3,1,220095.18999999997,0.0,0.0,0.0,10000.0
+NI EES,pre_covid,14,1,861686.2200000001,0.003,0.0,0.0,10000.0
+NI ERS,covid,3,1,657801.61,0.001,0.0,0.0,10000.0
+NI ERS,pre_covid,14,1,2781194.25,0.01,0.0,0.0,10000.0
+NJR LEVY CHARGE,covid,1,1,26360.96,0.0,0.0,100.0,10000.0
+NURSE MANAGER BAND 8D,covid,3,2,210643.9,0.0,0.0,66.667,5042.4
+NURSING DIRECTOR,covid,2,1,92433.67,0.0,0.0,50.0,10000.0
+National Ins Holt Drs- Ees,covid,3,1,166945.15000000002,0.0,0.0,0.0,10000.0
+National Ins Holt Drs- Ees,post_covid,27,1,1112038.94,0.001,0.0,0.0,10000.0
+National Ins Holt Drs- Ers,covid,3,1,516228.56,0.001,0.0,0.0,10000.0
+National Ins Holt Drs- Ers,post_covid,27,1,4324198.7700000005,0.004,0.0,0.0,10000.0
+National Insurance - Curr,post_covid,4,1,15882034.719999999,0.016,0.0,0.0,10000.0
+National Insurance - Ees,covid,3,1,5399736.07,0.009,0.0,0.0,10000.0
+National Insurance - Ees,post_covid,27,1,51179529.18,0.053,3.704,0.0,10000.0
+National Insurance - Ers,covid,3,1,8133956.0,0.013,0.0,0.0,10000.0
+National Insurance - Ers,post_covid,28,2,95420406.97999997,0.098,0.0,3.571,9946.3
+National Qc & Accred Fees,post_covid,1,1,447187.0,0.0,0.0,0.0,10000.0
+Network Hard/W,post_covid,6,4,516733.76999999996,0.001,0.0,0.0,3029.8
+Neurophysiology - Lincoln,post_covid,8,3,232455.0,0.0,0.0,12.5,3988.5
+Nhs England Income Non Block,covid,1,1,44200.0,0.0,0.0,0.0,10000.0
+Nhs England Income Non Block,post_covid,3,3,133930.08,0.0,0.0,33.333,3615.0
+Nhs Subcontracted Services,post_covid,6,1,1256928.42,0.001,0.0,0.0,10000.0
 Non NHS Capitl Pybls Curr,covid,1,1,482464.0,0.001,0.0,0.0,10000.0
 Non NHS Capitl Pybls Curr,pre_covid,1,1,350883.0,0.001,0.0,0.0,10000.0
+Non Pay Cip,post_covid,2,1,58325.74,0.0,0.0,0.0,10000.0
 NonNHS Trade Pybls Curr,covid,182,11,11734943.16,0.019,0.0,0.0,8502.6
-NonNHS Trade Pybls Curr,post_covid,6,1,1106121.48,0.001,0.0,0.0,10000.0
-NonNHS Trade Pybls Curr,pre_covid,357,17,20948441.16,0.077,0.0,0.84,1504.2
-NonRes Bldg Additions,covid,154,33,23768340.169999998,0.039,2.597,14.935,4187.3
-NonRes Bldg Additions,post_covid,4,1,1152277.99,0.001,0.0,0.0,10000.0
-NonRes Bldg Additions,pre_covid,31,17,1917528.14,0.007,3.226,22.581,2068.6
+NonNHS Trade Pybls Curr,post_covid,237,2,48111754.2,0.049,0.0,0.0,9983.6
+NonNHS Trade Pybls Curr,pre_covid,389,17,22815628.92,0.083,0.0,0.514,1400.5
+NonRes Bldg Additions,covid,154,33,23768340.169999998,0.039,0.649,14.935,4187.3
+NonRes Bldg Additions,post_covid,260,50,49536405.68000001,0.051,1.154,9.615,1496.0
+NonRes Bldg Additions,pre_covid,35,17,2365328.14,0.009,2.857,17.143,1964.6
+Nurse B5,covid,1,1,31425.0,0.0,0.0,100.0,10000.0
+Nurse B5,post_covid,1,1,28840.74,0.0,0.0,100.0,10000.0
 Nurse Band 8A,pre_covid,1,1,36896.15,0.0,0.0,0.0,10000.0
+Nurse Bank Recharges,post_covid,53,3,10167506.68,0.01,0.0,1.887,7890.7
 Nurse band 5,covid,1,1,6554.98,0.0,0.0,0.0,10000.0
 Nurse band 5,pre_covid,1,1,6555.0,0.0,0.0,0.0,10000.0
-OCCUPANCY GUARANTEE,covid,2,1,59109.96000000001,0.0,0.0,0.0,10000.0
-OCCUPANCY GUARANTEE,pre_covid,1,1,37924.98,0.0,0.0,0.0,10000.0
-OTHER AMBULANCE SERVICES,pre_covid,8,1,699254.88,0.003,0.0,0.0,10000.0
-OTHER NURSING,covid,4,1,457064.88,0.001,0.0,0.0,10000.0
-OTHER NURSING,pre_covid,3,1,311981.22000000003,0.001,0.0,0.0,10000.0
-OTHER TRANSPORT COSTS,pre_covid,1,1,154356.22,0.001,0.0,0.0,10000.0
-Other,post_covid,2,1,255628.39,0.0,0.0,0.0,10000.0
+OCCUPANCY GUARANTEE,covid,10,1,320076.72,0.001,0.0,0.0,10000.0
+OCCUPANCY GUARANTEE,pre_covid,3,1,117043.51000000001,0.0,0.0,0.0,10000.0
+OIL,pre_covid,2,1,52404.86,0.0,0.0,0.0,10000.0
+OTHER AMBULANCE SERVICES,covid,6,2,285600.0,0.0,0.0,16.667,6759.9
+OTHER AMBULANCE SERVICES,pre_covid,12,1,969861.48,0.004,0.0,0.0,10000.0
+OTHER CONSULTANCIES,covid,1,1,26875.0,0.0,0.0,100.0,10000.0
+OTHER NURSE MANAGER,covid,1,1,9503.6,0.0,0.0,0.0,10000.0
+OTHER NURSE MANAGER,pre_covid,2,2,88540.88,0.0,0.0,0.0,5000.0
+OTHER NURSING,covid,17,1,1942525.74,0.003,0.0,0.0,10000.0
+OTHER NURSING,pre_covid,4,1,415974.96,0.002,0.0,0.0,10000.0
+OTHER SENIOR MANAGER,covid,2,1,278147.0,0.0,0.0,0.0,10000.0
+OTHER TRANSPORT COSTS,covid,5,3,390387.22,0.001,0.0,0.0,3459.7
+OTHER TRANSPORT COSTS,pre_covid,2,2,220708.22,0.001,0.0,50.0,5795.0
+Occupancy Guarantee,covid,1,1,80837.29,0.0,0.0,0.0,10000.0
+Occupancy Guarantee,post_covid,1,1,45825.57,0.0,0.0,0.0,10000.0
+Occupational Health Ptrust,post_covid,1,1,31794.35,0.0,0.0,0.0,10000.0
+Office Equipment,post_covid,3,2,144206.58000000002,0.0,0.0,0.0,6059.0
+Org Development & Training,post_covid,1,1,96220.8,0.0,0.0,100.0,10000.0
+Other,post_covid,4,3,310498.19,0.0,0.0,25.0,6934.3
 Other Clinical Costs,covid,3,1,987519.0,0.002,0.0,0.0,10000.0
-Other Gen Supplies & Srv,covid,1,1,37951.24,0.0,0.0,100.0,10000.0
-Other Gen Supplies & Srv,post_covid,1,1,126000.0,0.0,0.0,0.0,10000.0
+Other Clinical Costs,post_covid,23,3,8164028.840000001,0.008,0.0,4.348,9473.7
+Other Consultancies,post_covid,2,2,126038.92,0.0,0.0,0.0,6546.0
+Other Gen Supplies & Srv,covid,1,1,37951.24,0.0,0.0,0.0,10000.0
+Other Gen Supplies & Srv,post_covid,2,2,226000.0,0.0,0.0,0.0,5066.2
 Other Gen Supplies & Srv,pre_covid,3,2,146530.0,0.001,0.0,0.0,5128.3
+Other Income,covid,1,1,30000.0,0.0,0.0,100.0,10000.0
 Other Liabilities - Curr,covid,169,2,11660721.16,0.019,0.0,0.0,9494.7
-Other Liabilities - Curr,post_covid,5,1,471837.37,0.0,0.0,0.0,10000.0
-Other Liabilities - Curr,pre_covid,53,2,7721457.79,0.028,0.0,1.887,9932.5
-Other NHS Payables <1Yr,covid,42,2,4286226.1,0.007,0.0,0.0,5008.5
-Other NHS Payables <1Yr,post_covid,4,1,205207.41999999998,0.0,0.0,0.0,10000.0
-Other NHS Payables <1Yr,pre_covid,19,1,965457.9099999999,0.004,0.0,0.0,10000.0
+Other Liabilities - Curr,post_covid,177,3,20622462.14,0.021,0.0,0.565,4844.6
+Other Liabilities - Curr,pre_covid,59,2,8453888.249999998,0.031,0.0,1.695,9938.3
+Other NHS Payables <1Yr,covid,42,2,4286226.1,0.007,2.381,2.381,5008.5
+Other NHS Payables <1Yr,post_covid,71,1,3969298.6100000003,0.004,0.0,0.0,10000.0
+Other NHS Payables <1Yr,pre_covid,21,1,1054325.35,0.004,0.0,0.0,10000.0
 Other Operatg Rev Non NHS,covid,1,1,42330.68,0.0,0.0,100.0,10000.0
 Other Patients Expenses,covid,8,2,256151.6,0.0,0.0,12.5,5309.9
-Other Patients Expenses,pre_covid,1,1,26033.04,0.0,100.0,100.0,10000.0
+Other Patients Expenses,post_covid,1,1,31932.7,0.0,0.0,0.0,10000.0
+Other Patients Expenses,pre_covid,1,1,26033.04,0.0,0.0,100.0,10000.0
 Other Public Sector,covid,6,1,160500.0,0.0,0.0,16.667,10000.0
+Other Public Sector,post_covid,17,2,768420.0,0.001,0.0,5.882,7144.3
 Other Public Sector,pre_covid,5,1,133750.0,0.0,0.0,0.0,10000.0
-Other professional fees,covid,730,162,238207519.91599998,0.396,1.644,8.767,2241.7
-Other professional fees,post_covid,1978,276,355517961.98249996,0.372,0.455,4.297,488.0
-Other professional fees,pre_covid,238,79,39259015.379999995,0.144,0.42,3.782,2161.8
+Other Research Exp,post_covid,78,15,6499697.3100000005,0.007,0.0,5.128,1162.7
+Other Senior Nurse,post_covid,19,1,4456382.58,0.005,0.0,0.0,10000.0
+Other Transport Costs,post_covid,3,1,263285.32,0.0,33.333,0.0,10000.0
+Other professional fees,covid,730,162,238207519.91599995,0.393,0.685,8.767,2241.7
+Other professional fees,post_covid,2091,280,378698003.9125,0.39,0.287,3.969,484.5
+Other professional fees,pre_covid,238,79,39259015.379999995,0.143,0.0,3.782,2161.8
+Outpatient It,post_covid,1,1,115200.0,0.0,0.0,0.0,10000.0
+Outpatients Pharmacies,post_covid,19,1,10701741.209999999,0.011,0.0,0.0,10000.0
+Outsource Service From Non Nhs,covid,7,3,1171800.4,0.002,0.0,0.0,7800.0
+Outsource Service From Non Nhs,post_covid,194,9,22083283.28,0.023,0.515,1.546,3205.6
 P&M Additions,covid,3,1,258936.02,0.0,0.0,0.0,10000.0
-PATHOLOGY SERVICES,covid,4,1,3445983.0,0.006,0.0,0.0,10000.0
-PATHOLOGY SERVICES,pre_covid,9,1,6927269.640000001,0.025,0.0,0.0,10000.0
+P&M Additions,post_covid,2,1,31125.690000000002,0.0,0.0,50.0,10000.0
+PATHOLOGY SERVICES,covid,23,1,17412308.619999997,0.029,0.0,0.0,10000.0
+PATHOLOGY SERVICES,pre_covid,15,1,12100323.64,0.044,0.0,0.0,10000.0
 PATIENT APPLIANCES,covid,2,1,60000.0,0.0,0.0,0.0,10000.0
-PAYE,covid,11,1,23628193.909999996,0.039,0.0,0.0,10000.0
-PAYE,pre_covid,32,1,56391130.64,0.206,0.0,0.0,10000.0
-PHARMACY,covid,22,6,803486.8600000001,0.001,0.0,4.545,2719.7
-PHARMACY,pre_covid,53,9,1880403.32,0.007,1.887,3.774,1955.0
-PHARMACY PILGRIM,covid,14,3,554569.5900000001,0.001,0.0,0.0,5301.8
-PHARMACY PILGRIM,pre_covid,68,5,2581386.81,0.009,0.0,2.941,3663.3
+PAYE,covid,63,1,159749884.47000003,0.264,0.0,0.0,10000.0
+PAYE,pre_covid,56,1,100239285.51999998,0.365,0.0,0.0,10000.0
+PGME,pre_covid,1,1,18224.03,0.0,0.0,0.0,10000.0
+PHARMACY,covid,153,15,5346396.109999999,0.009,0.654,1.961,1660.0
+PHARMACY,pre_covid,68,11,2378250.75,0.009,1.471,4.412,1983.1
+PHARMACY PILGRIM,covid,129,6,4736404.76,0.008,0.775,1.55,4595.6
+PHARMACY PILGRIM,pre_covid,113,6,4219359.31,0.015,0.0,0.885,3103.8
+PHOTOCOPIER MACHINES,covid,2,1,162987.0,0.0,0.0,0.0,10000.0
 PHOTOCOPIER MACHINES,pre_covid,3,1,237072.0,0.001,0.0,0.0,10000.0
-PLUMBING WORKS,pre_covid,1,1,32471.39,0.0,0.0,100.0,10000.0
-POST MAR 95 RETIREMENTS < 1 Yr,covid,1,1,18441.73,0.0,0.0,0.0,10000.0
-POSTAGE,covid,3,1,90000.0,0.0,0.0,33.333,10000.0
-POSTAGE,pre_covid,5,1,230000.0,0.001,0.0,20.0,10000.0
-PRE MAR 95 RETIREMENTS < 1 Yr,covid,1,1,6940.6,0.0,0.0,100.0,10000.0
+PHOTOCOPIERS LEASE COST,covid,1,1,74085.0,0.0,0.0,0.0,10000.0
+PLUMBING WORKS,pre_covid,2,1,57471.39,0.0,0.0,0.0,10000.0
+POST MAR 95 RETIREMENTS,pre_covid,2,1,39887.67,0.0,0.0,0.0,10000.0
+POST MAR 95 RETIREMENTS < 1 Yr,covid,5,1,92711.56,0.0,0.0,0.0,10000.0
+POSTAGE,covid,27,1,952154.25,0.002,0.0,3.704,10000.0
+POSTAGE,pre_covid,8,2,356011.2,0.001,0.0,0.0,8645.5
+PRE MAR 95 RETIREMENTS < 1 Yr,covid,5,1,34642.3,0.0,0.0,0.0,10000.0
+PRE MARCH 1995 RETIREMENTS,pre_covid,2,1,13602.24,0.0,0.0,50.0,10000.0
 PRINTING AND STATIONERY,pre_covid,2,2,35034.01,0.0,0.0,50.0,9535.2
-PROPERTY LEASE,covid,4,1,404165.78,0.001,0.0,0.0,10000.0
-PROPERTY LEASE,pre_covid,4,1,147273.69999999998,0.001,0.0,0.0,10000.0
-Pacemakers,covid,28,2,520741.19999999995,0.001,3.571,3.571,8251.6
-Pacemakers,pre_covid,11,1,466976.39999999997,0.002,0.0,0.0,10000.0
-Packing & Storage,post_covid,2,1,392563.92,0.0,0.0,50.0,10000.0
-Patients Appl: Purchase,covid,2,1,108000.0,0.0,0.0,50.0,10000.0
-Payt Rec On A/C Susp <1Yr,pre_covid,1,1,29371.34,0.0,100.0,100.0,10000.0
+PROPERTY LEASE,covid,7,1,546276.01,0.001,0.0,0.0,10000.0
+PROPERTY LEASE,pre_covid,12,2,1639258.9800000002,0.006,0.0,0.0,8281.3
+Pacemakers,covid,28,2,520741.2,0.001,0.0,3.571,8251.6
+Pacemakers,post_covid,2,1,39985.2,0.0,0.0,0.0,10000.0
+Pacemakers,pre_covid,12,1,533936.4,0.002,0.0,0.0,10000.0
+Packing & Storage,post_covid,8,1,604267.86,0.001,0.0,12.5,10000.0
+Pacs,post_covid,2,2,325117.96,0.0,0.0,0.0,5000.0
+Pacs/Emrad Project,post_covid,3,3,334338.36,0.0,0.0,33.333,4241.8
+Pathlinks,post_covid,11,1,6527012.22,0.007,0.0,0.0,10000.0
+Patients Appl: Purchase,covid,2,1,108000.0,0.0,50.0,50.0,10000.0
+Patients Appl: Purchase,post_covid,17,2,263797.48,0.0,0.0,0.0,9678.2
+Pay Recharge,covid,1,1,50000.0,0.0,0.0,0.0,10000.0
+Pay Recharge,post_covid,2,2,236590.7,0.0,0.0,0.0,6913.3
+Paye - Holt,covid,3,1,1249797.76,0.002,0.0,0.0,10000.0
+Paye - Holt,post_covid,27,1,11012120.870000001,0.011,0.0,0.0,10000.0
+Paye - Trust,covid,3,1,11864609.93,0.02,0.0,0.0,10000.0
+Paye - Trust,post_covid,27,1,153150684.19,0.158,0.0,0.0,10000.0
+Payroll Services Contract,covid,2,1,70893.34,0.0,0.0,0.0,10000.0
+Payroll Services Contract,post_covid,22,1,963919.1100000002,0.001,0.0,0.0,10000.0
+Payt Rec On A/C Susp <1Yr,pre_covid,1,1,29371.34,0.0,0.0,100.0,10000.0
 Permanent Injury Benefits,covid,7,1,216398.63,0.0,0.0,0.0,10000.0
+Permanent Injury Benefits,post_covid,11,1,369300.54000000004,0.0,0.0,0.0,10000.0
 Permanent Injury Benefits,pre_covid,5,1,158790.83000000002,0.001,0.0,0.0,10000.0
-Pharmaceutical services,covid,115,27,14120396.64,0.023,0.87,4.348,1138.7
-Pharmaceutical services,post_covid,129,22,25361658.310000002,0.027,1.55,0.0,2279.1
-Pharmaceutical services,pre_covid,87,19,8918570.52,0.033,0.0,1.149,1172.2
+Pharmaceutical services,covid,115,27,14120396.64,0.023,0.0,4.348,1138.7
+Pharmaceutical services,post_covid,149,22,30803446.31,0.032,1.342,0.0,2173.2
+Pharmaceutical services,pre_covid,87,19,8918570.52,0.032,0.0,1.149,1172.2
+Pharmacy,post_covid,124,20,5960881.49,0.006,0.806,0.806,1341.5
+Pharmacy Contract,post_covid,29,2,35020863.23,0.036,0.0,0.0,7482.4
+Pharmacy Dispensing Costs,post_covid,9,2,5887493.5600000005,0.006,0.0,11.111,9419.1
+Phlebotomist B2,post_covid,1,1,54068.88,0.0,0.0,0.0,10000.0
+Phone Install & Maintenance,post_covid,2,1,915252.04,0.001,0.0,0.0,10000.0
+Phone Rental and Calls,post_covid,1,1,53978.87,0.0,0.0,0.0,10000.0
 Phone Rental and Calls,pre_covid,1,1,62452.5,0.0,0.0,100.0,10000.0
+Photocopier Usage,post_covid,1,1,43579.08,0.0,0.0,0.0,10000.0
 Photographic Materials,covid,13,1,395914.23000000004,0.001,0.0,0.0,10000.0
+Photographic Materials,post_covid,1,1,27144.53,0.0,0.0,0.0,10000.0
 Photographic Materials,pre_covid,4,1,196010.71,0.001,0.0,0.0,10000.0
+Pilgrim Endoscopy,post_covid,2,1,98983.83,0.0,0.0,0.0,10000.0
+Pilgrim Estates Operations,post_covid,4,3,278730.67,0.0,0.0,25.0,4994.0
+Pilgrim Linen,post_covid,6,1,337869.35,0.0,0.0,0.0,10000.0
+Pilgrim Obstetrics Ip,post_covid,5,3,619760.5900000001,0.001,0.0,0.0,6060.8
+Pilgrim Radiology,post_covid,2,2,94083.73999999999,0.0,0.0,0.0,5194.8
+Pilgrim Rates,post_covid,7,1,469504.0,0.0,0.0,0.0,10000.0
+Pilgrim Respir Physiology Op,post_covid,1,1,45264.0,0.0,0.0,0.0,10000.0
+Pilgrim Utilities/Waste,post_covid,9,2,484806.36,0.0,0.0,0.0,5123.4
+Pilgrim Ward Housekeeping,post_covid,2,1,107023.2,0.0,0.0,0.0,10000.0
 Postage & Carriage,covid,10,2,320512.02,0.001,0.0,0.0,8312.0
-Postage & Carriage,pre_covid,6,1,195420.56,0.001,0.0,0.0,10000.0
-Premises,covid,1269,61,165814355.61,0.275,0.788,1.655,2683.2
-Premises,post_covid,1369,63,165211093.51999998,0.173,0.584,1.242,2745.7
-Premises,pre_covid,588,35,69537439.28999999,0.254,0.0,0.85,3643.8
+Postage & Carriage,post_covid,65,5,2436803.1599999997,0.003,1.538,1.538,3460.1
+Postage & Carriage,pre_covid,7,1,224973.97,0.001,0.0,0.0,10000.0
+Premises,covid,1269,61,165814355.61,0.274,0.709,1.655,2683.2
+Premises,post_covid,1466,68,172256658.07,0.177,0.341,1.296,2778.9
+Premises,pre_covid,588,35,69537439.28999999,0.253,0.0,0.85,3643.8
 Primary Care Trst Revenue,covid,1,1,52123.75,0.0,0.0,0.0,10000.0
+Primary Care Trst Revenue,post_covid,1,1,47543.38,0.0,0.0,0.0,10000.0
+Printing And Stationery,post_covid,3,1,141000.33000000002,0.0,0.0,33.333,10000.0
 Printing Costs,covid,1,1,27493.92,0.0,0.0,0.0,10000.0
+Printing Costs,post_covid,5,1,255555.0,0.0,0.0,0.0,10000.0
 Printing Design Costs,pre_covid,1,1,25200.0,0.0,0.0,100.0,10000.0
 Professional Fees,covid,31,5,506009.36000000004,0.001,0.0,6.452,3075.3
-Professional Fees,pre_covid,3,3,159440.0,0.001,33.333,33.333,4182.4
+Professional Fees,post_covid,14,6,1825109.7599999998,0.002,0.0,7.143,5172.6
+Professional Fees,pre_covid,3,3,159440.0,0.001,0.0,33.333,4182.4
+Progress Housing Rents,post_covid,26,1,1298726.0199999998,0.001,0.0,0.0,10000.0
+Progress Living,post_covid,9,1,1126955.07,0.001,0.0,0.0,10000.0
+Propco Leases,post_covid,19,1,1089861.2,0.001,0.0,0.0,10000.0
+Property Lease,post_covid,27,7,1696917.6500000004,0.002,3.704,11.111,4446.7
 Prostheses - Other,covid,2,1,29352.0,0.0,50.0,50.0,10000.0
-Provisions,covid,11,4,352430.68000000005,0.001,18.182,0.0,3111.0
-Provisions,post_covid,1,1,28531.15,0.0,0.0,100.0,10000.0
-Provisions,pre_covid,3,3,124859.98,0.0,33.333,100.0,4143.6
-Purch Tang FA AUC Addns,covid,17,2,2788345.32,0.005,0.0,0.0,9528.0
-Purch Tang FA AUC Addns,pre_covid,10,3,1761786.22,0.006,0.0,0.0,5878.0
-Purchase of healthcare from non-NHS bodies,covid,10601,1078,5170415387.176354,8.59,0.604,2.594,441.3
-Purchase of healthcare from non-NHS bodies,post_covid,11974,1064,2602168927.632934,2.721,1.603,1.253,765.4
-Purchase of healthcare from non-NHS bodies,pre_covid,5280,451,1783410346.8801365,6.522,0.152,0.89,510.7
-QUALIFIED AGENCY INVOICES,covid,43,7,1677485.23,0.003,2.326,9.302,1845.4
-QUALIFIED AGENCY INVOICES,pre_covid,20,4,651798.32,0.002,5.0,20.0,5560.0
-RATES,covid,2,1,903936.0,0.002,0.0,50.0,10000.0
-RATES,pre_covid,1,1,184611.1,0.001,0.0,0.0,10000.0
-RECRUITMENT  EXPENSES,covid,1,1,85352.66,0.0,0.0,100.0,10000.0
-RENTS,covid,8,2,712028.53,0.001,0.0,0.0,6545.1
-RENTS,pre_covid,11,3,656811.0499999999,0.002,0.0,9.091,5909.2
-RENTS LEASE,covid,2,1,98563.70999999999,0.0,0.0,0.0,10000.0
-RESUS STOCK CONSUMABLES,covid,14,2,4116135.4899999998,0.007,0.0,0.0,9878.0
-RESUS STOCK CONSUMABLES,pre_covid,18,2,4862414.130000001,0.018,0.0,5.556,6596.2
+Provision Early Depart <1yr,covid,1,1,25149.63,0.0,0.0,100.0,10000.0
+Provision Early Depart <1yr,post_covid,3,1,75234.35,0.0,33.333,0.0,10000.0
+Provision Legal Claims <1yr,post_covid,3,3,194650.73,0.0,0.0,66.667,4285.5
+Provision Pension Inj Ben <1yr,post_covid,3,2,79585.92,0.0,0.0,33.333,5495.6
+Provisions,covid,11,4,352430.68000000005,0.001,9.091,0.0,3111.0
+Provisions,post_covid,13,4,622687.2000000002,0.001,7.692,7.692,5147.4
+Provisions,pre_covid,4,4,182021.95,0.001,0.0,75.0,2935.9
+Public Relations Expenses,post_covid,1,1,23170.24,0.0,0.0,100.0,10000.0
+Purch Hcare From Nhs And Dhsc,covid,2,2,87003.09,0.0,0.0,50.0,5849.1
+Purch Hcare From Nhs And Dhsc,post_covid,18,3,731750.56,0.001,5.556,0.0,4816.7
+Purch Tang FA AUC Addns,covid,17,2,2788345.3200000003,0.005,0.0,0.0,9528.0
+Purch Tang FA AUC Addns,pre_covid,11,4,1807955.93,0.007,0.0,0.0,5588.2
+Purchase of healthcare from non-NHS bodies,covid,10601,1078,5170415387.176354,8.531,0.33,2.604,441.3
+Purchase of healthcare from non-NHS bodies,post_covid,13028,1081,2874373518.725174,2.956,2.863,1.197,790.9
+Purchase of healthcare from non-NHS bodies,pre_covid,5280,451,1783410346.8801365,6.497,0.0,0.89,510.7
+QUALIFIED AGENCY INVOICES,covid,303,8,14113260.02,0.023,0.0,0.66,2447.9
+QUALIFIED AGENCY INVOICES,pre_covid,45,7,1438089.4000000001,0.005,0.0,15.556,2558.9
+RATES,covid,8,4,3433216.0,0.006,12.5,12.5,3595.8
+RATES,pre_covid,4,3,2669331.1,0.01,0.0,0.0,4118.9
+RECRUITMENT  EXPENSES,covid,4,3,251305.36,0.0,0.0,25.0,4911.7
+RENTS,covid,15,2,1101731.2100000002,0.002,0.0,0.0,5220.8
+RENTS,pre_covid,20,4,1260927.1500000001,0.005,0.0,0.0,6918.7
+RENTS LEASE,covid,14,2,602823.7799999999,0.001,0.0,0.0,8876.9
+RESUS STOCK CONSUMABLES,covid,80,2,27258851.81,0.045,0.0,0.0,9981.5
+RESUS STOCK CONSUMABLES,pre_covid,34,3,9583205.15,0.035,0.0,0.0,6310.8
+Radiology Services,covid,1,1,41606.18,0.0,0.0,0.0,10000.0
+Radiology Services,post_covid,6,4,405727.7,0.0,0.0,0.0,2701.4
+Radiotherapy Physics,post_covid,2,2,678336.3500000001,0.001,0.0,0.0,9126.5
 Rates,covid,45,1,3439565.0,0.006,0.0,0.0,10000.0
-Rates,post_covid,3,2,154471.91,0.0,0.0,0.0,6543.2
-Rates,pre_covid,25,2,2004407.0,0.007,0.0,0.0,6456.6
+Rates,post_covid,135,6,10627633.27,0.011,0.741,0.741,3050.1
+Rates,pre_covid,27,3,2157032.0,0.008,0.0,0.0,5625.3
+Rchrg : Rcvd - Pathology,post_covid,35,1,1957213.5,0.002,0.0,0.0,10000.0
 Rechgs to-from Other NHS,covid,3,2,102564.47,0.0,0.0,0.0,5692.0
-Rechgs to-from Other NHS,pre_covid,1,1,45137.72,0.0,100.0,100.0,10000.0
+Rechgs to-from Other NHS,post_covid,2,1,90964.19,0.0,0.0,0.0,10000.0
+Rechgs to-from Other NHS,pre_covid,1,1,45137.72,0.0,0.0,100.0,10000.0
+Recruitment Agency Fees,covid,3,2,160132.29,0.0,0.0,0.0,5706.4
+Recruitment Agency Fees,post_covid,26,6,1079037.08,0.001,3.846,15.385,3914.9
+Repairs - Contract Work,post_covid,5,4,262628.05,0.0,0.0,0.0,3177.1
 Research and development (excluding staff costs),covid,3,1,434283.0,0.001,0.0,0.0,10000.0
-Research and development (excluding staff costs),post_covid,30,19,2671518.89,0.003,3.333,13.333,980.1
+Research and development (excluding staff costs),post_covid,30,19,2671518.89,0.003,0.0,13.333,980.1
 Research and development (excluding staff costs),pre_covid,2,1,172378.0,0.001,0.0,0.0,10000.0
-SERVICE AND FM CHARGES,covid,7,1,243350.88999999998,0.0,0.0,0.0,10000.0
-SERVICES FROM NON-NHS BODIES,covid,2,2,434880.31,0.001,0.0,0.0,6535.7
-SERVICES FROM NON-NHS BODIES,pre_covid,6,1,1688733.9400000002,0.006,0.0,0.0,10000.0
-SERVICES FROM OTHER NHS,covid,2,1,56658.490000000005,0.0,0.0,0.0,10000.0
-SERVICES FROM OTHER NHS,pre_covid,1,1,30512.93,0.0,0.0,100.0,10000.0
-STRUCTURE,covid,9,4,904438.85,0.002,0.0,0.0,4540.9
-STRUCTURE,pre_covid,48,8,9967409.059999999,0.036,2.083,4.167,4266.3
-STUDENT LOAN RE-PAYMENTS,covid,2,1,28545.0,0.0,0.0,0.0,10000.0
-STUDENT LOAN RE-PAYMENTS,pre_covid,8,1,77708.0,0.0,0.0,0.0,10000.0
-SUBSCRIPTION  FEES,pre_covid,2,2,721148.22,0.003,0.0,100.0,9205.7
-SW SUPPORT,pre_covid,2,2,141201.63,0.001,0.0,100.0,6415.2
+Risk & Incident Management,post_covid,1,1,48891.3,0.0,0.0,100.0,10000.0
+Room Hire (Non-Ifrs 16),covid,2,1,175549.72,0.0,0.0,0.0,10000.0
+Room Hire (Non-Ifrs 16),post_covid,73,3,7038417.89,0.007,0.0,1.37,5023.6
+Rowlands Dispensing Costs,post_covid,20,1,1877240.0399999996,0.002,0.0,0.0,10000.0
+Rowlands dispensing costs,covid,6,1,486644.33999999997,0.001,0.0,0.0,10000.0
+SENIOR MANAGER BAND 8D,covid,1,1,32031.44,0.0,0.0,100.0,10000.0
+SERVICE AND FM CHARGES,covid,39,3,2184803.86,0.004,0.0,0.0,4985.1
+SERVICES FROM NON-NHS BODIES,covid,15,3,1634503.51,0.003,0.0,0.0,6259.9
+SERVICES FROM NON-NHS BODIES,pre_covid,14,3,3224247.8300000005,0.012,0.0,0.0,9354.0
+SERVICES FROM OTHER NHS,covid,7,1,212772.74,0.0,0.0,0.0,10000.0
+SERVICES FROM OTHER NHS,pre_covid,5,1,164318.5,0.001,0.0,0.0,10000.0
+STAFF CARS LEASE COSTS,covid,1,1,19313.34,0.0,0.0,100.0,10000.0
+STAFF CARS SERVICE COSTS,covid,1,1,3890.52,0.0,0.0,0.0,10000.0
+STAFF UNIFORMS AND CLOTHING,covid,8,4,326373.5,0.001,0.0,37.5,3283.4
+STRUCTURE,covid,22,7,2366156.21,0.004,0.0,4.545,2480.0
+STRUCTURE,pre_covid,78,10,13722008.350000001,0.05,0.0,2.564,3796.6
+STUDENT LOAN RE-PAYMENTS,covid,3,1,38572.0,0.0,0.0,0.0,10000.0
+STUDENT LOAN RE-PAYMENTS,pre_covid,14,1,129778.0,0.0,0.0,0.0,10000.0
+SUBSCRIPTION  FEES,covid,6,4,976586.67,0.002,0.0,16.667,5287.0
+SUBSCRIPTION  FEES,pre_covid,3,3,1024155.22,0.004,0.0,33.333,5439.6
+SW SUPPORT,covid,9,3,978645.02,0.002,0.0,0.0,8708.6
+SW SUPPORT,pre_covid,7,3,464148.53,0.002,0.0,28.571,7483.2
+SYS VAT Non Recoverable,post_covid,1,1,179587.84,0.0,0.0,0.0,10000.0
+Sal Sac Home Electronics,post_covid,2,1,54528.63,0.0,0.0,0.0,10000.0
+Sal Sac Lease Cars,post_covid,2,1,52296.1,0.0,0.0,50.0,10000.0
+Salary Finance Borrow,post_covid,25,1,745318.73,0.001,0.0,0.0,10000.0
+Secondment Rchrg To-From Nhs,post_covid,2,2,65240.92,0.0,0.0,0.0,5180.2
 Senior Manager Band 8B,covid,8,1,5196.23,0.0,0.0,0.0,10000.0
+Senior Manager Band 8B,post_covid,5,2,108283.98999999999,0.0,20.0,20.0,5503.4
 Senior Manager Band 8C,covid,8,1,46769.86,0.0,0.0,0.0,10000.0
-Senior Manager Band 8C,post_covid,2,1,52909.0,0.0,0.0,0.0,10000.0
+Senior Manager Band 8C,post_covid,5,2,115068.51999999999,0.0,0.0,0.0,5052.4
 Senior Manager Band 8C,pre_covid,1,1,45496.0,0.0,0.0,0.0,10000.0
 Senior Manager Band 8D,covid,3,1,25781.72,0.0,0.0,0.0,10000.0
 Senior Manager Band 8D,pre_covid,3,1,575357.16,0.002,0.0,0.0,10000.0
 Senior Manager Trust,covid,2,1,27008.260000000002,0.0,50.0,0.0,10000.0
+Senior Manager Trust,post_covid,8,5,252090.01,0.0,0.0,12.5,2618.6
+Senior Manager band 8,post_covid,8,1,986705.52,0.001,0.0,0.0,10000.0
 Service Charge,pre_covid,1,1,143614.98,0.001,0.0,0.0,10000.0
 Services Received - CCG's,post_covid,1,1,1232000.0,0.001,0.0,0.0,10000.0
-Services Received - NHSTs,covid,122,5,6702650.77,0.011,0.0,1.639,3281.4
-Services Received - NHSTs,post_covid,31,3,1425681.38,0.001,6.452,0.0,4258.8
-Services Received - NHSTs,pre_covid,55,6,2027760.8299999998,0.007,0.0,0.0,3241.8
+Services Received - NHSTs,covid,122,5,6702650.77,0.011,0.0,0.82,3281.4
+Services Received - NHSTs,post_covid,194,6,16137168.799999999,0.017,0.515,0.0,2673.2
+Services Received - NHSTs,pre_covid,56,6,2209488.83,0.008,0.0,0.0,3433.0
 Services Received – CCGs,covid,2,1,2000000.0,0.003,0.0,0.0,10000.0
 Services from Local Auth,covid,2,1,362936.65,0.001,0.0,0.0,10000.0
+Services from Local Auth,post_covid,5,2,844638.0399999999,0.001,0.0,0.0,7406.8
 Services from Local Auth,pre_covid,1,1,134400.0,0.0,0.0,0.0,10000.0
-Services from other NHS bodies,covid,27308,392,47127785621.630005,78.299,1.263,0.143,110.1
-Services from other NHS bodies,post_covid,70486,407,70532540377.42036,73.755,2.226,0.072,136.8
-Services from other NHS bodies,pre_covid,20044,395,23259786999.55,85.058,0.125,0.065,134.0
+Services from other NHS bodies,covid,27308,392,47127785621.630005,77.762,1.296,0.139,110.1
+Services from other NHS bodies,post_covid,78147,415,76750920357.37036,78.941,2.872,0.073,138.5
+Services from other NHS bodies,pre_covid,20044,395,23259786999.55,84.731,0.2,0.065,134.0
 Sewerage,covid,10,1,155554.69,0.0,0.0,10.0,10000.0
-Sewerage,post_covid,1,1,14853.71,0.0,0.0,0.0,10000.0
+Sewerage,post_covid,24,1,418119.1,0.0,4.167,0.0,10000.0
 Sewerage,pre_covid,5,1,79393.17,0.0,0.0,0.0,10000.0
+Software  Lice Intang Additions,post_covid,2,1,366794.29,0.0,0.0,0.0,10000.0
+Sonographer Band 7,post_covid,1,1,99981.39,0.0,0.0,0.0,10000.0
+Specialist Midwives,post_covid,1,1,66146.4,0.0,0.0,0.0,10000.0
+Speech Therapy,post_covid,6,1,283126.98000000004,0.0,0.0,0.0,10000.0
 SrvcsRecd-FoundationTrust,covid,14,3,1560318.29,0.003,0.0,0.0,3455.9
-SrvcsRecd-FoundationTrust,post_covid,14,1,409429.32999999996,0.0,0.0,0.0,10000.0
+SrvcsRecd-FoundationTrust,post_covid,43,5,4046666.75,0.004,0.0,2.326,2586.9
 SrvcsRecd-FoundationTrust,pre_covid,2,1,256522.0,0.001,0.0,0.0,10000.0
-Supplies and services - general,covid,658,364,379280365.54,0.63,0.608,8.967,120.5
-Supplies and services – clinical,covid,4778,363,2127577445.1599998,3.535,0.335,0.419,145.3
-Supplies and services – clinical,post_covid,1256,156,500184084.1,0.523,0.557,1.592,186.3
-Supplies and services – clinical,pre_covid,993,173,216025302.48000002,0.79,0.403,0.604,167.4
-Supplies and services – general,covid,5842,782,1567495117.0429797,2.604,0.907,4.639,269.9
-Supplies and services – general,post_covid,9788,988,2925203569.769223,3.059,0.93,3.658,688.9
-Supplies and services – general,pre_covid,1803,442,500442911.210046,1.83,0.499,2.551,378.1
-TELEPHONES,covid,1,1,2090.7,0.0,0.0,0.0,10000.0
-TELEPHONES,pre_covid,1,1,569.62,0.0,0.0,0.0,10000.0
+Staff Consultancy & Suppt,post_covid,3,2,88906.2,0.0,0.0,33.333,5504.0
+Stationery,post_covid,7,2,232933.52999999997,0.0,14.286,14.286,7446.4
+Stp Contribution,post_covid,1,1,117925.0,0.0,0.0,0.0,10000.0
+Student Loan - Trust,covid,3,1,222357.0,0.0,0.0,0.0,10000.0
+Student Loan - Trust,post_covid,24,1,2478521.25,0.003,0.0,0.0,10000.0
+Subscription Fees,covid,1,1,66600.0,0.0,0.0,0.0,10000.0
+Subscription Fees,post_covid,7,5,945893.39,0.001,14.286,0.0,3464.2
+Supplies and services - general,covid,658,364,379280365.53999996,0.626,0.304,8.967,120.5
+Supplies and services – clinical,covid,4778,363,2127577445.1599998,3.511,0.23,0.481,145.3
+Supplies and services – clinical,post_covid,1323,157,537025683.77,0.552,0.454,1.663,199.3
+Supplies and services – clinical,pre_covid,993,173,216025302.48000002,0.787,0.101,0.604,167.4
+Supplies and services – general,covid,5842,782,1567495117.0429797,2.586,0.496,4.587,269.9
+Supplies and services – general,post_covid,10564,1009,3190615812.4892235,3.282,0.861,3.502,726.3
+Supplies and services – general,pre_covid,1803,442,500442911.21004605,1.823,0.055,2.551,378.1
+Supply Chain Control<1yr,covid,10,1,4235394.2700000005,0.007,0.0,0.0,10000.0
+Supply Chain Control<1yr,post_covid,217,2,65135218.220000006,0.067,0.0,0.0,8461.6
+Surg Instruments Disp,post_covid,3,1,33390.0,0.0,0.0,0.0,10000.0
+Surg Instruments General,post_covid,20,1,412579.75999999995,0.0,0.0,0.0,10000.0
+Surgery Division Management,post_covid,1,1,42740.22,0.0,0.0,0.0,10000.0
+Sw Support,covid,1,1,98954.26,0.0,0.0,0.0,10000.0
+Sw Support,post_covid,4,2,640188.06,0.001,0.0,0.0,8825.6
+System Digital,post_covid,1,1,436039.2,0.0,0.0,0.0,10000.0
+System Maintenance Costs,post_covid,9,6,748074.4099999999,0.001,0.0,11.111,2347.1
+TELEPHONES,covid,6,4,329355.08999999997,0.001,0.0,16.667,4464.3
+TELEPHONES,pre_covid,2,2,194246.02,0.001,0.0,0.0,9941.5
 THERAPY EQUIPMENT,covid,2,1,30000.0,0.0,0.0,50.0,10000.0
-Training Expenses,covid,2,2,407500.0,0.001,0.0,50.0,8532.1
+Taxi & Other Vehicle Hire,post_covid,5,3,156443.06,0.0,0.0,40.0,4428.2
+Telecommunications,post_covid,4,2,555128.5800000001,0.001,0.0,0.0,7088.0
+Theatres Gdh,post_covid,1,1,88109.28,0.0,0.0,0.0,10000.0
+Theatres Lch,post_covid,1,1,67852.8,0.0,0.0,0.0,10000.0
+Tissue Viability,post_covid,7,1,907373.01,0.001,0.0,0.0,10000.0
+Training Expenses,covid,2,2,407500.0,0.001,50.0,50.0,8532.1
+Training Expenses,post_covid,11,6,463294.3,0.0,0.0,18.182,3466.2
+Training Materials,post_covid,6,3,155633.34,0.0,0.0,50.0,3781.9
+Training Travel & Subsistence,post_covid,2,1,90071.79999999999,0.0,0.0,50.0,10000.0
+Trans Equip Additions,post_covid,2,1,44996.4,0.0,0.0,50.0,10000.0
 Transport,covid,59,3,28326153.03,0.047,1.695,0.0,9923.3
-Transport,post_covid,90,7,32029029.880000003,0.033,0.0,3.333,9817.0
-Transport,pre_covid,58,3,16675867.34,0.061,1.724,1.724,9088.4
+Transport,post_covid,95,8,35268406.95000001,0.036,0.0,3.158,9481.7
+Transport,pre_covid,58,3,16675867.34,0.061,0.0,1.724,9088.4
 Travel & Subsistence,covid,9,2,28003.41,0.0,0.0,0.0,9686.5
-Travel & Subsistence,post_covid,2,1,505.0,0.0,0.0,0.0,10000.0
-Travel & Subsistence,pre_covid,2,1,59426.25,0.0,50.0,50.0,10000.0
-Unspecified,post_covid,12099,1566,7249984846.64718,7.581,8.505,2.761,131.2
+Travel & Subsistence,post_covid,10,2,194889.04999999996,0.0,10.0,0.0,9938.1
+Travel & Subsistence,pre_covid,2,1,59426.25,0.0,0.0,50.0,10000.0
+Ulht Balance Sheet,post_covid,269,68,107661335.63,0.111,0.0,5.576,4631.3
 VAT Cont Out Serv Inp Tax,pre_covid,1,1,54893.72,0.0,0.0,0.0,10000.0
-WAN USAGE,covid,2,2,109047.95000000001,0.0,0.0,0.0,5936.3
-WAN USAGE,pre_covid,14,3,1057868.31,0.004,0.0,7.143,6919.5
-WATER AND SEWERAGE,covid,5,1,170132.66,0.0,0.0,0.0,10000.0
-WATER AND SEWERAGE,pre_covid,8,1,351314.85,0.001,0.0,0.0,10000.0
+VISITING CONSULTANTS,covid,1,1,39653.45,0.0,0.0,100.0,10000.0
+VISITING CONSULTANTS,pre_covid,1,1,37099.32,0.0,0.0,0.0,10000.0
+Vehicle Lease,post_covid,2,1,63572.69,0.0,0.0,0.0,10000.0
+Visiting Consultants,post_covid,7,3,369564.79,0.0,0.0,14.286,4294.2
+WAN USAGE,covid,11,3,542817.01,0.001,0.0,0.0,5653.8
+WAN USAGE,pre_covid,24,3,1856945.08,0.007,0.0,0.0,5826.1
+WASTE DISPOSAL-CLINICAL,covid,7,1,236023.23,0.0,0.0,14.286,10000.0
+WATER AND SEWERAGE,covid,21,1,782212.8899999999,0.001,0.0,0.0,10000.0
+WATER AND SEWERAGE,pre_covid,13,1,521127.24999999994,0.002,0.0,0.0,10000.0
+Waiting List Clerks,post_covid,1,1,45349.2,0.0,0.0,0.0,10000.0
+Wan Usage,post_covid,5,1,216890.74,0.0,0.0,0.0,10000.0
 Water,covid,11,1,173841.23,0.0,0.0,0.0,10000.0
-Water,post_covid,1,1,10535.28,0.0,0.0,0.0,10000.0
+Water,post_covid,26,1,404756.32,0.0,0.0,0.0,10000.0
 Water,pre_covid,5,1,72369.36,0.0,0.0,0.0,10000.0
+Water & Sewage,covid,1,1,25042.17,0.0,0.0,0.0,10000.0
+Water & Sewage,post_covid,29,1,2158008.14,0.002,0.0,0.0,10000.0
 Wheelchairs,covid,3,1,81480.0,0.0,66.667,33.333,10000.0
-Wheelchairs,post_covid,7,1,2261.8,0.0,0.0,0.0,10000.0
+Wheelchairs,post_covid,16,1,5025.0,0.0,0.0,0.0,10000.0
+Wifi Patient And Public,post_covid,3,1,233046.95,0.0,0.0,33.333,10000.0
 X-Ray Equip Maint/Repair,covid,41,4,1237546.29,0.002,0.0,0.0,6465.0
-X-Ray Equip Maint/Repair,post_covid,2,1,37985.5,0.0,0.0,0.0,10000.0
+X-Ray Equip Maint/Repair,post_covid,114,8,5509005.340000001,0.006,1.754,1.754,2668.3
+X-Ray Equipment,post_covid,2,2,88563.12,0.0,0.0,0.0,5195.7
 X-Ray Equipment Purchase,covid,16,5,314825.01999999996,0.001,0.0,12.5,2344.5
+X-Ray Equipment Purchase,post_covid,90,7,1558834.65,0.002,1.111,1.111,2357.2
 X-Ray Equipment Purchase,pre_covid,13,6,373059.38,0.001,0.0,15.385,2611.2
-XRAY MAINTENANCE,covid,2,1,108638.98,0.0,0.0,0.0,10000.0
-XRAY MAINTENANCE,pre_covid,5,1,304615.04000000004,0.001,0.0,20.0,10000.0
+X-Ray Film & Chemicals,post_covid,18,2,370182.38,0.0,0.0,0.0,5558.9
+XRAY MAINTENANCE,covid,36,5,1839546.3499999999,0.003,0.0,5.556,7238.0
+XRAY MAINTENANCE,pre_covid,9,3,634369.0599999999,0.002,0.0,0.0,6500.8
