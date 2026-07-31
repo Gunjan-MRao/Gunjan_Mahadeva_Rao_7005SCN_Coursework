@@ -8,6 +8,27 @@ MSc Data Science coursework (module 7005SCN, Coventry University). Supervisor: D
 
 This repository implements the full analytical pipeline behind that question: data engineering, exploratory/shock analysis, unsupervised anomaly detection, explainability, and a defensible proxy validation against literature-derived audit red-flag criteria.
 
+## What this means in practice (for non-technical readers)
+
+The sections below are written for a data-science audience; this section translates the same findings into plain language for a procurement or audit stakeholder who wants to know "so what should we actually do differently", without needing to read any code.
+
+**The one-sentence finding.** Procurement transactions look statistically "normal" until a supplier is brand new to a buyer — new supplier relationships, not large payments or large/established suppliers, are what an anomaly-detection model flags most often, and that pattern has become more common and more persistent since COVID-19, not less.
+
+**Why that specific finding, and not a different one, came out of the model.** The anomaly-detection stage (Isolation Forest) never sees a label saying "this is fraud" or "this is fine" — it only learns what a typical pre-2020 transaction looked like, then flags anything from 2020 onward that doesn't resemble that baseline. The explainability stage (SHAP) then asks, for every flagged transaction, *which input feature caused this one to be flagged*. Doing that at scale (across the 200 highest-confidence flags) is what produces the finding above: 179 of those 200 flags are driven primarily by how early the transaction sits in that supplier's relationship with the buyer, not by the size of the payment. That is a direct, code-traceable answer to the business question "why did the model think this transaction was unusual", not an assumption — it is why the explainability stage exists at all, rather than treating the model as a black box that just outputs a score.
+
+**Turning the composite supplier risk score into an action, not just a number.** `src/analysis/supplier_risk_score.py` blends three signals (how often a supplier's transactions get flagged, how extreme those flags are, and how often they also match an independent literature-derived audit red flag) into one 0–100 score per supplier, then buckets suppliers into four tiers. The table below is the missing link between "the model produced a score" and "a procurement team does something about it" — it is a recommended, not automated, response, since a score is a prioritisation signal, not a fraud finding:
+
+| Risk tier | Suppliers (of 3,682 scored) | Suggested procurement action |
+|---|---|---|
+| Critical | 185 | Hold pending manual review before the next payment or contract renewal; escalate to the counter-fraud/audit function rather than resolving at the procurement-desk level. |
+| High | 368 | Require a second approver on new POs; request supporting documentation (registration, prior delivery evidence) before extending the relationship further. |
+| Medium | 920 | No immediate action; include in the next periodic spend review rather than routine processing. |
+| Low | 2,209 | Standard procurement controls are sufficient; no additional review needed. |
+
+**The single most actionable operational implication.** Because the dominant driver of flagged anomalies is relationship-newness rather than payment size or supplier size, the highest-value control a procurement team can add is not "scrutinise our biggest suppliers more closely" — the data says the opposite. Suppliers who are structurally central (transact with multiple trusts, or transact at very high volume) actually show a *lower* per-transaction anomaly rate (1.02%) than smaller, single-relationship suppliers (2.89%) — see Stage 6D below. The more defensible, evidence-based control is to tighten onboarding checks specifically in the first few transactions of any *new* supplier relationship (e.g. verifying company registration and requesting delivery evidence before the third or fourth invoice is paid), which is exactly where the model concentrates its flags. The category-level deep dive (Phase 7B) adds a second, complementary prioritisation lens: "Med & Surg Equip General" and "CompSwrPrch Additions" saw the largest genuine (not small-base-artefact) absolute spend growth during COVID, so a retrospective audit sample drawn specifically from those two categories in the 2020–2022 window is likely to be more productive than a sample drawn at random from the whole panel.
+
+**What the model is not saying.** A flagged transaction is not a confirmed error or fraud case — it is a statistical outlier relative to pre-pandemic norms, corroborated independently by a literature-derived audit rule in 59.6% of cases (see Stage 6 below), which is well beyond what chance overlap between two independent detection methods would produce, but is still short of confirmed audit ground truth. The risk tiers above should be read and used as an audit-prioritisation tool that focuses limited review capacity where it is statistically most likely to be useful, not as a substitute for the review itself.
+
 ## Repository structure
 
 ```
@@ -51,6 +72,8 @@ docs/
   bi_dashboard_guide.md   Tableau/Power BI build guide for the BI export CSVs
   dissertation_sections.md  drop-in methodology/results sections for the dissertation write-up
 ```
+
+**Repository hygiene.** Only code, small summary/aggregate CSVs (<50KB, needed to reproduce a figure or table directly), and report figures are committed. Large per-record intermediate outputs (the merged panel, per-record anomaly/red-flag/method-comparison scores, the BI fact table — each tens of MB and fully regenerable in under two minutes via `python -m src.run_pipeline`), the raw source archive, and all local caches (`__pycache__/`, `.pytest_cache/`) are excluded via `.gitignore` (see the comments there for the exact rationale per exclusion). This keeps the repository focused on what an examiner needs to read and re-run the analysis, rather than on regenerable byproducts of doing so.
 
 ## Methodology (mapped to the original proposal's 5-stage design)
 
