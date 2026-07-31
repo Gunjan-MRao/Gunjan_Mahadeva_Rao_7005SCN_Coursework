@@ -32,6 +32,14 @@ is a lower bound, because some records in the "normal" background may
 themselves be genuine anomalies the detectors correctly (but not credited
 for) flagging. Recall against the KNOWN injected anomalies is the more
 reliable of the two headline metrics for this reason.
+
+Baseline comparison (methodological rigour check): a trivial, non-learned
+"new supplier + top-2% amount" heuristic is scored on the same benchmark
+alongside the four learned detectors. The question this answers is whether
+Isolation Forest earns its place as an ML layer, or whether a one-line rule
+captures the same signal just as well -- a fair challenge for any project
+that adds a full unsupervised model on top of features an analyst could
+filter on directly. See `fit_new_supplier_amount_baseline` below.
 """
 from __future__ import annotations
 
@@ -56,6 +64,26 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger(__name__)
 
 INJECTION_TYPES = ["invoice_inflation", "ghost_vendor_burst", "round_number_kickback"]
+
+# Naive, non-learned baseline: "is this a new supplier's transaction, and if
+# so, how large is it relative to its category norm?" Ranks candidate records
+# by amount_zscore_category but ONLY among is_new_supplier==1 records (score
+# is floored to BASELINE_SENTINEL otherwise, so an established-supplier
+# transaction can never be flagged by this rule regardless of size) -- this is
+# exactly rule R3 from audit_validation.py, expressed as a continuous,
+# rankable score so it can be benchmarked on equal footing (same percentile
+# threshold, same PR-AUC/F1 metric) as the four learned detectors above,
+# rather than only compared as a binary flag-overlap count. A large finite
+# sentinel (not -inf) is used because average_precision_score requires finite
+# inputs; it is far below any real amount_zscore_category value.
+EVAL_METHOD_NAMES = METHOD_NAMES + ["new_supplier_amount_baseline"]
+BASELINE_SENTINEL = -1e6
+
+
+def fit_new_supplier_amount_baseline(X: pd.DataFrame) -> np.ndarray:
+    is_new = X["is_new_supplier"].astype(bool).values
+    score = np.where(is_new, X["amount_zscore_category"].values, BASELINE_SENTINEL)
+    return score
 
 
 def _inject_invoice_inflation(row: pd.Series, rng: np.random.RandomState) -> pd.Series:
@@ -168,15 +196,24 @@ def run_synthetic_evaluation(panel: pd.DataFrame | None = None) -> pd.DataFrame:
             X_eval_scaled,
         ),
         "autoencoder": fit_autoencoder(X_train_scaled, X_eval_scaled),
+        "new_supplier_amount_baseline": fit_new_supplier_amount_baseline(X_eval),
     }
 
     rows = []
     per_type_rows = []
-    for method in METHOD_NAMES:
+    for method in EVAL_METHOD_NAMES:
         s = scores[method]
         pct = config.AUTOENCODER_ANOMALY_PERCENTILE if method == "autoencoder" else config.ANOMALY_SCORE_PERCENTILE
         threshold = np.percentile(s, pct)
-        y_pred = (s >= threshold).astype(int)
+        if method == "new_supplier_amount_baseline" and threshold <= BASELINE_SENTINEL:
+            # Fewer than (100-pct)% of records clear the sentinel floor (i.e.
+            # fewer than that share of records are even new suppliers) --
+            # there is no way to select a top-(100-pct)% tail under this
+            # rule, so flag every record that clears the floor at all
+            # instead of degenerately flagging the whole eval set.
+            y_pred = (s > BASELINE_SENTINEL).astype(int)
+        else:
+            y_pred = (s >= threshold).astype(int)
 
         precision = precision_score(y_true, y_pred, zero_division=0)
         recall = recall_score(y_true, y_pred, zero_division=0)

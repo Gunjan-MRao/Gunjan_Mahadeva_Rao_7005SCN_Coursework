@@ -161,12 +161,13 @@ def fig_synthetic_precision_recall():
     synthetic-injection ground truth."""
     df = pd.read_csv(config.SYNTHETIC_RESULTS_PATH)
     label_map = {"isolation_forest": "Isolation\nForest", "local_outlier_factor": "Local Outlier\nFactor",
-                 "one_class_svm": "One-Class\nSVM", "autoencoder": "MLP\nAutoencoder"}
+                 "one_class_svm": "One-Class\nSVM", "autoencoder": "MLP\nAutoencoder",
+                 "new_supplier_amount_baseline": "New-Supplier +\nTop-2% Amount\n(baseline rule)"}
     metrics = ["precision", "recall", "f1"]
     x = np.arange(len(df))
     width = 0.25
 
-    fig, ax = plt.subplots(figsize=(9, 5.5))
+    fig, ax = plt.subplots(figsize=(10.5, 5.5))
     colors = ["#1f5fae", "#c1272d", "#2a9d8f"]
     for i, metric in enumerate(metrics):
         ax.bar(x + (i - 1) * width, df[metric], width, label=metric.upper(), color=colors[i])

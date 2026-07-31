@@ -116,6 +116,64 @@ def test_hypergeometric_extreme_overlap_gives_tiny_p_value(tmp_path, monkeypatch
     assert result["p_value"] < 0.01 or result["log_p_value"] < np.log(0.01)
 
 
+def test_hypergeometric_circularity_check_drops_r3_only(tmp_path, monkeypatch):
+    from src import config
+    # R3 (flag_new_supplier_large_covid) flags an extra record that no other
+    # rule flags and that IS ML-flagged; the other three rules flag a
+    # disjoint, larger set that overlaps ML more. Removing R3 should drop
+    # the overlap by exactly 1 and leave K (rule-flagged count) unaffected
+    # for the remaining rules.
+    val = pd.DataFrame({
+        "is_anomaly":                     [True, True, True, False, False, False, False, False, False, False],
+        "flag_direct_award_covid":        [True, False, False, True, False, False, False, False, False, False],
+        "flag_price_spike":               [False, True, False, False, True, False, False, False, False, False],
+        "flag_new_supplier_large_covid":  [False, False, True, False, False, False, False, False, False, False],
+        "flag_round_amount":              [False, False, False, False, False, True, False, False, False, False],
+    })
+    path = tmp_path / "validation_redflags.csv"
+    val.to_csv(path, index=False)
+    monkeypatch.setattr(config, "VALIDATION_PATH", path)
+
+    df = statistical_tests.hypergeometric_triangulation_circularity_check()
+    all_rules = df[df["scenario"] == "all_4_rules"].iloc[0]
+    excl_r3 = df[df["scenario"] == "excl_r3_new_supplier_rule"].iloc[0]
+
+    assert all_rules["observed_overlap"] == 3  # ML rows 0,1,2 all rule-flagged (by R1, R2, R3 respectively)
+    assert excl_r3["observed_overlap"] == 2    # only ML rows 0,1 still corroborated once R3 is dropped
+    assert excl_r3["n_ml_flagged"] == all_rules["n_ml_flagged"]  # ML flags themselves are untouched by which rules we compare against
+    assert "new_supplier_large_covid" not in excl_r3["rule_cols_used"]
+
+
+# ---------------------------------------------------------------------------
+# synthetic_evaluation.py -- new_supplier_amount_baseline
+# ---------------------------------------------------------------------------
+
+def test_new_supplier_amount_baseline_only_scores_new_suppliers():
+    X = pd.DataFrame({
+        "is_new_supplier": [1, 0, 1, 0],
+        "amount_zscore_category": [5.0, 5.0, -1.0, 99.0],
+    })
+    scores = synthetic_evaluation.fit_new_supplier_amount_baseline(X)
+    assert scores[0] == 5.0
+    assert scores[2] == -1.0
+    # Established suppliers (is_new_supplier == 0) are floored to the sentinel
+    # regardless of how extreme their amount is, so they can never be flagged.
+    assert scores[1] == synthetic_evaluation.BASELINE_SENTINEL
+    assert scores[3] == synthetic_evaluation.BASELINE_SENTINEL
+
+
+def test_new_supplier_amount_baseline_ranks_new_suppliers_above_established():
+    X = pd.DataFrame({
+        "is_new_supplier": [0, 1],
+        "amount_zscore_category": [1000.0, 0.1],  # established supplier has the bigger raw amount z-score
+    })
+    scores = synthetic_evaluation.fit_new_supplier_amount_baseline(X)
+    # Despite the established supplier's far larger amount, only the new
+    # supplier is even eligible to be flagged under this rule.
+    assert scores[1] > scores[0]
+    assert np.isfinite(scores).all()  # must stay finite for average_precision_score
+
+
 # ---------------------------------------------------------------------------
 # supplier_network.py
 # ---------------------------------------------------------------------------

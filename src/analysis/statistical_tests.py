@@ -17,6 +17,14 @@ of a Masters-level quantitative dissertation:
      distribution between period pairs (pre-COVID vs COVID, pre-COVID vs
      post-COVID, COVID vs post-COVID) — a non-parametric test appropriate
      for the heavily right-skewed anomaly-score distribution.
+  4. Triangulation circularity check: rule R3 (`flag_new_supplier_large_covid`)
+     and the Isolation Forest feature set share an input (`is_new_supplier`,
+     plus the closely related `supplier_txn_seq`), so part of the headline
+     59.6% ML/rule overlap could in principle be a mechanical consequence of
+     that shared feature rather than independent corroboration. The
+     hypergeometric triangulation test is therefore re-run on rule flags
+     R1+R2+R4 only (R3 excluded) to check whether the overlap survives
+     without the one rule that is not feature-independent of the ML model.
 
 All tests read from the CSV artefacts already produced by earlier pipeline
 stages, so this module must run AFTER data_engineering, eda, stl_shock, the
@@ -71,6 +79,71 @@ def hypergeometric_triangulation_test() -> dict:
         observed_overlap, expected_overlap_by_chance, N, K, n, log_p_value,
     )
     return result
+
+
+RULE_COLS_ALL = ["flag_direct_award_covid", "flag_price_spike", "flag_new_supplier_large_covid", "flag_round_amount"]
+# R3 (flag_new_supplier_large_covid) is excluded here because it and the
+# Isolation Forest feature set both key on the supplier's new/incumbent
+# status (is_new_supplier directly, and supplier_txn_seq — the SHAP-dominant
+# feature — indirectly, since a low sequence number is definitionally what
+# "new" means). R1 (direct-award/contract), R2 (price spike vs. historical
+# median) and R4 (round amount) do not use supplier tenure at all.
+RULE_COLS_EXCL_R3 = ["flag_direct_award_covid", "flag_price_spike", "flag_round_amount"]
+
+
+def _hypergeometric_test_for_rule_set(val: pd.DataFrame, rule_cols: list[str], scenario: str) -> dict:
+    """Exact hypergeometric overlap test between `is_anomaly` (ML) and the
+    union of the given rule-flag columns. Shared logic behind both the
+    headline (all-rules) test and the R3-excluded circularity-check variant."""
+    rule_flagged = val[rule_cols].any(axis=1)
+    N = len(val)
+    K = int(rule_flagged.sum())
+    n = int(val["is_anomaly"].sum())
+    observed_overlap = int((val["is_anomaly"] & rule_flagged).sum())
+
+    expected_overlap_by_chance = n * K / N
+    p_value = stats.hypergeom.sf(observed_overlap - 1, N, K, n)
+    log_p_value = stats.hypergeom.logsf(observed_overlap - 1, N, K, n)
+
+    result = {
+        "scenario": scenario, "rule_cols_used": "+".join(c.replace("flag_", "") for c in rule_cols),
+        "N_total": N, "K_rule_flagged": K, "n_ml_flagged": n,
+        "observed_overlap": observed_overlap,
+        "expected_overlap_under_chance": round(expected_overlap_by_chance, 1),
+        "overlap_rate_pct": round(observed_overlap / n * 100, 2) if n else np.nan,
+        "chance_overlap_rate_pct": round(expected_overlap_by_chance / n * 100, 2) if n else np.nan,
+        "p_value": p_value,
+        "log_p_value": log_p_value,
+        "p_value_lt": "1e-300" if p_value == 0.0 else str(p_value),
+    }
+    logger.info(
+        "[%s] rules=%s: observed overlap=%d (%.2f%% of ML flags) vs expected-by-chance=%.1f (%.2f%%) "
+        "(N=%d, K=%d, n=%d) -> log(p)=%.1f",
+        scenario, result["rule_cols_used"], observed_overlap, result["overlap_rate_pct"],
+        expected_overlap_by_chance, result["chance_overlap_rate_pct"], N, K, n, log_p_value,
+    )
+    return result
+
+
+def hypergeometric_triangulation_circularity_check() -> pd.DataFrame:
+    """Re-runs the ML/rule triangulation hypergeometric test twice: once with
+    all four audit red-flag rules (reproduces the headline 59.6% figure as a
+    sanity check) and once with R3 (`flag_new_supplier_large_covid`) removed,
+    since R3 shares the `is_new_supplier` input with the Isolation Forest
+    feature set and is therefore not a feature-independent corroboration
+    source. If the overlap rate survives (remains far above the chance rate
+    and remains highly significant) with R3 excluded, the triangulation
+    result is not simply an artefact of the shared feature."""
+    val = pd.read_csv(config.VALIDATION_PATH, usecols=["is_anomaly"] + RULE_COLS_ALL, low_memory=False)
+    for col in RULE_COLS_ALL:
+        val[col] = val[col].astype(bool)
+    val["is_anomaly"] = val["is_anomaly"].astype(bool)
+
+    rows = [
+        _hypergeometric_test_for_rule_set(val, RULE_COLS_ALL, "all_4_rules"),
+        _hypergeometric_test_for_rule_set(val, RULE_COLS_EXCL_R3, "excl_r3_new_supplier_rule"),
+    ]
+    return pd.DataFrame(rows)
 
 
 def _bootstrap_ci(values: np.ndarray, statistic_fn, n_bootstrap: int, random_state: int) -> tuple[float, float, float]:
@@ -162,6 +235,9 @@ def run_statistical_tests() -> pd.DataFrame:
     logger.info("Running hypergeometric triangulation significance test...")
     hyper_result = hypergeometric_triangulation_test()
 
+    logger.info("Running triangulation circularity check (all rules vs. R3-excluded)...")
+    circularity_df = hypergeometric_triangulation_circularity_check()
+
     logger.info("Running bootstrap confidence intervals (n=%d resamples each)...", config.N_BOOTSTRAP)
     boot_anomaly = bootstrap_anomaly_rate_by_period()
     boot_new_supplier = bootstrap_new_supplier_rate_by_period()
@@ -179,9 +255,13 @@ def run_statistical_tests() -> pd.DataFrame:
     bootstrap_all.to_csv(config.STATS_RESULTS_PATH, index=False)
     mwu.to_csv(str(config.STATS_RESULTS_PATH).replace(".csv", "_mannwhitney.csv"), index=False)
     pd.DataFrame([hyper_result]).to_csv(str(config.STATS_RESULTS_PATH).replace(".csv", "_hypergeometric.csv"), index=False)
-    logger.info("Saved statistical test results -> %s (+ _mannwhitney / _hypergeometric variants)", config.STATS_RESULTS_PATH)
+    circularity_df.to_csv(str(config.STATS_RESULTS_PATH).replace(".csv", "_hypergeometric_circularity_check.csv"), index=False)
+    logger.info(
+        "Saved statistical test results -> %s (+ _mannwhitney / _hypergeometric / _hypergeometric_circularity_check variants)",
+        config.STATS_RESULTS_PATH,
+    )
 
-    return bootstrap_all, mwu, hyper_result
+    return bootstrap_all, mwu, hyper_result, circularity_df
 
 
 if __name__ == "__main__":

@@ -11,3 +11,6 @@ one_class_svm,round_number_kickback,0.0308,130
 autoencoder,invoice_inflation,0.0368,136
 autoencoder,ghost_vendor_burst,0.0,134
 autoencoder,round_number_kickback,0.0231,130
+new_supplier_amount_baseline,invoice_inflation,0.0147,136
+new_supplier_amount_baseline,ghost_vendor_burst,1.0,134
+new_supplier_amount_baseline,round_number_kickback,0.0385,130

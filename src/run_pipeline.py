@@ -100,7 +100,7 @@ def main():
     logger.info("=" * 70)
     logger.info("PHASE 6C — Statistical Significance Testing")
     logger.info("=" * 70)
-    bootstrap_df, mwu_df, hyper_result = run_statistical_tests()
+    bootstrap_df, mwu_df, hyper_result, circularity_df = run_statistical_tests()
 
     logger.info("=" * 70)
     logger.info("PHASE 6D — Supplier-Buyer Network / Collusion-Indicator Analysis")
@@ -156,6 +156,8 @@ def main():
     if n_overlap is not None and n_ml:
         print(f"\nML/rule-based triangulation overlap: {n_overlap:,}/{n_ml:,} ({n_overlap/n_ml*100:.1f}% of ML flags corroborated by >=1 independent rule)")
         print(f"Hypergeometric significance test on this overlap: log(p)={hyper_result['log_p_value']:.1f} (p underflows float64 to 0; astronomically significant)")
+    print("\nTriangulation circularity check (R3 shares is_new_supplier with the ML feature set):")
+    print(circularity_df[["scenario", "rule_cols_used", "n_ml_flagged", "observed_overlap", "overlap_rate_pct", "log_p_value"]].to_string(index=False))
     print("\nMulti-method consensus (>=2/4 detectors agree):", f"{method_comparison_df['consensus_flag_majority'].sum():,}/{len(method_comparison_df):,} records")
     print("\nSynthetic-injection evaluation (precision/recall/F1 vs known injected anomalies):")
     print(synthetic_results_df.to_string(index=False))
