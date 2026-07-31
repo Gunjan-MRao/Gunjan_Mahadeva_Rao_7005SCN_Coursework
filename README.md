@@ -215,7 +215,7 @@ Notes:
 
 ## Data quality caveats and limitations
 
-- United Lincolnshire Hospitals data covers only Jan 2019 – Jul 2021 (incomplete disclosure availability), limiting post-COVID comparison for that trust specifically.
+- United Lincolnshire Hospitals and Bradford Teaching Hospitals both now cover the full Jan 2019 – Dec 2024 study window; an earlier iteration of the raw data had these trusts truncated (Lincolnshire to Jul 2021, Bradford to Feb 2022) due to a date-parsing defect in the manually-prepared raw files, since fixed by the Phase 1 rebuild — see `docs/dissertation_sections.md` for the full before/after comparison.
 - UK Contracts Finder `awards.csv`/`awards_suppliers.csv` sub-files (award-level supplier names) are sparse and were not incorporated into the anomaly-detection panel; only the `main.csv` buyer/tender-notice level is used.
 - The rule-based validation in Stage 6 is a literature-derived **proxy** for genuine audit ground truth, not a substitute for it — the overlap statistic indicates triangulated plausibility, not confirmed fraud/error.
 - Amount caps (>£50m trust spend, >£2bn contract notices treated as data artefacts) are a modelling judgement call; see `src/data_engineering/clean_merge.py` for the exact thresholds and rationale.
