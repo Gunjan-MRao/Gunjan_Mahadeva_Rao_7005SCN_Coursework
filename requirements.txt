@@ -21,3 +21,8 @@ plotly>=5.20
 # Tested with gdown 6.1.0. Not required if you place the four
 # data/raw/*_clean.csv files manually.
 gdown>=5.1
+# Needed for src/data_engineering/build_raw_from_drive.py to read Bradford's
+# Jan-19 return, which is published only as a macro-enabled Excel (.xlsm)
+# file with no CSV equivalent. Without this, that one month (101 rows) is
+# silently skipped with a warning rather than failing loudly.
+openpyxl>=3.1
