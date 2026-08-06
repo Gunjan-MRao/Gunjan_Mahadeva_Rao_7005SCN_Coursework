@@ -28,7 +28,14 @@ Star schema:
                             with all rule flags, anomaly flag/score, and the
                             supplier's composite risk tier already joined in
                             -- a single wide table a BI tool can slice by any
-                            dimension without further joins.
+                            dimension without further joins. Also includes
+                            three derived fields for advanced BI visuals
+                            (decomposition trees, per-period anomaly-score
+                            distributions, Key Influencers): rule_flag_severity
+                            (binned rule_flag_count), anomaly_score_zscore
+                            (ml_anomaly_score standardised within its period),
+                            and spend_pctile_in_category (amount's percentile
+                            rank within its category).
   dim_supplier.csv        - one row per scored supplier: risk score/tier,
                             hub/community membership, transaction volume.
   dim_category.csv        - one row per spend category: totals, anomaly
@@ -89,6 +96,19 @@ def build_fact_transactions() -> pd.DataFrame:
     fact["period"] = fact["period"].map({
         "pre_covid": "Pre-COVID", "covid": "COVID", "post_covid": "Post-COVID",
     }).fillna(fact["period"])
+
+    # Derived fields for BI-tool visuals that need more than the raw flags/score
+    # (decomposition trees, per-period score distributions, Key Influencers):
+    fact["rule_flag_severity"] = pd.cut(
+        fact["rule_flag_count"], bins=[-1, 0, 1, 2, 4],
+        labels=["None", "Single", "Double", "Triple+"],
+    )
+    fact["anomaly_score_zscore"] = fact.groupby("period")["ml_anomaly_score"].transform(
+        lambda x: (x - x.mean()) / x.std()
+    )
+    fact["spend_pctile_in_category"] = fact.groupby("category")["amount"].transform(
+        lambda x: x.rank(pct=True).mul(100).round(1)
+    )
 
     logger.info("Built fact_transactions: %d rows x %d columns", len(fact), len(fact.columns))
     return fact

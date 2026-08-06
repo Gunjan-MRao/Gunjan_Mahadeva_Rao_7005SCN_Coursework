@@ -61,6 +61,9 @@ the fact table):
 | `supplier_is_network_hub` | bool | multi-trust hub supplier (Phase 6D network analysis) |
 | `composite_risk_score` | number 0-100 | Phase 7A composite risk score |
 | `risk_tier` | text | `Low` / `Medium` / `High` / `Critical` / `Not scored` |
+| `rule_flag_severity` | text | `rule_flag_count` binned to `None` / `Single` / `Double` / `Triple+` -- feeds decomposition-tree and Key Influencers visuals |
+| `anomaly_score_zscore` | number | `ml_anomaly_score` standardised (z-score) within its own `period` -- lets a BI tool compare anomaly severity across periods on a common scale; blank wherever `ml_anomaly_score` is blank |
+| `spend_pctile_in_category` | number 0-100 | `amount`'s percentile rank within its `category` -- flags unusually large/small spend relative to peers in the same category |
 
 ### `dim_supplier.csv`
 `supplier`, `total_transactions`, `total_spend`, `mean_transaction_amount`,
