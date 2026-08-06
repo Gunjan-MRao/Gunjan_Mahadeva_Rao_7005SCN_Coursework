@@ -1,36 +1,37 @@
 # Data directory guide
 
-This folder is intentionally mostly empty in git. It documents where the
-data lives, how it is structured, and how to regenerate it — see
-`.gitignore` at the repo root for the exact list of excluded paths and the
-reasoning behind each exclusion.
+This directory is intentionally sparse in version control. It records the
+data locations, structure, and regeneration procedures; see `.gitignore` at
+the repository root for the complete set of excluded paths and the rationale
+for each exclusion.
 
 ## Why the raw files aren't committed
 
-The underlying sources are large, third-party FOI (Freedom of Information)
+The underlying sources are large third-party FOI (Freedom of Information)
 and Contracts Finder exports (~106MB combined for `data/raw/`, and up to
-~500MB of original per-month files when staged from Google Drive) — not
-code, and fully regenerable. Keeping them out of git keeps the repository
-light and avoids re-distributing third-party data dumps. A handful of large
-*derived* outputs (the full analytical panel, per-record anomaly scores,
-per-record validation flags, the per-record method-comparison score dump,
-and the BI fact table) are excluded for the same reason — they sit close to
-GitHub's 100MB per-file limit and provide no review value as raw dumps. All
-small summary/aggregate CSVs that directly support the report's figures and
-tables **are** committed.
+~500MB of original per-month files when staged from Google Drive). They are
+not code and are fully regenerable. Their exclusion from version control
+prevents redistribution of third-party source dumps and maintains a focused
+repository. Several large *derived* outputs, including the full analytical
+panel, per-record anomaly scores, per-record validation flags, the per-record
+method-comparison score dump, and the BI fact table, are excluded on the same
+basis: they approach GitHub's 100MB per-file limit and do not provide
+additional review value as raw record-level dumps. All small summary and
+aggregate CSVs that directly support report figures and tables **are**
+committed.
 
 ## Expected folder structure
 
 ```
 data/
-├── raw/                        # gitignored — 4 consolidated per-source CSVs
+├── raw/                        # gitignored: 4 consolidated per-source CSVs
 │   ├── bradford_clean.csv
 │   ├── lincolnshire_clean.csv
 │   ├── nhs_england_clean.csv
 │   └── contracts_clean.csv
-├── _raw_staging/                # gitignored — ~500MB of original per-month
+├── _raw_staging/                # gitignored: ~500MB of original per-month
 │                                 # FOI/Contracts Finder files from Google Drive
-├── raw_ground_truth_backup/     # gitignored — local safety copy of data/raw/
+├── raw_ground_truth_backup/     # gitignored: local safety copy of data/raw/
 └── processed/                   # small summary CSVs committed; large
     │                             # per-record dumps gitignored (see above)
     ├── master_procurement_panel.csv        # gitignored (~79MB)
@@ -68,9 +69,9 @@ data/
 
 ## Regenerating the raw data
 
-The four `data/raw/*_clean.csv` files are built from a public Google Drive
-archive of the original FOI and Contracts Finder exports. To rebuild them
-from scratch:
+The four `data/raw/*_clean.csv` files are reconstructed from a public Google
+Drive archive of the original FOI and Contracts Finder exports. To regenerate
+them from first principles:
 
 ```bash
 python -m src.data_engineering.build_raw_from_drive
@@ -79,17 +80,17 @@ python -m src.data_engineering.build_raw_from_drive
 Add `--force` to re-download and re-consolidate even if the raw files
 already exist locally. This step downloads and consolidates:
 
-- **Bradford Teaching Hospitals** — 13,925 rows from 72 source files
-- **United Lincolnshire Hospitals** — 8,280 rows from 72 source files
-- **NHS England** — 271,598 rows from 72 source files
-- **Contracts Finder** — 81,482 rows, 45 columns (health-sector filtered
+- **Bradford Teaching Hospitals**: 13,925 rows from 72 source files
+- **United Lincolnshire Hospitals**: 8,280 rows from 72 source files
+- **NHS England**: 271,598 rows from 72 source files
+- **Contracts Finder**: 81,482 rows, 45 columns (health-sector filtered
   from the national `awards.csv` / `awards_suppliers.csv` / `main.csv`
   bulk exports)
 
-If you'd rather not use Google Drive, you can place the four
-`data/raw/*_clean.csv` files manually in `data/raw/` (matching the column
-structure the loaders in `src/data_engineering/` expect) and skip this step
-— `gdown` is only required for the automated download path.
+As an alternative to Google Drive, the four `data/raw/*_clean.csv` files
+may be placed manually in `data/raw/`, provided that they match the column
+structure expected by the loaders in `src/data_engineering/`; `gdown` is
+required only for the automated download pathway.
 
 ## Regenerating the processed data
 
@@ -100,15 +101,15 @@ the full pipeline:
 python -m src.run_pipeline
 ```
 
-This merges and cleans the four raw sources into the analytical panel
-(**326,991 rows** after cleaning, from 349,584 raw merged rows — 93.5%
-retained), then runs the EDA/shock analysis, anomaly detection (Isolation
-Forest + SHAP), rule-based validation, multi-method comparison, statistical
-significance testing, network analysis, composite risk scoring, category
-deep-dive, robustness checks, BI export, and interactive dashboard stages in
-sequence, writing all outputs into `data/processed/`.
+This command merges and cleans the four raw sources into the analytical
+panel (**326,991 rows** after cleaning, from 349,584 raw merged rows; 93.5%
+retained). It then executes, in sequence, EDA and shock analysis, anomaly
+detection (Isolation Forest + SHAP), rule-based validation, multi-method
+comparison, statistical-significance testing, network analysis, composite
+risk scoring, category-level analysis, robustness checks, BI export, and
+interactive dashboard generation, writing outputs to `data/processed/`.
 
-To regenerate the report figures afterwards:
+To regenerate the associated report figures:
 
 ```bash
 python -m src.analysis.make_figures

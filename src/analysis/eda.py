@@ -1,12 +1,9 @@
-"""
-Phase 3 — Exploratory Data Analysis.
+"""Phase 3: exploratory data analysis.
 
-Produces:
-  * data quality report (row counts, null rates, date coverage per source)
-  * spend distribution statistics by period
-  * new-supplier rate by month (reproduces the prior finding that new-supplier
-    onboarding spikes during COVID — a literature-supported red flag for
-    emergency/direct-award procurement, Transparency International UK, 2024)
+Constructs source-level data-quality diagnostics, period-specific expenditure
+distributions, and monthly new-supplier entry rates. These descriptive outputs
+characterise coverage, missingness, distributional heterogeneity, and changes
+in procurement participation before formal modelling.
 """
 from __future__ import annotations
 
@@ -21,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_panel() -> pd.DataFrame:
+    """Load the master panel and standardise analytical data types."""
     panel = pd.read_csv(config.MASTER_PANEL_PATH, low_memory=False)
     panel["date"] = pd.to_datetime(panel["date"], errors="coerce", format="mixed")
     panel["is_new_supplier"] = panel["is_new_supplier"].astype(bool)
@@ -28,6 +26,7 @@ def load_panel() -> pd.DataFrame:
 
 
 def data_quality_report(panel: pd.DataFrame) -> pd.DataFrame:
+    """Summarise source-specific coverage, missingness, and expenditure scale."""
     rows = []
     for source, grp in panel.groupby("source"):
         rows.append({
@@ -46,6 +45,7 @@ def data_quality_report(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def spend_distribution_by_period(panel: pd.DataFrame) -> pd.DataFrame:
+    """Describe trust-spend distributions across the study-period regimes."""
     trust = panel[panel["record_type"] == "trust_spend"]
     dist = trust.groupby("period")["amount"].describe(percentiles=[0.5, 0.9, 0.99])
     logger.info("Spend distribution (trust_spend) by period:\n%s", dist.to_string())
@@ -53,6 +53,7 @@ def spend_distribution_by_period(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def new_supplier_rate_by_month(panel: pd.DataFrame) -> pd.DataFrame:
+    """Estimate the monthly share of trust-spend transactions from new suppliers."""
     trust = panel[panel["record_type"] == "trust_spend"].copy()
     monthly = trust.groupby("year_month").agg(
         n_transactions=("is_new_supplier", "size"),
@@ -61,7 +62,7 @@ def new_supplier_rate_by_month(panel: pd.DataFrame) -> pd.DataFrame:
     monthly["new_supplier_rate_pct"] = monthly["n_new_supplier_txns"] / monthly["n_transactions"] * 100
     monthly = monthly.reset_index().sort_values("year_month")
 
-    # attach period label for easy grouping
+    # Map each monthly estimate to its predefined analytical period.
     period_lookup = trust.drop_duplicates("year_month").set_index("year_month")["period"]
     monthly["period"] = monthly["year_month"].map(period_lookup)
 

@@ -1,50 +1,9 @@
-"""
-Phase 7D — BI-ready data export.
+"""Phase 7D: business-intelligence export.
 
-A genuine .pbix (Power BI) file cannot be reliably hand-generated: it is a
-proprietary, closed binary format with no supported Python (or open-source)
-library capable of writing one from scratch. A .twbx (Tableau) file is
-theoretically constructible (it is a zipped XML "twb" plus extract) but doing
-so by hand, without Tableau itself to validate the result, is unverifiable
-and highly likely to produce a corrupt file a marker cannot open. Fabricating
-either and presenting it as a working deliverable would be misleading.
-
-The practical, honest alternative adopted here -- standard practice when a BI
-desktop tool isn't available in the build environment -- is:
-  1. THIS MODULE: a small set of clean, denormalised, BI-import-ready CSVs in
-     a star-schema layout (one fact table + four dimension/summary tables),
-     so a marker can open Tableau/Power BI Desktop, connect to these CSVs,
-     and build the dashboard themselves in a few minutes.
-  2. dashboard.py (Phase 7E): an interactive Plotly HTML dashboard built
-     directly from these same CSVs, viewable in any browser with no BI
-     software installed -- a working, inspectable equivalent deliverable.
-  3. docs/bi_dashboard_guide.md: a short field-by-field guide mapping these
-     CSVs to specific Tableau/Power BI chart types, so the star schema is
-     immediately actionable in either tool.
-
-Star schema:
-  fact_transactions.csv  - one row per trust_spend transaction (the same
-                            257,095 records scored throughout Phases 4-7),
-                            with all rule flags, anomaly flag/score, and the
-                            supplier's composite risk tier already joined in
-                            -- a single wide table a BI tool can slice by any
-                            dimension without further joins. Also includes
-                            three derived fields for advanced BI visuals
-                            (decomposition trees, per-period anomaly-score
-                            distributions, Key Influencers): rule_flag_severity
-                            (binned rule_flag_count), anomaly_score_zscore
-                            (ml_anomaly_score standardised within its period),
-                            and spend_pctile_in_category (amount's percentile
-                            rank within its category).
-  dim_supplier.csv        - one row per scored supplier: risk score/tier,
-                            hub/community membership, transaction volume.
-  dim_category.csv        - one row per spend category: totals, anomaly
-                            rate, HHI, averaged across all periods.
-  dim_period.csv          - one row per pre/covid/post period: the Phase 3/4
-                            headline numbers (STL deviation, anomaly rate).
-  dim_month.csv           - one row per calendar month: monthly spend, HHI,
-                            new-supplier rate, anomaly rate (the time series
-                            that drives the dashboard's trend-line panels).
+Produces CSV tables at transaction, supplier, category, period, and month
+grain. The outputs implement a pragmatic star-schema design: a denormalised
+fact table supports interactive filtering, while dimensions provide stable
+aggregation grains for spend, concentration, anomaly, and risk analysis.
 """
 from __future__ import annotations
 
@@ -60,10 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 def build_fact_transactions() -> pd.DataFrame:
-    """One wide, denormalised row per trust_spend transaction: raw fields +
-    every rule flag (Phase 5) + ML anomaly flag/score (Phase 4) + the
-    transacting supplier's composite risk tier (Phase 7A) -- ready to drop
-    straight into a BI tool's data model with zero further joins."""
+    """Construct a transaction-grain fact table for the BI semantic layer.
+
+    Joins audit-rule indicators, Isolation Forest outputs, and supplier-level
+    composite risk attributes to enable multidimensional descriptive analysis.
+    """
     fact = pd.read_csv(
         config.VALIDATION_PATH, low_memory=False,
         usecols=[
@@ -97,8 +57,7 @@ def build_fact_transactions() -> pd.DataFrame:
         "pre_covid": "Pre-COVID", "covid": "COVID", "post_covid": "Post-COVID",
     }).fillna(fact["period"])
 
-    # Derived fields for BI-tool visuals that need more than the raw flags/score
-    # (decomposition trees, per-period score distributions, Key Influencers):
+    # Derived fields support decomposition, distributional, and attribution-oriented visuals.
     fact["rule_flag_severity"] = pd.cut(
         fact["rule_flag_count"], bins=[-1, 0, 1, 2, 4],
         labels=["None", "Single", "Double", "Triple+"],
@@ -115,16 +74,10 @@ def build_fact_transactions() -> pd.DataFrame:
 
 
 def build_dim_supplier() -> pd.DataFrame:
-    """One row per scored supplier: composite risk score/tier (Phase 7A),
-    network hub/community membership (Phase 6D), transaction volume."""
+    """Construct the supplier dimension with risk, network, and volume attributes."""
     risk = pd.read_csv(config.SUPPLIER_RISK_SCORE_PATH)
     try:
-        # NOTE: only suppliers that co-occur with >=1 other supplier under a
-        # shared buyer (Phase 6D bipartite projection) appear as nodes here.
-        # A NaN community_id/community_size for a given supplier is therefore
-        # the *expected* outcome for a supplier with no shared-buyer links
-        # (an isolated node), not a join-key bug -- spot-checked and confirmed
-        # 799/3,456 risk-scored suppliers have a community assignment.
+        # Community attributes exist only for suppliers linked in the buyer-projection network.
         community = pd.read_csv(config.NETWORK_COMMUNITY_PATH, usecols=["node", "community_id", "community_size"])
         community = community.rename(columns={"node": "supplier"})
         risk = risk.merge(community, on="supplier", how="left")
@@ -147,10 +100,11 @@ def build_dim_supplier() -> pd.DataFrame:
 
 
 def build_dim_category() -> pd.DataFrame:
-    """One row per spend category, aggregated across all three periods --
-    totals, average anomaly/new-supplier rate, and average HHI, for
-    category-level slicing in the BI tool (backs the same numbers as
-    category_deep_dive.csv, Phase 7B, just pre-rolled to category grain)."""
+    """Construct a category dimension using transaction-weighted period metrics.
+
+    Weighting by transaction counts preserves the contribution of each
+    category-period cell when summarising anomaly, entry, and HHI measures.
+    """
     deep_dive = pd.read_csv(config.CATEGORY_DEEP_DIVE_PATH)
     grand_total = deep_dive["total_spend"].sum()
 
@@ -183,9 +137,7 @@ def build_dim_category() -> pd.DataFrame:
 
 
 def build_dim_period() -> pd.DataFrame:
-    """One row per pre/covid/post period: the headline STL shock (Phase 3)
-    and overall anomaly-rate numbers (Phase 4), for the dashboard's top-level
-    KPI cards and period filter."""
+    """Construct the period dimension with STL deviations and anomaly rates."""
     stl = pd.read_csv(config.STL_PATH)
     try:
         scores = pd.read_csv(config.ANOMALY_SCORES_PATH, usecols=["period", "is_anomaly"])
@@ -205,9 +157,7 @@ def build_dim_period() -> pd.DataFrame:
 
 
 def build_dim_month() -> pd.DataFrame:
-    """One row per calendar month: total spend, transaction count, HHI
-    (Phase 3), new-supplier rate, and ML anomaly rate -- the time series
-    behind the dashboard's trend-line panels."""
+    """Construct the monthly time-series dimension for longitudinal BI analysis."""
     panel = pd.read_csv(
         config.MASTER_PANEL_PATH, low_memory=False,
         usecols=["record_id", "record_type", "year_month", "period", "amount", "is_new_supplier"],

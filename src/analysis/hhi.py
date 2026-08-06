@@ -1,16 +1,9 @@
-"""
-Phase 3 — Exploratory Spend Intelligence: supplier concentration (HHI).
+"""Phase 3: supplier-concentration analysis using the HHI.
 
-Herfindahl-Hirschman Index (Hirschman, 1945) computed monthly and by period,
-per source, on trust_spend records only (contract notices are buyer-side and
-have no consistent awarded-supplier field in this dataset).
-
-HHI = sum(market_share_i^2) * 10,000, where market_share_i is supplier i's
-share of total spend within the group. Conventionally:
-  < 1,500            -> competitive / unconcentrated market
-  1,500 - 2,500       -> moderately concentrated
-  > 2,500             -> highly concentrated (potential governance/collusion risk,
-                          per Serafino et al., 2024)
+Computes the Herfindahl-Hirschman Index monthly, by period, and by source for
+trust-spend records with identified suppliers. Within each analytical group,
+HHI = 10,000 × Σᵢsᵢ², where sᵢ is supplier i's expenditure share; source-level
+estimates avoid conflating heterogeneous trust populations.
 """
 from __future__ import annotations
 
@@ -25,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def _hhi(group: pd.DataFrame) -> float:
+    """Calculate supplier expenditure concentration for a single analytical group."""
     total = group["amount"].sum()
     if total <= 0:
         return float("nan")
@@ -33,6 +27,7 @@ def _hhi(group: pd.DataFrame) -> float:
 
 
 def compute_hhi(panel: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Estimate monthly and period-source HHI series from trust-spend records."""
     if panel is None:
         panel = pd.read_csv(config.MASTER_PANEL_PATH, low_memory=False)
     trust = panel[panel["record_type"] == "trust_spend"].dropna(subset=["supplier_norm"])
@@ -58,7 +53,7 @@ def compute_hhi(panel: pd.DataFrame | None = None) -> pd.DataFrame:
     logger.info("Saved monthly HHI series -> %s", config.HHI_PATH)
     logger.info("HHI by period/source:\n%s", by_period_source.to_string(index=False))
 
-    # Top-10 suppliers by total spend (concentration snapshot)
+    # Report a descriptive supplier-spend concentration snapshot.
     top_suppliers = (
         trust.groupby("supplier_norm")["amount"].sum().sort_values(ascending=False).head(10)
     )

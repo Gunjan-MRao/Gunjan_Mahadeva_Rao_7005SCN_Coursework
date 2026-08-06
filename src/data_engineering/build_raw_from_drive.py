@@ -1,21 +1,17 @@
-"""
-Phase 1 — Data Acquisition & Consolidation.
+"""Phase 1: raw-data acquisition and source consolidation.
 
-Fetches the original raw FOI/Contracts Finder archive from the project's public
-Google Drive folder and consolidates it into the four files that Phase 2
-(`loaders.py`) consumes:
+Acquires the public FOI and Contracts Finder archive and consolidates it into
+the four source-specific inputs consumed by Phase 2 (`loaders.py`):
 
     data/raw/bradford_clean.csv
     data/raw/lincolnshire_clean.csv
     data/raw/nhs_england_clean.csv
     data/raw/contracts_clean.csv
 
-Despite the historical `_clean` suffix these outputs are *consolidated raw*, not
-analytically clean: this module only concatenates the per-month source files and
-standardises column names. Every substantive cleaning decision (dropna, mixed
-date parsing, amount coercion, supplier normalisation) deliberately stays in
-`loaders.py` so the separation of concerns documented for Phases 2-7 is
-preserved — see docs/dissertation_sections.md "Phase 1".
+The historical `_clean` suffix denotes consolidated raw data, not analytical
+cleaning. This module preserves source lineage while harmonising headers;
+missing-value treatment, mixed-format date parsing, monetary coercion, and
+supplier normalisation are intentionally deferred to `loaders.py`.
 
 Run standalone with:
     python -m src.data_engineering.build_raw_from_drive [--force]
@@ -37,9 +33,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Drive layout
+# Source-archive structure
 # ---------------------------------------------------------------------------
-# Top-level folder name in the Drive archive -> logical source key.
+# Maps each Drive top-level directory to its internal source identifier.
 SOURCE_FOLDERS = {
     "NHS Bradford teaching hospitals": "bradford",
     "NHS England": "nhs_england",
@@ -47,40 +43,32 @@ SOURCE_FOLDERS = {
     "NHS UK Contracts": "contracts",
 }
 
-# The Contracts Finder bulk export ships 13 CSVs per year; only these three
-# carry fields used downstream. The rest (parties, *_documents, planning_*,
-# tender_*, relatedProcesses) are 10-30MB each and unused, so they are never
-# downloaded.
+# Only these Contracts Finder annual-export files contain fields required by
+# downstream analyses; excluding ancillary files reduces acquisition volume.
 CONTRACTS_WANTED_FILES = {"main.csv", "awards.csv", "awards_suppliers.csv"}
 
 SPREADSHEET_SUFFIXES = {".xls", ".xlsx", ".xlsm"}
 
-# Anonymous access to a public Drive folder is rate-limited. Downloading the
-# ~500MB archive flat-out reliably trips Google's abuse threshold partway
-# through, after which every subsequent request fails for several minutes, so
-# requests are paced and retried with a long backoff rather than hammered.
+# Public Drive access is rate-limited; pacing and back-off mitigate incomplete
+# acquisition of the approximately 500 MB archival corpus.
 DOWNLOAD_MAX_ATTEMPTS = 4
 DOWNLOAD_RETRY_BACKOFF_S = 60
 DOWNLOAD_PACING_S = 0.5
 
 # ---------------------------------------------------------------------------
-# Health/NHS relevance filter for the Contracts Finder national bulk export
+# Health-sector relevance filter for the national Contracts Finder export
 # ---------------------------------------------------------------------------
-# The Drive archive holds the *full UK national* Contracts Finder export
-# (~50,000 notices per year across every public-sector buyer), whereas this
-# study covers the health sector only. This keyword filter reconstructs the
-# health subset. It is a best-effort reconstruction, not a byte-exact replay of
-# whatever bespoke search produced the original extract — see the limitation
-# recorded in docs/dissertation_sections.md "Phase 1".
+# The archive contains the full UK Contracts Finder export, whereas the study
+# population is health-sector procurement. Keyword matching reconstructs an
+# approximate health-sector subset and is not equivalent to the original query.
 NHS_KEYWORDS = (
     r"nhs|health|hospital|clinical|ambulance|blood|commissioning support|"
     r"clinical commissioning|integrated care board|hospice|primary care|care trust"
 )
 _NHS_RE = re.compile(NHS_KEYWORDS, re.IGNORECASE)
 
-# Text columns searched per Contracts Finder file. main.csv exposes buyer and
-# tender text; awards.csv only a free-text description; awards_suppliers.csv
-# only the awarded supplier name.
+# Searchable fields differ by Contracts Finder file: buyer/tender text in
+# main.csv, descriptions in awards.csv, and supplier names in awards_suppliers.csv.
 CONTRACTS_TEXT_COLUMNS = {
     "main.csv": ["buyer_name", "tender_title", "tender_description"],
     "awards.csv": ["description"],
@@ -88,19 +76,16 @@ CONTRACTS_TEXT_COLUMNS = {
 }
 
 # ---------------------------------------------------------------------------
-# Raw -> intermediate column mapping
+# Raw-to-intermediate schema mapping
 # ---------------------------------------------------------------------------
-# Header spellings drift across years and sources ("AP Amount" vs
-# "AP Amount (£)", "Transaction Number" vs "Transaction number", a trailing
-# space in Lincolnshire's "Supplier "), so headers are normalised to lowercase
-# alphanumeric-and-space tokens before lookup.
+# Header spellings vary by year and publisher; token normalisation supports
+# deterministic mapping to the intermediate schema.
 SPEND_COLUMN_ALIASES = {
     "department_family": ["department family", "department of health", "department"],
     "entity": ["entity"],
     "date": ["date", "date of payment", "payment date", "date paid", "transaction date"],
-    # Lincolnshire renames its spend-category column almost every year
-    # ("Expenditure type" -> "Nature of spend" -> "9AN - Level 9 Account Name");
-    # NHS England appends " for Report" from Nov-2024 onwards.
+    # Lincolnshire changes the expenditure-category header across years; NHS
+    # England adds the suffix " for Report" from November 2024.
     "expense_type": [
         "expense type", "expense type for report", "expenditure type",
         "nature of spend", "9an level 9 account name",
@@ -114,12 +99,8 @@ SPEND_COLUMN_ALIASES = {
     "month": ["month"],
 }
 
-# Minimum number of cells in a row that must look like known column headers for
-# that row to be treated as the header. A threshold (rather than looking for one
-# specific token) is required because United Lincolnshire's headerless files
-# begin with the literal value "Department Of Health" in column 1 — identical to
-# the header token — so single-token tests cannot tell header from data there.
-# A real header row matches 7-10 aliases; a data row matches at most 1.
+# Minimum alias matches required to identify a header row. A threshold avoids
+# classifying Lincolnshire data rows containing "Department Of Health" as headers.
 HEADER_ALIAS_MIN_HITS = 3
 
 BRADFORD_COLUMNS = [
@@ -129,8 +110,7 @@ BRADFORD_COLUMNS = [
 ]
 NHS_ENGLAND_COLUMNS = BRADFORD_COLUMNS
 
-# United Lincolnshire publishes two shapes of the same 8 positional fields:
-# some months carry a header row, others are headerless (first row is data).
+# Lincolnshire publishes the same eight fields with and without a header row.
 LINCOLNSHIRE_POSITIONAL_COLUMNS = [
     "department_family", "entity", "date", "expense_type",
     "expense_area", "supplier", "amount", "month",
@@ -145,7 +125,7 @@ LINCOLNSHIRE_COLUMNS = [
 # Helpers
 # ---------------------------------------------------------------------------
 def _normalise_header(name: object) -> str:
-    """'AP Amount (£)' -> 'ap amount';  'Supplier ' -> 'supplier'."""
+    """Canonicalise a raw header for case-insensitive alias matching."""
     text = re.sub(r"[^0-9a-z]+", " ", str(name).lower())
     return re.sub(r"\s+", " ", text).strip()
 
@@ -156,7 +136,7 @@ _ALIAS_LOOKUP = {
 
 
 def _build_rename_map(columns) -> dict:
-    """Map a raw file's actual columns onto canonical intermediate names."""
+    """Map recognised raw headers to canonical intermediate-schema fields."""
     rename = {}
     for col in columns:
         canon = _ALIAS_LOOKUP.get(_normalise_header(col))
@@ -166,7 +146,7 @@ def _build_rename_map(columns) -> dict:
 
 
 def _header_alias_hits(cells) -> int:
-    """How many cells in this row look like known spend-file column headers?"""
+    """Count cells matching recognised spend-file header aliases."""
     return sum(1 for c in cells if _normalise_header(c) in _ALIAS_LOOKUP)
 
 
@@ -175,17 +155,18 @@ def _looks_like_header(cells) -> bool:
 
 
 def _sniff_delimiter(path: Path) -> str:
-    """Lincolnshire's May-19 month is published as tab-separated data under a
-    `.csv` extension, so the extension cannot be trusted to imply commas."""
+    """Infer the delimiter because the May 2019 Lincolnshire CSV is tab-delimited."""
     with open(path, encoding="latin1") as fh:
         head = "".join(next(fh, "") for _ in range(5))
     return "\t" if head.count("\t") > head.count(",") else ","
 
 
 def _read_csv_any_encoding(path: Path, **kwargs) -> pd.DataFrame:
-    """FOI exports are published with inconsistent encodings (UTF-8 in most
-    years, Windows/Latin-1 in others). Try each in turn rather than losing a
-    whole month to a UnicodeDecodeError."""
+    """Read FOI exports under their observed, heterogeneous character encodings.
+
+    Sequential decoding preserves monthly coverage when UTF-8 and legacy
+    Windows/Latin-1 encodings coexist within a source archive.
+    """
     kwargs.setdefault("sep", _sniff_delimiter(path))
     for encoding in ("utf-8", "utf-8-sig", "cp1252", "latin1"):
         try:
@@ -196,11 +177,10 @@ def _read_csv_any_encoding(path: Path, **kwargs) -> pd.DataFrame:
 
 
 def _find_header_row(probe: pd.DataFrame) -> int:
-    """Locate the real header row within the first few rows of a spend file.
+    """Locate the schema header within an initial file probe.
 
-    2024 Bradford exports prepend a report-title row
-    ("A3131. Expenditure Over Threshold Report (AP),Unnamed: 1,...") above the
-    genuine header, so the header cannot be assumed to be row 0.
+    Some 2024 Bradford exports prepend a report-title row, so row zero cannot
+    be assumed to contain field names.
     """
     for idx in range(len(probe)):
         if _looks_like_header(probe.iloc[idx].tolist()):
@@ -209,11 +189,11 @@ def _find_header_row(probe: pd.DataFrame) -> int:
 
 
 def _read_spend_file(path: Path) -> pd.DataFrame | None:
-    """Read one monthly spend export (CSV or Excel), skipping any title row."""
+    """Read a monthly CSV or workbook after identifying its schema header."""
     try:
         if path.suffix.lower() in SPREADSHEET_SUFFIXES:
-            # openpyxl handles .xlsx/.xlsm (Bradford's Jan-19 is published only as
-            # .xlsm); legacy .xls needs pandas' own engine selection (xlrd).
+            # Bradford January 2019 is available only as .xlsm; legacy .xls files
+            # require pandas to select the compatible reader engine.
             engine = "openpyxl" if path.suffix.lower() in {".xlsx", ".xlsm"} else None
             probe = pd.read_excel(path, header=None, nrows=6, dtype=str, engine=engine)
             return pd.read_excel(path, header=_find_header_row(probe), dtype=str, engine=engine)
@@ -225,7 +205,7 @@ def _read_spend_file(path: Path) -> pd.DataFrame | None:
 
 
 def _iter_source_files(staging_dir: Path, folder_name: str):
-    """Yield readable source files for one Drive top-level folder, sorted."""
+    """Yield non-hidden source files in deterministic path order."""
     root = Path(staging_dir) / folder_name
     if not root.is_dir():
         logger.warning("Staging folder missing: %s", root)
@@ -239,12 +219,11 @@ def _iter_source_files(staging_dir: Path, folder_name: str):
 # Download
 # ---------------------------------------------------------------------------
 def _select_drive_files(entries) -> list:
-    """Pick the subset of the Drive archive actually needed.
+    """Select non-duplicated source files required for consolidation.
 
-    * spend sources — prefer the `.csv` publication of each month and skip its
-      co-located Excel duplicate; fall back to the Excel file only where no CSV
-      exists (Bradford's `Jan-19.xlsm` is published without a CSV counterpart).
-    * Contracts Finder — keep only main/awards/awards_suppliers.
+    For spend data, CSV is preferred to a co-located workbook, except where
+    only a workbook exists. For Contracts Finder, the retained files provide
+    notice, award, and supplier fields used in subsequent analyses.
     """
     by_month: dict[tuple, list] = {}
     selected = []
@@ -262,7 +241,7 @@ def _select_drive_files(entries) -> list:
 
         if suffix != ".csv" and suffix not in SPREADSHEET_SUFFIXES:
             continue
-        # group the .csv and its .xls/.xlsx twin under one key (dir + stem)
+        # Group co-located CSV/workbook representations of one reporting month.
         by_month.setdefault((parts[:-1], Path(name).stem.lower()), []).append(entry)
 
     for candidates in by_month.values():
@@ -273,14 +252,13 @@ def _select_drive_files(entries) -> list:
 
 
 def download_drive_folder(dest_dir=None) -> Path:
-    """Download the needed subset of the Drive raw archive into `dest_dir`.
+    """Acquire the selected public archive subset into ``dest_dir``.
 
-    The folder is a public "anyone with the link" share, so no credentials or
-    API key are required. Individual failures are logged and skipped so a
-    transient error on one month does not abort the whole acquisition step.
-    Already-downloaded files are left alone, making the step resumable.
+    Existing non-empty files are retained, enabling resumable acquisition.
+    Individual retrieval failures are logged rather than terminating the
+    complete data-ingestion stage.
     """
-    import gdown  # imported lazily so the rest of the pipeline never needs it
+    import gdown  # Deferred dependency: required only by the acquisition stage.
 
     dest_dir = Path(dest_dir or config.RAW_STAGING_DIR)
     dest_dir.mkdir(parents=True, exist_ok=True)
@@ -319,7 +297,7 @@ def download_drive_folder(dest_dir=None) -> Path:
     if failures:
         logger.warning(
             "%d file(s) could not be downloaded and are excluded from the consolidated "
-            "output: %s. Re-run this module to retry them — already-downloaded files are "
+            "output: %s. Re-run this module to retry them: already-downloaded files are "
             "skipped, so a second pass only fetches the gaps.",
             len(failures), ", ".join(failures[:10]) + (" ..." if len(failures) > 10 else ""),
         )
@@ -331,21 +309,18 @@ def _download_via_gdown(gdown, entry, target: Path) -> None:
 
 
 def _download_direct(entry, target: Path) -> None:
-    """Fetch straight from Drive's file-download endpoint.
+    """Retrieve a Drive file through its direct download endpoint.
 
-    gdown's pre-flight metadata lookup is the first thing Google rate-limits: it
-    starts raising "Cannot retrieve the public link ... have had many accesses"
-    while this endpoint keeps serving files normally. Trying it as a fallback
-    recovers most of an otherwise-stalled run.
+    This route avoids the metadata request that is commonly rate-limited under
+    anonymous access and complements the ``gdown`` fallback.
     """
-    import requests  # a gdown dependency, so always present alongside it
+    import requests  # Installed transitively with the gdown acquisition dependency.
 
     url = f"https://drive.usercontent.google.com/download?id={entry.id}&export=download&confirm=t"
     headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/126 Safari/537.36"}
     with requests.get(url, headers=headers, stream=True, timeout=180) as resp:
         resp.raise_for_status()
-        # Drive serves an HTML interstitial (virus-scan warning / quota notice)
-        # instead of the file when it does not want to hand it over anonymously.
+        # HTML responses indicate an interstitial or quota notice, not file content.
         if "text/html" in resp.headers.get("Content-Type", ""):
             raise RuntimeError("Drive returned an HTML interstitial rather than the file")
         with open(target, "wb") as fh:
@@ -354,20 +329,15 @@ def _download_direct(entry, target: Path) -> None:
 
 
 def _download_one(gdown, entry, target: Path) -> bool:
-    """Fetch one Drive file, trying both transports and retrying with backoff.
+    """Retrieve one file through complementary transports with bounded retries.
 
-    Google rate-limits anonymous access to public folders, which shows up as
-    sporadic then sustained per-file failures partway through a ~230-file run.
-    These are transient, so each file gets a few spaced retries across both
-    transports before being given up on; a lost file otherwise silently drops a
-    whole month of spend from the consolidated output.
+    Back-off preserves acquisition completeness under transient public-access
+    rate limiting; an omitted file can remove an entire reporting month.
     """
     for attempt in range(1, DOWNLOAD_MAX_ATTEMPTS + 1):
         errors = []
-        # `direct` first: it is a single HTTP GET, whereas gdown does a metadata
-        # pre-flight that is both slower and the first thing Google rate-limits.
-        # gdown remains the fallback because it handles the confirm-token /
-        # virus-scan interstitial flow that large files need.
+        # Direct retrieval avoids a rate-limited metadata pre-flight; gdown remains
+        # necessary for confirmation-token and large-file interstitial handling.
         for label, fetch in (
             ("direct", lambda: _download_direct(entry, target)),
             ("gdown", lambda: _download_via_gdown(gdown, entry, target)),
@@ -396,21 +366,17 @@ def _download_one(gdown, entry, target: Path) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Consolidation — spend sources
+# Consolidation: spend sources
 # ---------------------------------------------------------------------------
 _ISO_MIDNIGHT_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})[ T]00:00:00(?:\.0+)?$")
 
 
 def _drop_zero_time_component(series: pd.Series) -> pd.Series:
-    """Render ISO dates one way so a concatenated `date` column has one format.
+    """Remove only a zero-time suffix from otherwise identical ISO dates.
 
-    Bradford publishes 2019-2021 as `2019-04-30` but 2022-2024 as
-    `2023-06-30 00:00:00`. Both are unambiguous ISO-8601, but `pd.to_datetime`
-    infers a single format from the first value and coerces the rest to NaT, so
-    the mixed column silently loses whichever half it did not infer. Only an
-    exact zero time component is stripped; anything else (including ambiguous
-    dd/mm vs mm/dd forms) is passed through untouched for `loaders.py` to
-    interpret, so Lincolnshire's `_parse_mixed_dates` behaviour is unaffected.
+    This harmonises Bradford's date-only and midnight-timestamp publications
+    without interpreting ambiguous day/month formats, which remain the
+    responsibility of Lincolnshire's ``_parse_mixed_dates`` routine.
     """
     return series.astype("string").str.replace(_ISO_MIDNIGHT_RE, r"\1", regex=True)
 
@@ -424,7 +390,7 @@ def _consolidate_spend(staging_dir, folder_name: str, dataset_source: str, colum
         df = df.rename(columns=_build_rename_map(df.columns))
         keep = [c for c in columns if c in df.columns]
         if "supplier" not in keep or "amount" not in keep:
-            logger.warning("  ! %s has no recognisable supplier/amount column — skipped", path.name)
+            logger.warning("  ! %s has no recognisable supplier/amount column, skipped", path.name)
             continue
         block = df[keep].copy()
         block["_dataset_source"] = dataset_source
@@ -457,19 +423,16 @@ def consolidate_nhs_england(staging_dir=None) -> pd.DataFrame:
         "NHS_England",
         NHS_ENGLAND_COLUMNS,
     )
-    # Mirrors load_nhs_england()'s .fillna("NHS England"): a handful of monthly
-    # exports leave the entity column blank because the publisher is implicit.
+    # The publisher is implicit in some monthly exports, leaving entity blank.
     out["entity"] = out["entity"].fillna("NHS England")
     return out
 
 
 def consolidate_lincolnshire(staging_dir=None) -> pd.DataFrame:
-    """United Lincolnshire Hospitals — the messiest source.
+    """Consolidate heterogeneous United Lincolnshire Hospitals monthly exports.
 
-    Two published shapes coexist: months with a header row, and headerless
-    months whose first row is already data. Filenames also contain non-ASCII
-    characters (en-dashes) and doubled dots. Date/amount messiness is left
-    untouched here; `loaders.py::_parse_mixed_dates` handles it in Phase 2.
+    Headered and headerless layouts coexist. This stage retains original dates
+    and amounts; Phase 2 applies ``_parse_mixed_dates`` and monetary cleaning.
     """
     staging_dir = staging_dir or config.RAW_STAGING_DIR
     frames = []
@@ -484,8 +447,8 @@ def consolidate_lincolnshire(staging_dir=None) -> pd.DataFrame:
         if probe.empty:
             continue
 
-        # May-19 carries a "PUBLISHED AREA" title row above the real header, so
-        # the header (when present at all) is not necessarily row 0.
+        # May 2019 includes a title row before its header; the header is not
+        # necessarily the first row.
         header_row = next(
             (i for i in range(len(probe)) if _looks_like_header(probe.iloc[i].tolist())), None
         )
@@ -497,7 +460,7 @@ def consolidate_lincolnshire(staging_dir=None) -> pd.DataFrame:
             else:
                 df = _read_csv_any_encoding(path, header=None, dtype=str)
                 n_headerless += 1
-                # assign the 8 known fields positionally; ignore extra trailing columns
+                # Map the eight documented positional fields and discard trailing fields.
                 width = min(len(LINCOLNSHIRE_POSITIONAL_COLUMNS), df.shape[1])
                 df = df.iloc[:, :width]
                 df.columns = LINCOLNSHIRE_POSITIONAL_COLUMNS[:width]
@@ -524,10 +487,10 @@ def consolidate_lincolnshire(staging_dir=None) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Consolidation — Contracts Finder
+# Consolidation: Contracts Finder
 # ---------------------------------------------------------------------------
 def _is_nhs_related(df: pd.DataFrame, text_columns: list) -> pd.Series:
-    """Row mask: does the buyer/supplier/title/description text look health-sector?"""
+    """Return a mask for records whose available text matches health-sector terms."""
     present = [c for c in text_columns if c in df.columns]
     if not present:
         return pd.Series(False, index=df.index)
@@ -538,12 +501,10 @@ def _is_nhs_related(df: pd.DataFrame, text_columns: list) -> pd.Series:
 
 
 def consolidate_contracts(staging_dir=None) -> pd.DataFrame:
-    """UK Contracts Finder OCDS bulk export, filtered to the health sector.
+    """Consolidate the health-sector subset of the Contracts Finder OCDS export.
 
-    Concatenates main.csv / awards.csv / awards_suppliers.csv across 2019-2024
-    with an outer union of columns (the OCDS schema drifts slightly between
-    annual exports), tagging each row with its originating `_source_file` so
-    `load_contracts_finder()` can keep using only the `main.csv` block.
+    An outer schema union accommodates annual field drift, while ``_source_file``
+    preserves provenance and permits Phase 2 to select the ``main.csv`` notices.
     """
     staging_dir = staging_dir or config.RAW_STAGING_DIR
     frames = []
@@ -593,24 +554,24 @@ BUILDERS = {
 
 
 def raw_files_present() -> bool:
-    """True when all four consolidated raw files already exist on disk."""
+    """Return whether every required consolidated raw-data file is present."""
     return all(Path(p).exists() for p in config.RAW_FILES.values())
 
 
 def build_all(force: bool = False, staging_dir=None, out_dir=None) -> dict:
-    """Download + consolidate the Drive raw archive into `data/raw/`.
+    """Acquire and consolidate the source archive into ``data/raw``.
 
-    Returns a {key: row_count} summary. No-ops when all four outputs already
-    exist and `force` is False, so a working manual setup is never disturbed.
+    Returns source-level row counts. Existing complete outputs are retained
+    unless ``force`` is set, preserving a manually provisioned raw-data state.
     """
     out_dir = Path(out_dir or config.DATA_RAW_DIR)
 
     if not force and raw_files_present():
-        logger.info("All four consolidated raw files already present in %s — skipping Phase 1", out_dir)
+        logger.info("All four consolidated raw files already present in %s, skipping Phase 1", out_dir)
         return {}
 
     logger.info("=" * 70)
-    logger.info("PHASE 1 — Data Acquisition & Consolidation (Google Drive raw archive)")
+    logger.info("PHASE 1: Data Acquisition & Consolidation (Google Drive raw archive)")
     logger.info("=" * 70)
 
     staging_dir = download_drive_folder(staging_dir)

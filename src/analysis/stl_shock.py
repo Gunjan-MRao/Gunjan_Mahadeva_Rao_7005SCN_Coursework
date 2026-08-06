@@ -1,11 +1,9 @@
-"""
-Phase 3 (continued) — COVID-19 Shock Analysis via STL decomposition.
+"""Phase 3: COVID-19 expenditure-shock analysis using STL decomposition.
 
-Implements Cleveland et al. (1990) STL (Seasonal-Trend decomposition using
-Loess) on the monthly aggregated NHS spend series. A baseline trend+seasonal
-model is fitted on the pre-COVID window (2018 H2 - 2019, per config) and
-extrapolated forward; the residual between actual and expected spend during
-COVID and post-COVID periods quantifies the disruption referenced in RQ1.
+Applies robust seasonal-trend decomposition using LOESS (STL) to monthly NHS
+trust expenditure. A pre-COVID reference window establishes baseline spending;
+period-specific deviations and residuals quantify disruption beyond recurring
+seasonality and smooth long-run trend.
 """
 from __future__ import annotations
 
@@ -22,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def build_monthly_series(panel: pd.DataFrame) -> pd.Series:
+    """Aggregate trust-spend transactions to a complete monthly expenditure series."""
     monthly = (
         panel[panel["record_type"] == "trust_spend"]
         .groupby(panel["date"].dt.to_period("M"))["amount"]
@@ -33,6 +32,7 @@ def build_monthly_series(panel: pd.DataFrame) -> pd.Series:
 
 
 def run_stl_shock_analysis(panel: pd.DataFrame | None = None):
+    """Estimate STL components and period-level expenditure deviations from baseline."""
     if panel is None:
         panel = pd.read_csv(config.MASTER_PANEL_PATH, low_memory=False)
     panel["date"] = pd.to_datetime(panel["date"], errors="coerce", format="mixed")
@@ -48,8 +48,7 @@ def run_stl_shock_analysis(panel: pd.DataFrame | None = None):
     seasonal = result.seasonal
     resid = result.resid
 
-    # Baseline expected level = mean trend+seasonal computed over the pre-COVID window only,
-    # then compared against actual spend in each period to quantify the COVID shock.
+    # The pre-COVID mean provides a common counterfactual reference for period comparisons.
     baseline_mask = (monthly.index >= config.STL_BASELINE_START) & (monthly.index <= config.STL_BASELINE_END)
     baseline_level = float(monthly[baseline_mask].mean()) if baseline_mask.any() else float(monthly.mean())
 

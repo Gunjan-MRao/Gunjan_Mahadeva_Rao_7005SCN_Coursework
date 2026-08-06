@@ -1,6 +1,8 @@
-"""
-Generates the report figures referenced in the README/methodology writeup.
-Run after `python -m src.run_pipeline` has produced the processed CSVs.
+"""Generate dissertation figures from processed analytical artefacts.
+
+Figures visualise STL decomposition, supplier concentration, anomaly detection,
+SHAP attribution, network structure, composite risk scores, category shocks,
+and robustness checks after pipeline outputs have been generated.
 """
 from __future__ import annotations
 
@@ -20,6 +22,7 @@ COVID_END = pd.Timestamp(config.COVID_END)
 
 
 def fig_stl_decomposition():
+    """Plot observed expenditure and STL trend, seasonal, and residual components."""
     df = pd.read_csv(config.DATA_PROCESSED_DIR / "stl_decomposition.csv", parse_dates=["date"])
     fig, axes = plt.subplots(4, 1, figsize=(11, 10), sharex=True)
     for ax, col, title in zip(
@@ -41,10 +44,8 @@ def fig_stl_decomposition():
 
 
 def fig_hhi_trend():
-    # Per-source HHI is the informative view here: the national NHS_England
-    # aggregate spans hundreds of distinct trusts/suppliers and is mechanically
-    # always low-HHI (unconcentrated), whereas individual smaller trusts
-    # (Bradford, Lincolnshire) show real month-to-month concentration shifts.
+    """Plot source-specific monthly HHI to retain trust-level concentration variation."""
+    # National aggregation can attenuate concentration variation across heterogeneous trusts.
     df = pd.read_csv(config.DATA_PROCESSED_DIR / "hhi_monthly_by_source.csv")
     df["date"] = pd.to_datetime(df["year_month"], format="%Y-%m")
     df = df.sort_values("date")
@@ -68,6 +69,7 @@ def fig_hhi_trend():
 
 
 def fig_anomaly_timeline():
+    """Plot the monthly Isolation Forest anomaly rate across the study horizon."""
     df = pd.read_csv(config.ANOMALY_SCORES_PATH, parse_dates=["date"])
     monthly = df.set_index("date").resample("MS").agg(
         n_total=("is_anomaly", "size"), n_anomaly=("is_anomaly", "sum")
@@ -89,6 +91,7 @@ def fig_anomaly_timeline():
 
 
 def fig_shap_summary():
+    """Plot the dominant SHAP feature among the highest-scored anomalies."""
     df = pd.read_csv(config.SHAP_VALUES_PATH)
     counts = df["top_shap_feature"].value_counts()
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -104,6 +107,7 @@ def fig_shap_summary():
 
 
 def fig_new_supplier_rate():
+    """Plot monthly new-supplier entry as a share of trust-spend transactions."""
     df = pd.read_csv(config.DATA_PROCESSED_DIR / "new_supplier_rate_by_month.csv")
     df["date"] = pd.to_datetime(df["year_month"], format="%Y-%m")
     df = df.sort_values("date")
@@ -122,11 +126,11 @@ def fig_new_supplier_rate():
 
 
 # ---------------------------------------------------------------------------
-# Phase 6 (dissertation-advancement) figures
+# Phase 6 figures
 # ---------------------------------------------------------------------------
 
 def fig_method_agreement_heatmap():
-    """Jaccard-index agreement heatmap between the four anomaly detectors."""
+    """Plot pairwise Jaccard agreement among the anomaly-detection methods."""
     agree = pd.read_csv(str(config.METHOD_COMPARISON_SUMMARY_PATH).replace(".csv", "_agreement.csv"))
     methods = sorted(set(agree["method_a"]) | set(agree["method_b"]))
     label_map = {"isolation_forest": "Isolation\nForest", "local_outlier_factor": "Local Outlier\nFactor",
@@ -157,8 +161,7 @@ def fig_method_agreement_heatmap():
 
 
 def fig_synthetic_precision_recall():
-    """Grouped bar chart of precision/recall/F1 per detector against known
-    synthetic-injection ground truth."""
+    """Plot detector precision, recall, and F1 against synthetic ground truth."""
     df = pd.read_csv(config.SYNTHETIC_RESULTS_PATH)
     label_map = {"isolation_forest": "Isolation\nForest", "local_outlier_factor": "Local Outlier\nFactor",
                  "one_class_svm": "One-Class\nSVM", "autoencoder": "MLP\nAutoencoder",
@@ -185,8 +188,7 @@ def fig_synthetic_precision_recall():
 
 
 def fig_network_hub_comparison():
-    """Bar chart comparing mean anomaly rate for hub vs non-hub suppliers,
-    and a scatter of transaction volume vs anomaly rate colour-coded by hub status."""
+    """Compare hub status, transaction volume, and supplier anomaly rates."""
     nodes = pd.read_csv(config.NETWORK_NODE_METRICS_PATH)
     scores = pd.read_csv(config.ANOMALY_SCORES_PATH, usecols=["supplier", "is_anomaly"], low_memory=False)
     supplier_rate = scores.groupby("supplier")["is_anomaly"].mean()
@@ -225,8 +227,7 @@ def fig_network_hub_comparison():
 
 
 def fig_community_anomaly_rate():
-    """Bar chart of the top supplier co-occurrence communities by mean
-    Isolation Forest anomaly rate."""
+    """Plot high-anomaly supplier co-occurrence communities of adequate size."""
     communities = pd.read_csv(config.NETWORK_COMMUNITY_PATH)
     scores = pd.read_csv(config.ANOMALY_SCORES_PATH, usecols=["supplier", "is_anomaly"], low_memory=False)
     supplier_rate = scores.groupby("supplier")["is_anomaly"].mean()
@@ -256,12 +257,11 @@ def fig_community_anomaly_rate():
 
 
 # ---------------------------------------------------------------------------
-# Phase 7 (dataset-extension) figures
+# Phase 7 figures
 # ---------------------------------------------------------------------------
 
 def fig_supplier_risk_score():
-    """Left: risk-tier distribution across scored suppliers. Right: the top 15
-    suppliers by composite risk score, colour-coded by hub status."""
+    """Plot risk-tier prevalence and the highest-ranked composite-risk suppliers."""
     df = pd.read_csv(config.SUPPLIER_RISK_SCORE_PATH)
     tier_order = ["Low", "Medium", "High", "Critical"]
     tier_colors = {"Low": "#94a3b8", "Medium": "#f4a259", "High": "#e07a5f", "Critical": "#c1272d"}
@@ -290,9 +290,7 @@ def fig_supplier_risk_score():
 
 
 def fig_category_covid_shock():
-    """Horizontal bar chart of the categories with the largest pre-COVID ->
-    COVID spend growth, i.e. the categories that drove the aggregate STL
-    shock (Phase 3) most."""
+    """Plot category-level pre-COVID-to-COVID expenditure growth rankings."""
     df = pd.read_csv(config.CATEGORY_SHOCK_RANKING_PATH)
     df = df.dropna(subset=["pct_change_pre_to_covid"])
     top10 = df.sort_values("pct_change_pre_to_covid", ascending=False).head(10).iloc[::-1]
@@ -313,9 +311,7 @@ def fig_category_covid_shock():
 
 
 def fig_robustness_checks():
-    """Left: anomaly rate by period at 95th/98th/99th percentile thresholds
-    (threshold sensitivity). Right: anomaly rate by period under the baseline
-    vs +/-1-month-shifted COVID boundaries (period-boundary sensitivity)."""
+    """Plot threshold and period-boundary sensitivity of anomaly-rate estimates."""
     thresh = pd.read_csv(config.ROBUSTNESS_THRESHOLD_PATH)
     shift = pd.read_csv(config.ROBUSTNESS_PERIOD_SHIFT_PATH)
 
@@ -352,8 +348,7 @@ def fig_robustness_checks():
 
 
 def run_make_figures():
-    """Generate all report figures. Called both by `python -m src.analysis.make_figures`
-    and as Phase 7F of `python -m src.run_pipeline`."""
+    """Generate the complete reproducible dissertation figure set."""
     paths = [
         fig_stl_decomposition(),
         fig_hhi_trend(),
@@ -373,7 +368,7 @@ def run_make_figures():
     return paths
 
 
-# Backward-compatible alias for direct-script usage.
+# Compatibility alias for direct script execution.
 main = run_make_figures
 
 

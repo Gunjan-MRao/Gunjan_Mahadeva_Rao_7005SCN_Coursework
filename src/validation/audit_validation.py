@@ -1,23 +1,10 @@
 """
-Phase 5 — Validation against literature-derived audit red-flag criteria.
+Phase 5: rule-based audit red-flag triangulation.
 
-Confidential NAO / NHS Counter Fraud Authority (NHSCFA) case-level audit data
-is not publicly accessible, so this project uses a defensible proxy: published
-red-flag criteria from Transparency International UK's 2024 review of
-pandemic-era procurement, and NHSCFA's published fraud-risk indicators, are
-encoded as explicit rules. The overlap between rule-flagged and
-Isolation-Forest-flagged records is then reported as a triangulation /
-construct-validity check on the unsupervised model (per proposal Stage 5).
-
-Rules implemented:
-  R1  Direct-award / single-source contract notice issued during COVID.
-  R2  Trust-spend transaction where amount > 3x the supplier's own historical
-      median amount ("price spike vs historical median").
-  R3  New supplier (per is_new_supplier flag) whose first transaction during
-      COVID exceeds the 90th percentile of same-period spend
-      ("new supplier + large COVID contract").
-  R4  Suspiciously round invoice amounts (exact multiples of 10,000, excluding
-      very small amounts where rounding is common for legitimate reasons).
+With no public case-level audit labels, published procurement-risk indicators
+are operationalised as direct-award, price-spike, new-supplier, and round-amount
+rules. Their overlap with Isolation Forest flags is a construct-validity
+triangulation measure, not a supervised estimate of fraud-detection accuracy.
 """
 from __future__ import annotations
 
@@ -90,7 +77,7 @@ def run_validation():
         logger.info("%s: %d flagged (%.2f%%)", col, panel[col].sum(), panel[col].mean() * 100)
     logger.info("Any rule flagged: %d (%.2f%%)", panel["rule_flagged"].sum(), panel["rule_flagged"].mean() * 100)
 
-    # triangulation against ML (Isolation Forest) anomalies, where available
+    # Triangulate rule-based flags with Isolation Forest anomalies when score data are available.
     try:
         ml_scores = pd.read_csv(config.ANOMALY_SCORES_PATH, low_memory=False)[["record_id", "is_anomaly", "anomaly_score"]]
         merged = panel.merge(ml_scores, on="record_id", how="left")
@@ -113,7 +100,7 @@ def run_validation():
         logger.info("Saved validation/triangulation table -> %s", config.VALIDATION_PATH)
         return merged
     except FileNotFoundError:
-        logger.warning("Anomaly scores not found — run isolation_forest_shap.py first for full triangulation. Saving rule-only output.")
+        logger.warning("Anomaly scores not found; run isolation_forest_shap.py first for full triangulation. Saving rule-only output.")
         panel.to_csv(config.VALIDATION_PATH, index=False)
         return panel
 

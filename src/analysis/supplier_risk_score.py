@@ -1,42 +1,9 @@
-"""
-Phase 7A — Composite supplier risk score.
+"""Phase 7A: composite supplier risk scoring.
 
-Combines three independent signals into a single, ranked supplier-level risk
-index, following the "composite risk index" approach used in the public
-procurement corruption-risk literature (Fazekas, Toth & King, 2016, "An
-Objective Corruption Risk Index Using Public Procurement Data", European
-Journal on Criminal Policy and Research, 22(3); IMF Working Paper 2022/094,
-"Assessing Vulnerabilities to Corruption in Public Procurement", which builds
-a Composite Risk Indicator as a simple/weighted average of normalised red-flag
-indicators). Each raw signal is percentile-ranked (0-100) across suppliers
-before blending, so the three signals -- which live on very different natural
-scales -- contribute equally regardless of their underlying distribution
-(a standard normalisation step in composite-indicator construction; see also
-OECD/JRC Handbook on Constructing Composite Indicators, 2008).
-
-Signals blended (equal weights, see config.SUPPLIER_RISK_WEIGHTS):
-  1. anomaly_rate       - share of the supplier's own trust_spend transactions
-                          flagged anomalous by the Phase 4 Isolation Forest.
-  2. mean_anomaly_score - supplier's mean raw (continuous) anomaly score,
-                          capturing magnitude of anomalousness, not just the
-                          binary flag (a supplier just over the 98th-percentile
-                          cut and one far beyond it both score 1 on signal #1).
-  3. rule_flag_rate     - share of the supplier's transactions matching >=1
-                          literature-derived audit red-flag rule (Phase 5).
-
-Network centrality (hub status, Phase 6D) is deliberately EXCLUDED from the
-composite score itself and reported only as a separate descriptive column.
-Stage 6D found hub suppliers have a significantly LOWER anomaly rate than
-non-hub suppliers (Mann-Whitney p=5.4e-22) -- large, established multi-trust
-suppliers are, if anything, under-represented among anomalies, likely because
-they have long transaction histories the model has learned as "normal".
-Folding centrality into the risk score would therefore bias it in the wrong
-direction; it is retained for analysts to see, not scored on.
-
-Suppliers below config.SUPPLIER_RISK_MIN_TRANSACTIONS are excluded from
-ranking: a single anomalous transaction out of 1-2 total is too thin a basis
-for a supplier-level judgement (small-sample noise), a standard exclusion
-criterion in supplier scorecarding.
+Combines percentile-ranked anomaly incidence, anomaly-score magnitude, and
+rule-flag incidence using configured weights. Scale normalisation permits
+aggregation of heterogeneous indicators, while a minimum transaction count
+limits supplier-level inference from sparse transactional histories.
 """
 from __future__ import annotations
 
@@ -53,9 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_supplier_signals() -> pd.DataFrame:
-    """Aggregate the three raw per-supplier signals from existing pipeline
-    artefacts (anomaly_scores.csv from Phase 4, validation_redflags.csv from
-    Phase 5)."""
+    """Aggregate per-supplier anomaly and audit-rule signals from pipeline outputs."""
     scores = pd.read_csv(
         config.ANOMALY_SCORES_PATH, low_memory=False,
         usecols=["supplier", "amount", "anomaly_score", "is_anomaly"],
@@ -79,7 +44,7 @@ def load_supplier_signals() -> pd.DataFrame:
 
 
 def attach_hub_status(supplier_df: pd.DataFrame) -> pd.DataFrame:
-    """Join network hub-status as a descriptive (non-scoring) column."""
+    """Join network hub status as a descriptive attribute, not a score component."""
     try:
         network = pd.read_csv(
             config.NETWORK_NODE_METRICS_PATH, low_memory=False,
@@ -97,6 +62,7 @@ def attach_hub_status(supplier_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_composite_score(supplier_df: pd.DataFrame) -> pd.DataFrame:
+    """Construct percentile-normalised composite scores and empirical risk tiers."""
     df = supplier_df[supplier_df["n_transactions"] >= config.SUPPLIER_RISK_MIN_TRANSACTIONS].copy()
     logger.info(
         "Scoring %d / %d suppliers with >= %d transactions",
@@ -134,10 +100,11 @@ def compute_composite_score(supplier_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compare_hub_vs_nonhub_risk(scored_df: pd.DataFrame) -> dict:
-    """Descriptive check (not used to build the score): do hub suppliers score
-    higher or lower composite risk than non-hub suppliers? Reported for
-    consistency with -- and as an independent replication of -- the Stage 6D
-    finding that hub status is inversely related to raw anomaly rate."""
+    """Compare composite-score distributions between hub and non-hub suppliers.
+
+    This descriptive Mann-Whitney analysis is excluded from score construction
+    to preserve the separation of network position and risk-score inputs.
+    """
     valid = scored_df.dropna(subset=["is_hub_supplier"])
     if valid.empty or valid["is_hub_supplier"].nunique() < 2:
         logger.warning("Insufficient hub-status data for hub-vs-non-hub risk-score comparison.")

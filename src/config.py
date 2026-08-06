@@ -1,9 +1,7 @@
-"""
-Central configuration for the NHS Procurement Anomaly Detection project (7005SCN).
+"""Central configuration for the NHS procurement anomaly-detection study.
 
-All file paths, COVID period boundaries, and model hyperparameters live here so
-every pipeline stage (data engineering -> EDA -> modelling -> validation) reads
-from a single source of truth.
+Defines filesystem locations, study-period boundaries, reproducibility controls,
+and model parameters shared across data engineering, analysis, and validation.
 """
 from pathlib import Path
 
@@ -28,13 +26,11 @@ RAW_FILES = {
 }
 
 # ---------------------------------------------------------------------------
-# Phase 1 — raw data acquisition (see src/data_engineering/build_raw_from_drive.py)
+# Phase 1: raw-data acquisition
 # ---------------------------------------------------------------------------
-# The original per-month FOI exports and Contracts Finder bulk extracts are too
-# large / third-party-licensed to commit, so they are hosted in a public
-# "anyone with the link" Google Drive folder and fetched on demand. RAW_FILES
-# above are the *consolidated* outputs Phase 2 reads; RAW_STAGING_DIR holds the
-# downloaded originals and is gitignored.
+# Monthly FOI exports and Contracts Finder extracts are externally hosted.
+# ``RAW_FILES`` identifies the consolidated Phase 2 inputs; ``RAW_STAGING_DIR``
+# retains downloaded source artefacts and is excluded from version control.
 GOOGLE_DRIVE_RAW_FOLDER_URL = (
     "https://drive.google.com/drive/folders/1giZvxWA-uqWj8n8DcqOcOwKWh6ZFxVtS?usp=sharing"
 )
@@ -48,9 +44,9 @@ HHI_PATH = DATA_PROCESSED_DIR / "hhi_monthly.csv"
 STL_PATH = DATA_PROCESSED_DIR / "stl_shock_summary.csv"
 
 # ---------------------------------------------------------------------------
-# COVID-19 period boundaries (UK) — used to split pre / during / post COVID
-# Pre-COVID:  2019-01-01 -> 2020-03-22  (day before first UK national lockdown)
-# COVID:      2020-03-23 -> 2022-02-23  (day before "living with COVID" plan)
+# UK COVID-19 study-period boundaries
+# Pre-COVID:  2019-01-01 to 2020-03-22 (before the first national lockdown)
+# COVID:      2020-03-23 to 2022-02-23 (before the "Living with COVID" plan)
 # Post-COVID: 2022-02-24 -> 2024-12-31
 # ---------------------------------------------------------------------------
 PRE_COVID_START = "2019-01-01"
@@ -60,54 +56,48 @@ COVID_END = "2022-02-23"
 POST_COVID_START = "2022-02-24"
 POST_COVID_END = "2024-12-31"
 
-# STL baseline year used to quantify the COVID-19 shock (methodology stage 3)
-STL_BASELINE_START = "2018-07-01"  # extended slightly to give STL enough seasonal cycles
+# STL baseline period for quantifying the COVID-19 expenditure shock
+STL_BASELINE_START = "2018-07-01"  # Extends the baseline to support seasonal decomposition.
 STL_BASELINE_END = "2019-12-31"
 
 # ---------------------------------------------------------------------------
-# Modelling hyperparameters
+# Anomaly-detection model parameters
 # ---------------------------------------------------------------------------
 ISOLATION_FOREST_PARAMS = {
     "n_estimators": 300,
     "max_samples": "auto",
-    "contamination": 0.02,   # ~2% of pre-COVID transactions treated as the tail baseline
+    "contamination": 0.02,   # Assumes 2% of pre-COVID transactions form the anomalous tail.
     "random_state": 42,
     "n_jobs": -1,
 }
 
-# Percentile threshold used to flag anomalies once scored on covid/post-covid data
+# Percentile threshold for flagging COVID and post-COVID anomaly scores
 ANOMALY_SCORE_PERCENTILE = 98
 
-# Random seed used across the project for reproducibility
+# Shared pseudorandom seed for reproducible estimation
 RANDOM_STATE = 42
 
 # ---------------------------------------------------------------------------
-# Multi-method anomaly detection comparison (Phase 4 extension)
+# Multi-method anomaly-detection comparison
 # ---------------------------------------------------------------------------
 LOF_PARAMS = {
     "n_neighbors": 35,
-    "novelty": True,          # allows scoring records not used in fit()
+    "novelty": True,          # Permits scoring records not included in model fitting.
     "contamination": 0.02,
     "n_jobs": -1,
 }
 
 OCSVM_PARAMS = {
     "kernel": "rbf",
-    "nu": 0.02,                # analogous to expected contamination
+    "nu": 0.02,                # Sets an expected outlier proportion analogous to contamination.
     "gamma": "scale",
 }
-# One-Class SVM training scales poorly (O(n^2)-O(n^3)) with sample size, so
-# fitting is subsampled to a manageable training set for computational
-# tractability -- standard practice for kernel-SVM methods on large datasets.
-# All records (not just the subsample) are still scored/flagged.
+# One-Class SVM fitting has quadratic-to-cubic sample-size complexity; fitting
+# is therefore subsampled, while all records are retained for scoring.
 OCSVM_TRAIN_SAMPLE_SIZE = 8000
 
-# "Autoencoder" implemented as a bottleneck MLP trained for input
-# reconstruction (scikit-learn MLPRegressor) rather than a full deep-learning
-# framework, to keep the pipeline dependency-light, CPU-only, and fully
-# reproducible without GPU requirements. Architecture: 7 -> 4 -> 2 -> 4 -> 7,
-# i.e. a genuine bottleneck (compression to 2 latent units) as in a standard
-# autoencoder; anomaly score = reconstruction error (MSE).
+# The autoencoder is a symmetric bottleneck MLP (7→4→2→4→7) estimated with
+# ``MLPRegressor``. Reconstruction mean-squared error is the anomaly measure.
 AUTOENCODER_PARAMS = {
     "hidden_layer_sizes": (4, 2, 4),
     "activation": "tanh",
@@ -117,78 +107,70 @@ AUTOENCODER_PARAMS = {
     "early_stopping": True,
     "n_iter_no_change": 15,
 }
-AUTOENCODER_ANOMALY_PERCENTILE = 98  # reconstruction-error percentile used to flag
+AUTOENCODER_ANOMALY_PERCENTILE = 98  # Reconstruction-error percentile for flagging.
 
 METHOD_COMPARISON_PATH = DATA_PROCESSED_DIR / "method_comparison_scores.csv"
 METHOD_COMPARISON_SUMMARY_PATH = DATA_PROCESSED_DIR / "method_comparison_summary.csv"
 
 # ---------------------------------------------------------------------------
-# Synthetic anomaly injection (quantitative precision/recall/F1 evaluation)
+# Synthetic anomaly injection for precision, recall, and F1 evaluation
 # ---------------------------------------------------------------------------
-# Confidential audit ground truth is unavailable (see validation/audit_validation.py),
-# so detector performance is additionally benchmarked against synthetic anomalies
-# with known, literature-motivated fraud/error signatures injected into a held-out
-# evaluation sample. This gives genuine precision/recall/F1/PR-AUC numbers,
-# standard practice for evaluating unsupervised anomaly detectors absent labels.
-SYNTHETIC_INJECTION_RATE = 0.02       # fraction of eval sample replaced with synthetic anomalies
-SYNTHETIC_EVAL_SAMPLE_SIZE = 20000    # size of the (post-COVID) evaluation sample
-SYNTHETIC_AMOUNT_INFLATION_RANGE = (5.0, 15.0)   # x-normal-amount multiplier for inflated invoices
+# In the absence of confidential audit labels, known synthetic fraud/error
+# signatures support quantitative evaluation on a held-out sample.
+SYNTHETIC_INJECTION_RATE = 0.02       # Evaluation-sample share replaced by synthetic anomalies.
+SYNTHETIC_EVAL_SAMPLE_SIZE = 20000    # Post-COVID evaluation-sample size.
+SYNTHETIC_AMOUNT_INFLATION_RANGE = (5.0, 15.0)   # Multiplier applied to inflated invoices.
 SYNTHETIC_RESULTS_PATH = DATA_PROCESSED_DIR / "synthetic_injection_evaluation.csv"
 
 # ---------------------------------------------------------------------------
-# Statistical significance testing
+# Statistical-inference settings
 # ---------------------------------------------------------------------------
 N_PERMUTATIONS = 5000
 N_BOOTSTRAP = 2000
 STATS_RESULTS_PATH = DATA_PROCESSED_DIR / "statistical_tests_summary.csv"
 
 # ---------------------------------------------------------------------------
-# Supplier-buyer network analysis
+# Supplier–buyer network analysis
 # ---------------------------------------------------------------------------
-NETWORK_MIN_TRANSACTIONS = 2   # minimum trust-supplier transactions to include an edge
-NETWORK_HUB_PERCENTILE = 95    # betweenness-centrality percentile defining a "hub" supplier
+NETWORK_MIN_TRANSACTIONS = 2   # Minimum trust-supplier transactions required for an edge.
+NETWORK_HUB_PERCENTILE = 95    # Betweenness-centrality percentile defining a hub supplier.
 NETWORK_NODE_METRICS_PATH = DATA_PROCESSED_DIR / "network_supplier_metrics.csv"
 NETWORK_COMMUNITY_PATH = DATA_PROCESSED_DIR / "network_communities.csv"
 
 # ---------------------------------------------------------------------------
-# Composite supplier risk score (Phase 7A)
+# Composite supplier-risk score
 # ---------------------------------------------------------------------------
-# Suppliers with fewer transactions than this are excluded from scoring/ranking
-# (a single flagged transaction out of 1-2 total is too noisy a basis for a
-# supplier-level risk judgement).
+# Sparse supplier histories are excluded because one or two transactions do not
+# support a stable supplier-level risk estimate.
 SUPPLIER_RISK_MIN_TRANSACTIONS = 5
-# Equal-weighted blend of: (i) share of the supplier's own transactions flagged
-# by Isolation Forest, (ii) the supplier's mean raw anomaly score (captures
-# magnitude, not just the binary flag), and (iii) share of transactions
-# matching >=1 literature-derived audit red-flag rule. Network centrality is
-# deliberately excluded from the score itself (kept as a separate descriptive
-# column) given the Stage 6D finding that hub suppliers are *less*, not more,
-# anomalous -- folding it in would bias the score in the wrong direction.
+# Equally weights anomaly incidence, mean anomaly magnitude, and audit-rule
+# incidence. Network centrality remains descriptive because its observed
+# association with anomaly rates is inverse.
 SUPPLIER_RISK_WEIGHTS = {
     "anomaly_rate": 1 / 3,
     "mean_anomaly_score": 1 / 3,
     "rule_flag_rate": 1 / 3,
 }
-SUPPLIER_RISK_TIER_THRESHOLDS = {"critical": 95, "high": 85, "medium": 60}  # percentile cut points
+SUPPLIER_RISK_TIER_THRESHOLDS = {"critical": 95, "high": 85, "medium": 60}  # Percentile cut points.
 SUPPLIER_RISK_SCORE_PATH = DATA_PROCESSED_DIR / "supplier_risk_score.csv"
 
 # ---------------------------------------------------------------------------
-# Category-level deep dive (Phase 7B)
+# Category-level analysis
 # ---------------------------------------------------------------------------
 CATEGORY_DEEP_DIVE_PATH = DATA_PROCESSED_DIR / "category_deep_dive.csv"
 CATEGORY_SHOCK_RANKING_PATH = DATA_PROCESSED_DIR / "category_covid_shock_ranking.csv"
 
 # ---------------------------------------------------------------------------
-# Robustness checks (Phase 7C)
+# Sensitivity analyses
 # ---------------------------------------------------------------------------
 ROBUSTNESS_THRESHOLD_PERCENTILES = [95, 98, 99]
-ROBUSTNESS_PERIOD_SHIFT_MONTHS = 1  # +/- shift applied to all three period boundaries
+ROBUSTNESS_PERIOD_SHIFT_MONTHS = 1  # Symmetric shift applied to each period boundary.
 ROBUSTNESS_THRESHOLD_PATH = DATA_PROCESSED_DIR / "robustness_threshold_sensitivity.csv"
 ROBUSTNESS_PERIOD_SHIFT_PATH = DATA_PROCESSED_DIR / "robustness_period_shift.csv"
 ROBUSTNESS_FEATURE_ABLATION_PATH = DATA_PROCESSED_DIR / "robustness_feature_ablation.csv"
 
 # ---------------------------------------------------------------------------
-# BI-ready export (Phase 7D)
+# Business-intelligence export
 # ---------------------------------------------------------------------------
 BI_EXPORT_DIR = DATA_PROCESSED_DIR / "bi_export"
 BI_EXPORT_DIR.mkdir(parents=True, exist_ok=True)

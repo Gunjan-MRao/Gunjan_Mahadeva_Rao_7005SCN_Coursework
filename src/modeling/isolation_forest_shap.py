@@ -1,19 +1,10 @@
 """
-Phase 4 — Unsupervised Anomaly Detection (Isolation Forest) + SHAP Explainability.
+Phase 4: Isolation Forest anomaly detection and SHAP feature attribution.
 
-Methodology (per proposal RQ2/RQ3):
-  1. Engineer a feature set capturing amount magnitude, deviation from
-     category/supplier norms, transaction recency/frequency and new-supplier
-     status.
-  2. Train Isolation Forest (Liu, Ting & Zhou, 2008) ONLY on pre-COVID
-     trust_spend records, so the model learns "normal" pre-pandemic
-     procurement behaviour.
-  3. Score every record (pre/COVID/post) with the trained model.
-  4. Flag the top `ANOMALY_SCORE_PERCENTILE` percent of (most anomalous)
-     records as anomalies.
-  5. Use SHAP TreeExplainer (Lundberg & Lee, 2017) to attribute each anomaly
-     score to individual features, giving human-interpretable explanations
-     of why a transaction was flagged (addresses RQ3 on explainability).
+The model is trained exclusively on pre-COVID trust-spend records, treating
+that period as the stable procurement baseline against which all periods are
+scored. Isolation Forest partition-depth scores identify sparse observations;
+SHAP TreeExplainer attributes each selected score to the engineered features.
 """
 from __future__ import annotations
 
@@ -29,16 +20,10 @@ from src import config
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 
-# NOTE: raw source/category identity are deliberately excluded from the feature
-# set. An earlier iteration included ordinal-encoded source/category directly
-# and found (via SHAP) that ~60% of top-ranked anomalies were driven almost
-# entirely by `source_enc` -- i.e. the model was mostly learning "this record
-# came from a small trust dataset (Bradford/Lincolnshire), not NHS England"
-# rather than detecting genuine spend anomalies, because those two sources are
-# a small minority of the pre-COVID training rows. `amount_zscore_category`
-# already normalises amount within each source+category group, which captures
-# the useful signal without letting sheer sample-size imbalance across sources
-# dominate the anomaly ranking.
+# Raw `source_enc` and `category_enc` are excluded: ordinal identities induced
+# source-size artefacts in earlier SHAP results, rather than procurement-risk
+# signals. `amount_zscore_category` retains within-source/category normalisation
+# without allowing source imbalance to dominate the anomaly ranking.
 FEATURE_COLUMNS = [
     "log_amount",
     "amount_zscore_category",
@@ -79,8 +64,7 @@ def train_and_score(panel: pd.DataFrame | None = None):
     model = IsolationForest(**config.ISOLATION_FOREST_PARAMS)
     model.fit(X_train)
 
-    # decision_function: higher = more normal, lower/negative = more anomalous.
-    # We flip sign so higher = more anomalous, which is more intuitive to report.
+    # Reverse the decision function so larger values consistently denote greater anomaly severity.
     df["anomaly_score"] = -model.decision_function(X)
     threshold = np.percentile(df["anomaly_score"], config.ANOMALY_SCORE_PERCENTILE)
     df["is_anomaly"] = df["anomaly_score"] >= threshold
@@ -106,9 +90,7 @@ def train_and_score(panel: pd.DataFrame | None = None):
 def explain_with_shap(df: pd.DataFrame, model: IsolationForest, X: pd.DataFrame, top_n: int = 200):
     logger.info("Computing SHAP values with TreeExplainer (this can take a while on large samples)...")
 
-    # SHAP on the full scored set is expensive; explain the flagged anomalies plus
-    # a random normal-record sample for contrast, which is standard practice for
-    # explaining unsupervised outlier models at manageable computational cost.
+    # Explain all flagged cases and a reproducible normal reference sample to control computation.
     anomaly_idx = df.index[df["is_anomaly"]]
     sample_normal_idx = df.index[~df["is_anomaly"]].to_series().sample(
         n=min(2000, (~df["is_anomaly"]).sum()), random_state=config.RANDOM_STATE
@@ -122,7 +104,7 @@ def explain_with_shap(df: pd.DataFrame, model: IsolationForest, X: pd.DataFrame,
     shap_df["record_id"] = df.loc[explain_idx, "record_id"].values
     shap_df["is_anomaly"] = df.loc[explain_idx, "is_anomaly"].values
 
-    # top anomalies ranked by score, with their dominant SHAP feature attribution
+    # Record the largest absolute SHAP attribution for each highest-scoring anomaly.
     top_anomalies = df.loc[anomaly_idx].sort_values("anomaly_score", ascending=False).head(top_n).copy()
     feature_shap = shap_df.loc[top_anomalies.index, FEATURE_COLUMNS]
     top_anomalies["top_shap_feature"] = feature_shap.abs().idxmax(axis=1)

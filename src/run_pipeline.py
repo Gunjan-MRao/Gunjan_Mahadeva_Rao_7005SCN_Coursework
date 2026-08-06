@@ -1,19 +1,9 @@
-"""
-End-to-end orchestrator for the NHS Procurement Anomaly Detection pipeline.
+"""End-to-end orchestration for the NHS procurement anomaly-detection study.
 
-Usage:
-    python -m src.run_pipeline
-
-Runs, in order:
-  Phase 1  Data acquisition (fetch + consolidate the raw Google Drive archive)
-           -- automatic, and only when data/raw/*_clean.csv are missing
-  Phase 2  Data engineering (load, clean, merge 4 sources -> master panel)
-  Phase 3  EDA (data quality report, spend distribution, new-supplier rate)
-           + HHI supplier concentration + STL COVID shock decomposition
-  Phase 4  Isolation Forest anomaly detection + SHAP explainability
-  Phase 5  Rule-based audit red-flag validation + ML/rule triangulation
-
-Prints a final summary of key headline statistics referenced in the report.
+Executes data acquisition, panel construction, descriptive analysis, anomaly
+detection, validation, sensitivity analyses, and report-output generation in
+the required dependency order. Phase 1 is conditional on the availability of
+the consolidated raw inputs.
 """
 from __future__ import annotations
 
@@ -44,14 +34,15 @@ logger = logging.getLogger(__name__)
 
 
 def main():
+    """Execute all pipeline phases and report study-level summary statistics."""
     t0 = time.time()
 
-    # Phase 1 — only runs when the consolidated raw files are absent, so an
-    # existing manual `data/raw/` setup is left exactly as-is.
+    # Acquire sources only when consolidated inputs are absent, preserving
+    # manually provisioned raw data and reproducible input provenance.
     missing = [k for k, p in config.RAW_FILES.items() if not p.exists()]
     if missing:
         logger.info(
-            "Consolidated raw file(s) missing (%s) — running Phase 1 to fetch and "
+            "Consolidated raw file(s) missing (%s): running Phase 1 to fetch and "
             "consolidate the original per-month FOI/Contracts Finder exports from the "
             "project's public Google Drive archive. This downloads ~500MB and takes a "
             "few minutes; it is a one-off. To supply the files manually instead, see "
@@ -61,80 +52,77 @@ def main():
         build_raw_from_drive.build_all()
 
     logger.info("=" * 70)
-    logger.info("PHASE 2 — Data Engineering")
+    logger.info("PHASE 2: Data Engineering")
     logger.info("=" * 70)
     panel = clean_and_merge()
 
     logger.info("=" * 70)
-    logger.info("PHASE 3 — EDA, HHI, STL Shock Analysis")
+    logger.info("PHASE 3: EDA, HHI, STL Shock Analysis")
     logger.info("=" * 70)
     dq, dist, new_supplier = run_eda()
     hhi_monthly, hhi_period_source, top_suppliers = compute_hhi(panel)
     stl_summary, stl_decomp = run_stl_shock_analysis(panel)
 
     logger.info("=" * 70)
-    logger.info("PHASE 4 — Isolation Forest + SHAP")
+    logger.info("PHASE 4: Isolation Forest + SHAP")
     logger.info("=" * 70)
     scored_df, shap_df, top_anomalies = run_modeling_pipeline()
 
     logger.info("=" * 70)
-    logger.info("PHASE 5 — Audit Red-Flag Validation")
+    logger.info("PHASE 5: Audit Red-Flag Validation")
     logger.info("=" * 70)
     validation_df = run_validation()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6A — Multi-Method Anomaly Detection Comparison")
+    logger.info("PHASE 6A: Multi-Method Anomaly Detection Comparison")
     logger.info("=" * 70)
-    # NOTE: `panel` here is the FULL merged panel (trust_spend + contract_notice).
-    # method_comparison / synthetic_evaluation require the trust_spend-only view
-    # (same as Phase 4's Isolation Forest), so we deliberately do NOT pass `panel`
-    # through -- each function loads and filters its own trust-only copy via
-    # `load_trust_panel()` to avoid silently scoring contract_notice rows (which
-    # have null supplier/amount-derived features) as if they were spend records.
+    # ``panel`` includes expenditure and contract-notice records. The comparison
+    # and injection analyses independently load the trust-spend population used
+    # by Isolation Forest, excluding notices without supplier-derived covariates.
     method_comparison_df, method_comparison_summary = run_method_comparison()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6B — Synthetic Anomaly Injection Evaluation")
+    logger.info("PHASE 6B: Synthetic Anomaly Injection Evaluation")
     logger.info("=" * 70)
     synthetic_results_df, synthetic_by_type_df = run_synthetic_evaluation()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6C — Statistical Significance Testing")
+    logger.info("PHASE 6C: Statistical Significance Testing")
     logger.info("=" * 70)
     bootstrap_df, mwu_df, hyper_result, circularity_df = run_statistical_tests()
 
     logger.info("=" * 70)
-    logger.info("PHASE 6D — Supplier-Buyer Network / Collusion-Indicator Analysis")
+    logger.info("PHASE 6D: Supplier-Buyer Network / Collusion-Indicator Analysis")
     logger.info("=" * 70)
     network_node_df, hub_comparison, community_df, top_communities = run_network_analysis()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7A — Composite Supplier Risk Score")
+    logger.info("PHASE 7A: Composite Supplier Risk Score")
     logger.info("=" * 70)
     risk_score_df, risk_hub_comparison = run_supplier_risk_score()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7B — Category-Level Deep Dive")
+    logger.info("PHASE 7B: Category-Level Deep Dive")
     logger.info("=" * 70)
     category_table_df, category_shock_ranking_df = run_category_deep_dive()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7C — Robustness Checks")
+    logger.info("PHASE 7C: Robustness Checks")
     logger.info("=" * 70)
     robustness_threshold_df, robustness_period_shift_df, robustness_ablation_df = run_robustness_checks()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7D — BI-Ready Data Export (star schema)")
+    logger.info("PHASE 7D: BI-Ready Data Export (star schema)")
     logger.info("=" * 70)
     bi_tables = run_bi_export()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7E — Interactive Plotly Dashboard")
+    logger.info("PHASE 7E: Interactive Plotly Dashboard")
     logger.info("=" * 70)
     dashboard_path = run_dashboard()
 
     logger.info("=" * 70)
-    logger.info("PHASE 7F — Generate Report Figures")
+    logger.info("PHASE 7F: Generate Report Figures")
     logger.info("=" * 70)
     run_make_figures()
 
@@ -168,15 +156,15 @@ def main():
     print("\nSynthetic-injection evaluation (precision/recall/F1 vs known injected anomalies):")
     print(synthetic_results_df.to_string(index=False))
     print(f"\nHub vs non-hub supplier anomaly rate: {hub_comparison['mean_anomaly_rate_hub_pct']:.2f}% vs {hub_comparison['mean_anomaly_rate_nonhub_pct']:.2f}% (Mann-Whitney p={hub_comparison['p_value']:.3g})")
-    print("\nComposite supplier risk score — risk tier counts:")
+    print("\nComposite supplier risk score, risk tier counts:")
     print(risk_score_df["risk_tier"].value_counts().to_string())
     print("\nTop 5 highest composite-risk suppliers:")
     print(risk_score_df[["supplier", "n_transactions", "composite_risk_score", "risk_tier"]].head(5).to_string(index=False))
     print("\nTop 3 categories by pre-COVID -> COVID spend growth:")
     print(category_shock_ranking_df[["category", "spend_pre_covid", "spend_covid", "pct_change_pre_to_covid"]].head(3).to_string(index=False))
-    print("\nRobustness — threshold sensitivity (95/98/99th pct):")
+    print("\nRobustness: threshold sensitivity (95/98/99th pct):")
     print(robustness_threshold_df[["threshold_percentile", "flagged_rate_pct", "rate_covid_pct", "rule_overlap_rate_pct"]].to_string(index=False))
-    print("\nRobustness — feature ablation (drop is_new_supplier), Jaccard overlap vs baseline flags:", f"{robustness_ablation_df['jaccard_overlap'].iloc[0]:.3f}")
+    print("\nRobustness: feature ablation (drop is_new_supplier), Jaccard overlap vs baseline flags:", f"{robustness_ablation_df['jaccard_overlap'].iloc[0]:.3f}")
     print(f"\nBI-ready star-schema export ({len(bi_tables)} tables): {config.BI_EXPORT_DIR}")
     print(f"Interactive dashboard: {dashboard_path}")
     print(f"\nAll outputs saved under: {config.DATA_PROCESSED_DIR}")

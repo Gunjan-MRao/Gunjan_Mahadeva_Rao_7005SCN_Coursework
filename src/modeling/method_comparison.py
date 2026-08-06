@@ -1,34 +1,10 @@
 """
-Phase 4 extension — Multi-method anomaly detection comparison.
+Phase 4 extension: comparative unsupervised anomaly detection.
 
-Directly addresses supervisor feedback: "More detailed comparison between
-methods would improve it further."
-
-Trains four unsupervised anomaly detectors on the *same* pre-COVID feature
-matrix used by the primary Isolation Forest model (see
-`src.modeling.isolation_forest_shap.FEATURE_COLUMNS`), scores every
-trust-spend record, and reports:
-
-  1. Per-method flag rates by period/source (does the qualitative COVID
-     shock story replicate across methods, or is it an Isolation-Forest-
-     specific artefact?).
-  2. Pairwise agreement between methods (Jaccard index + Cohen's kappa on
-     the binary anomaly flags) — the standard way to report "detector
-     agreement" in comparative anomaly-detection studies (cf. the worked
-     multi-detector comparison in scikit-learn's own anomaly-detection
-     gallery, https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_anomaly_comparison.html).
-  3. A consensus score (fraction of methods flagging each record), which
-     forms the ensemble signal reused as an extra red-flag rule in
-     Phase 5 and as a feature in Phase 6 network analysis.
-
-Methods compared:
-  - Isolation Forest (Liu, Ting & Zhou, 2008)      — tree-partitioning
-  - Local Outlier Factor (Breunig et al., 2000)    — density-based
-  - One-Class SVM (Schölkopf et al., 2001)         — boundary/margin-based
-  - MLP Autoencoder (reconstruction-error based)   — representation-learning
-
-All four are trained ONLY on pre-COVID data (same as the primary model) so
-comparisons are apples-to-apples with the headline Isolation Forest result.
+Isolation Forest, Local Outlier Factor, One-Class SVM, and an MLP autoencoder
+are trained on the common pre-COVID feature baseline and scored on all records.
+Pairwise Jaccard indices and Cohen's kappa quantify binary-flag agreement,
+while two-or-more detector consensus summarises cross-detector corroboration.
 """
 from __future__ import annotations
 
@@ -60,24 +36,26 @@ def _flag_top_percentile(scores: np.ndarray, percentile: float) -> np.ndarray:
 def fit_isolation_forest(X_train: pd.DataFrame, X: pd.DataFrame) -> np.ndarray:
     model = IsolationForest(**config.ISOLATION_FOREST_PARAMS)
     model.fit(X_train)
-    return -model.decision_function(X)  # higher = more anomalous
+    return -model.decision_function(X)  # Negation aligns larger scores with greater anomaly severity.
 
 
 def fit_lof(X_train: pd.DataFrame, X: pd.DataFrame) -> np.ndarray:
     model = LocalOutlierFactor(**config.LOF_PARAMS)
     model.fit(X_train)
-    return -model.decision_function(X)  # higher = more anomalous
+    return -model.decision_function(X)  # Negation aligns larger scores with greater anomaly severity.
 
 
 def fit_one_class_svm(X_train_scaled: np.ndarray, X_scaled: np.ndarray) -> np.ndarray:
     model = OneClassSVM(**config.OCSVM_PARAMS)
     model.fit(X_train_scaled)
-    return -model.decision_function(X_scaled)  # higher = more anomalous
+    return -model.decision_function(X_scaled)  # Negation aligns larger scores with greater anomaly severity.
 
 
 def fit_autoencoder(X_train_scaled: np.ndarray, X_scaled: np.ndarray) -> np.ndarray:
-    """Bottleneck MLP trained to reconstruct its own (scaled) input.
-    Anomaly score = per-record mean squared reconstruction error."""
+    """Fit an MLP autoencoder to reconstruct scaled feature vectors.
+
+    Per-record mean squared reconstruction error is used as the anomaly score.
+    """
     model = MLPRegressor(**config.AUTOENCODER_PARAMS)
     model.fit(X_train_scaled, X_train_scaled)
     reconstruction = model.predict(X_scaled)
@@ -136,12 +114,12 @@ def run_method_comparison(panel: pd.DataFrame | None = None) -> tuple[pd.DataFra
         )
 
     out["consensus_count"] = out[[f"{m}_flag" for m in METHOD_NAMES]].sum(axis=1)
-    out["consensus_flag_majority"] = out["consensus_count"] >= 2  # flagged by >=2 of 4 methods
+    out["consensus_flag_majority"] = out["consensus_count"] >= 2  # Consensus threshold: at least two of four detectors flag the record.
 
     out.to_csv(config.METHOD_COMPARISON_PATH, index=False)
     logger.info("Saved per-record method comparison scores -> %s", config.METHOD_COMPARISON_PATH)
 
-    # --- Summary 1: flag rate by period, per method -------------------------------
+    # Summarise period-specific flag rates to assess detector stability across regimes.
     rate_rows = []
     for method in METHOD_NAMES:
         by_period = out.groupby("period")[f"{method}_flag"].mean().mul(100).round(2)
@@ -149,7 +127,7 @@ def run_method_comparison(panel: pd.DataFrame | None = None) -> tuple[pd.DataFra
             rate_rows.append({"method": method, "period": period, "flag_rate_pct": rate})
     rate_df = pd.DataFrame(rate_rows)
 
-    # --- Summary 2: pairwise agreement (Jaccard + Cohen's kappa) -------------------
+    # Jaccard captures shared flags; kappa adjusts binary agreement for chance.
     from sklearn.metrics import cohen_kappa_score
 
     agreement_rows = []
@@ -180,7 +158,7 @@ def run_method_comparison(panel: pd.DataFrame | None = None) -> tuple[pd.DataFra
         "pairwise_agreement": agreement_df,
         "timings_seconds": pd.DataFrame([timings]),
     }
-    # persist a flattened summary CSV for the report
+    # Persist tabular summaries for reproducible reporting and downstream analysis.
     rate_df.to_csv(config.METHOD_COMPARISON_SUMMARY_PATH, index=False)
     agreement_df.to_csv(str(config.METHOD_COMPARISON_SUMMARY_PATH).replace(".csv", "_agreement.csv"), index=False)
 

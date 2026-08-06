@@ -1,16 +1,9 @@
-"""
-Phase 2 (continued) — cleaning, quality filtering, feature-ready merge.
+"""Phase 2b: analytical cleaning and procurement-panel construction.
 
-Takes the standardised panel from `loaders.load_all_sources()` and:
-  1. restricts to the 2019-01-01 -> 2024-12-31 study window
-  2. removes non-monetary / clearly erroneous rows (zero, negative, and
-     extreme-outlier placeholder amounts)
-  3. normalises supplier names for matching across sources
-  4. assigns the pre-COVID / COVID / post-COVID period label
-  5. flags first-time suppliers ("is_new_supplier") per entity
-  6. computes a small set of anomaly-detection-ready numeric features
-
-Running this module directly regenerates `data/processed/master_procurement_panel.csv`.
+Transforms the source-standardised records into the analysis panel by applying
+the pre-specified observation window, monetary quality filters, supplier
+normalisation, econometric period labels, and detection covariates. The
+resulting panel is written to ``master_procurement_panel.csv``.
 """
 from __future__ import annotations
 
@@ -27,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 def _assign_period(dates: pd.Series) -> pd.Series:
+    """Assign mutually exclusive study periods using inclusive calendar boundaries."""
     conditions = [
         dates.between(config.PRE_COVID_START, config.PRE_COVID_END),
         dates.between(config.COVID_START, config.COVID_END),
@@ -37,6 +31,7 @@ def _assign_period(dates: pd.Series) -> pd.Series:
 
 
 def _normalise_supplier(series: pd.Series) -> pd.Series:
+    """Canonicalise supplier names for entity-level longitudinal matching."""
     s = series.astype(str).str.upper().str.strip()
     s = s.str.replace(r"[^A-Z0-9& ]", "", regex=True)
     s = s.str.replace(r"\s+(LTD|LIMITED|PLC|LLP|INC)\.?$", "", regex=True)
@@ -45,38 +40,42 @@ def _normalise_supplier(series: pd.Series) -> pd.Series:
 
 
 def clean_and_merge() -> pd.DataFrame:
+    """Construct the cleaned, feature-ready procurement panel.
+
+    The procedure applies documented inclusion criteria before generating
+    longitudinal supplier and amount-distribution covariates for anomaly
+    detection and period-based inference.
+    """
     panel = load_all_sources()
     n_raw = len(panel)
 
-    # 1. study window
+    # 1. Restrict records to the pre-specified econometric observation window.
     panel["date"] = pd.to_datetime(panel["date"], errors="coerce")
     panel = panel[panel["date"].between(config.PRE_COVID_START, config.POST_COVID_END)]
 
-    # 2. remove non-monetary / erroneous amounts
+    # 2. Exclude null, non-positive, and implausibly large monetary values.
     panel = panel[panel["amount"].notna()]
     panel = panel[panel["amount"] > 0]
-    # NHS trust invoices above £50m and contract notices above £2bn are treated as
-    # data-entry / framework-ceiling artefacts rather than genuine single transactions
+    # Values above £50m for trust invoices or £2bn for notices are treated as
+    # data-entry errors or framework ceilings rather than single transactions.
     panel = panel[
         ((panel["record_type"] == "trust_spend") & (panel["amount"] <= 5e7))
         | ((panel["record_type"] == "contract_notice") & (panel["amount"] <= 2e9))
     ]
 
-    # 3. normalise supplier names (trust_spend rows only; contract notices have no supplier)
+    # 3. Harmonise observed supplier strings; contract notices retain null suppliers.
     panel["supplier_norm"] = np.where(
         panel["supplier"].notna(), _normalise_supplier(panel["supplier"]), np.nan
     )
     panel["entity_norm"] = panel["entity"].astype(str).str.upper().str.strip()
 
-    # 4. period label
+    # 4. Assign the period indicator used in comparative analyses.
     panel["period"] = _assign_period(panel["date"])
     panel = panel[panel["period"] != "out_of_scope"]
 
-    # 5. new-supplier flag: first time this supplier is seen for this entity.
-    # A 6-month burn-in window (start of panel -> 2019-06-30) is excluded from the
-    # flag because every supplier active in that window would otherwise look
-    # "new" purely due to left-censoring (no earlier history exists in the data
-    # to compare against), which would artificially inflate the pre-COVID rate.
+    # 5. Flag the first observed supplier-entity occurrence in trust expenditure.
+    # The six-month burn-in window (1 January–30 June 2019) avoids classifying
+    # incumbents as new solely because pre-panel supplier history is unobserved.
     panel = panel.sort_values("date")
     trust_mask = panel["record_type"] == "trust_spend"
     panel["is_new_supplier"] = False
@@ -86,20 +85,20 @@ def clean_and_merge() -> pd.DataFrame:
     trust_rows["is_new_supplier"] = (~first_seen) & (trust_rows["date"] > burn_in_end)
     panel.loc[trust_mask, "is_new_supplier"] = trust_rows["is_new_supplier"].values
 
-    # 6. modelling features
+    # 6. Generate covariates for anomaly-detection models.
     panel["log_amount"] = np.log1p(panel["amount"])
     panel["year"] = panel["date"].dt.year
     panel["month"] = panel["date"].dt.month
     panel["year_month"] = panel["date"].dt.to_period("M").astype(str)
     panel["day_of_week"] = panel["date"].dt.dayofweek
 
-    # supplier-level frequency & recency features (trust_spend only)
+    # Entity-supplier frequency and recency covariates, retaining null-supplier groups.
     panel = panel.sort_values(["entity_norm", "supplier_norm", "date"])
     grp = panel.groupby(["entity_norm", "supplier_norm"], dropna=False)
     panel["days_since_last_txn"] = grp["date"].diff().dt.days
     panel["supplier_txn_seq"] = grp.cumcount() + 1
 
-    # category-level z-score of amount (within source + category), robust to scale differences
+    # Within-source/category standardisation controls for heterogeneous expenditure scales.
     cat_stats = panel.groupby(["source", "category"], dropna=False)["log_amount"].transform(
         lambda s: (s - s.mean()) / (s.std(ddof=0) + 1e-9)
     )

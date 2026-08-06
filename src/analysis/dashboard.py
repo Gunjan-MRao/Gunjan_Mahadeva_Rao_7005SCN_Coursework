@@ -1,18 +1,9 @@
-"""
-Phase 7E — Masters-level interactive HTML dashboard.
+"""Phase 7E: Interactive analytical dashboard.
 
-Builds a self-contained, dark-themed, multi-tab dashboard from the same
-star-schema CSVs exported by bi_export.py (Phase 7D), plus a handful of
-already-computed enrichment tables (SHAP, network, method-agreement,
-synthetic-injection, community) that already exist elsewhere in
-data/processed/. Every KPI, chart value, and caption number below is
-computed live from those files at render time -- nothing is hard-coded --
-so the dashboard always reflects whatever data is actually on disk.
-
-Output requires no server: open reports/nhs_procurement_dashboard.html
-directly in any browser. Plotly.js is loaded once from CDN in <head>;
-each chart is embedded as an individual `fig.to_html(full_html=False,
-include_plotlyjs=False)` div. Tabs are pure vanilla JS (no frameworks).
+Renders an HTML dashboard from the Phase 7D star-schema exports and optional
+enrichment artefacts. Reported values are calculated from the current
+processed data, including STL, HHI, anomaly, network, robustness, and
+SHAP-based feature-attribution results.
 """
 from __future__ import annotations
 
@@ -30,7 +21,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Design tokens
+# Visual design constants
 # ---------------------------------------------------------------------------
 COLORS = {
     "bg": "#0a0d14",
@@ -53,7 +44,7 @@ PLOTLY_CDN = "https://cdn.plot.ly/plotly-2.35.2.min.js"
 
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Data access
 # ---------------------------------------------------------------------------
 def _load_tables() -> dict:
     """Load the five required star-schema BI-export tables (Phase 7D)."""
@@ -68,10 +59,11 @@ def _load_tables() -> dict:
 
 
 def _safe_read_csv(path, **kwargs):
-    """Best-effort read of an *enrichment* CSV that is not part of the core
-    star schema. Several of these files are gitignored/local-only artefacts
-    of the ML pipeline, so a fresh checkout without a full pipeline run
-    should not crash dashboard generation -- callers degrade gracefully."""
+    """Read an optional enrichment table without interrupting dashboard generation.
+
+    Optional artefacts permit supplementary analysis while retaining a
+    reproducible dashboard from the required star-schema tables alone.
+    """
     try:
         return pd.read_csv(path, low_memory=False, **kwargs)
     except (FileNotFoundError, OSError):
@@ -96,7 +88,7 @@ def _b64_png(path) -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# Live metric computation (no hard-coded figures anywhere below)
+# Data-derived metric computation
 # ---------------------------------------------------------------------------
 def _compute_kpis(t: dict) -> dict:
     fact, supplier, month, period = t["fact"], t["supplier"], t["month"], t["period"]
@@ -186,16 +178,12 @@ def _compute_shap_summary() -> dict:
 
 
 def _compute_hub_comparison(t: dict) -> dict:
-    """Hub vs non-hub anomaly rate. Prefers the full buyer-supplier network
-    population (matching the Phase 6D methodology in
-    src/network/supplier_network.py: network_supplier_metrics.csv
-    cross-referenced with per-supplier rates from anomaly_scores.csv),
-    since that is the population the dissertation's headline hub-vs-non-hub
-    finding is drawn from. Falls back to the smaller, risk-scored
-    dim_supplier population (>=5 transactions) -- and its own
-    ml_anomaly_rate / is_network_hub columns, as those are always present
-    in the committed star schema -- if the richer network files are not
-    available in the current environment."""
+    """Compare anomaly rates for hub and non-hub suppliers.
+
+    The full buyer-supplier network is preferred because it matches the
+    network-analytic population; the risk-scored supplier dimension provides
+    a documented fallback when network enrichment artefacts are unavailable.
+    """
     try:
         node_df = _safe_read_csv(config.NETWORK_NODE_METRICS_PATH)
         scores = _safe_read_csv(config.ANOMALY_SCORES_PATH, usecols=["supplier", "is_anomaly"])
@@ -266,7 +254,7 @@ def _compute_robustness() -> pd.DataFrame | None:
 
 
 # ---------------------------------------------------------------------------
-# Plotly theme helpers
+# Plotly presentation helpers
 # ---------------------------------------------------------------------------
 def _dark(fig: go.Figure, height: int = 440) -> go.Figure:
     fig.update_layout(
@@ -301,7 +289,7 @@ def _sparkline(y: list, color: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Chart builders
+# Chart construction
 # ---------------------------------------------------------------------------
 def _fig_spend_anomaly(month: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
@@ -494,7 +482,7 @@ def _fig_category_heatmap(category: pd.DataFrame) -> go.Figure:
 
 
 # ---------------------------------------------------------------------------
-# HTML fragments (static -- plain strings, no f-string brace conflicts)
+# Static HTML fragments
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
@@ -627,16 +615,16 @@ def build_dashboard() -> str:
     robustness = _compute_robustness()
     generated = datetime.now().strftime("%d %b %Y, %H:%M")
 
-    # --- Executive summary (dynamic, corrected wording) ---------------------
+    # Executive summary text is parameterised with data-derived estimates.
     exec_p1 = (
         f"This study analysed {k['total_txn']:,} NHS trust procurement transactions spanning "
         f"{k['date_min']} \u2013 {k['date_max']}. An Isolation Forest machine-learning model flagged "
         f"{k['anomaly_rate']:.2f}% of {k['ml_scored']:,} scored transactions as anomalous overall."
     )
     exec_p2 = (
-        f"The anomaly rate rose steadily across the study period \u2014 from {k['rate_pre']:.2f}% pre-COVID to "
+        f"The anomaly rate rose steadily across the study period, from {k['rate_pre']:.2f}% pre-COVID to "
         f"{k['rate_covid']:.2f}% during the COVID-19 emergency-procurement window, and further to {k['rate_post']:.2f}% "
-        f"post-COVID \u2014 indicating the signal has not reverted to baseline even after the acute crisis period ended."
+        f"post-COVID. This pattern indicates the signal has not reverted to baseline even after the acute crisis period ended."
     )
     exec_p3 = (
         f"Of {k['n_suppliers_scored']:,} risk-scored suppliers, {k['n_critical']} ({k['pct_critical']:.1f}%) were "
@@ -645,7 +633,7 @@ def build_dashboard() -> str:
         f"({hub_stats['nonhub_rate']:.2f}%)."
     )
 
-    # --- KPI cards ------------------------------------------------------------
+    # Key performance indicators summarise the analytical population.
     kpi_html = (
         _kpi_card("\u00a3", "#4f98a3", f"\u00a3{k['total_spend']/1e9:.1f}bn", "Total Trust Spend Analysed",
                    f"{k['total_txn']:,} trust_spend transactions, {k['date_min']}\u2013{k['date_max']}",
@@ -660,13 +648,13 @@ def build_dashboard() -> str:
                      [supplier["risk_tier"].value_counts().get(tr, 0) for tr in TIER_ORDER])
     )
 
-    # --- Tab: Overview ----------------------------------------------------
+    # Overview tab
     overview_annotation = (
         f"COVID-19 drove a +{stl['covid_dev']:.1f}% monthly spend surge above the pre-pandemic STL baseline, "
         f"deepening further to +{stl['post_dev']:.1f}% post-COVID. The ML anomaly rate climbed from "
         f"{k['rate_pre']:.2f}% pre-pandemic to {k['rate_covid']:.2f}% during the emergency-procurement window, and "
-        f"continued rising to {k['rate_post']:.2f}% post-COVID \u2014 the highest of the three periods, not COVID "
-        f"itself \u2014 suggesting the disruption to normal procurement controls persisted well beyond the acute crisis."
+        f"continued rising to {k['rate_post']:.2f}% post-COVID, the highest of the three periods rather than COVID "
+        f"itself, suggesting the disruption to normal procurement controls persisted well beyond the acute crisis."
     )
     hhi_caption = (
         f"Herfindahl-Hirschman Index across the study period ranges from {month['hhi'].min():,.0f} to "
@@ -677,7 +665,7 @@ def build_dashboard() -> str:
     new_sup_caption = (
         f"New-supplier entry rate averaged {new_sup.get('Pre-COVID', float('nan')):.2f}% pre-COVID, more than doubling to "
         f"{new_sup.get('COVID', float('nan')):.2f}% during COVID as emergency procurement onboarded unfamiliar suppliers, "
-        f"before settling to {new_sup.get('Post-COVID', float('nan')):.2f}% post-COVID \u2014 still above the pre-COVID baseline."
+        f"before settling to {new_sup.get('Post-COVID', float('nan')):.2f}% post-COVID, a level that remains above the pre-COVID baseline."
     )
 
     tab_overview = (
@@ -689,12 +677,12 @@ def build_dashboard() -> str:
         + '</div>'
     )
 
-    # --- Tab: Anomaly Analysis ----------------------------------------------
+    # Anomaly-analysis tab
     scatter_caption = (
         f"ML anomaly flags ({jacc['n_ml']:,} transactions) and independent rule-based audit flags "
         f"({jacc['n_rule']:,} transactions) overlap on only {jacc['n_both']:,} transactions "
         f"(Jaccard index = {jacc['jaccard']:.3f}). The low overlap indicates the two detection approaches are largely "
-        f"complementary rather than redundant \u2014 each catches risk signal the other misses."
+        f"complementary rather than redundant: each approach captures risk signal that the other misses."
     )
     heatmap_caption = "Pairwise agreement (Jaccard index) between all four anomaly-detection methods compared in Phase 4."
     if method_agree is not None and len(method_agree):
@@ -712,7 +700,7 @@ def build_dashboard() -> str:
             if "new_supplier_amount_baseline" in s.index:
                 base_f1 = s.loc["new_supplier_amount_baseline", "f1"]
                 synth_caption += (
-                    f", below the simple new-supplier-large-amount heuristic baseline (F1 = {base_f1:.3f}) \u2014 an "
+                    f", below the simple new-supplier-large-amount heuristic baseline (F1 = {base_f1:.3f}). This is an "
                     f"honest limitation to acknowledge, though the ML flags still add complementary value on top of "
                     f"rule-based detection (see the low ML-vs-rule Jaccard above)."
                 )
@@ -731,7 +719,7 @@ def build_dashboard() -> str:
         + '</div>'
     )
 
-    # --- Tab: Supplier Risk --------------------------------------------------
+    # Supplier-risk tab
     tier_caption = (
         f"{k['n_suppliers_scored']:,} suppliers with \u22655 transactions were risk-scored; "
         f"{k['n_critical']} ({k['pct_critical']:.1f}%) fall into the Critical tier."
@@ -741,7 +729,7 @@ def build_dashboard() -> str:
         f"{hub_stats['nonhub_rate']:.2f}% (n={hub_stats['n_nonhub']:,}) for non-hub suppliers"
         + (f", a difference confirmed by Mann-Whitney U test (p = {hub_stats['p_value']:.3g})" if hub_stats['p_value'] == hub_stats['p_value'] else "")
         + f". Computed from {hub_stats['source']}. Structurally central suppliers are, counter-intuitively, the "
-          f"*lower*-risk group \u2014 anomalies concentrate instead among smaller, newer, single-relationship suppliers."
+          f"*lower*-risk group: anomalies concentrate instead among smaller, newer, single-relationship suppliers."
     )
 
     tab_supplier = (
@@ -756,11 +744,11 @@ def build_dashboard() -> str:
         + '</div>'
     )
 
-    # --- Tab: Category Intelligence ------------------------------------------
+    # Category-intelligence tab
     top_shock_cat = category.dropna(subset=["pct_change_pre_to_covid"]).sort_values("pct_change_pre_to_covid", ascending=False).iloc[0]
     top_shock_caption = f"The largest COVID-era spend shock was in \u201c{top_shock_cat['category']}\u201d, up {top_shock_cat['pct_change_pre_to_covid']:,.0f}% pre-COVID \u2192 COVID."
     stl_caption = f"STL decomposition of the monthly trust-spend series shows a +{stl['covid_dev']:.1f}% deviation above the pre-pandemic seasonal baseline during COVID, widening to +{stl['post_dev']:.1f}% post-COVID."
-    anomaly_timeline_caption = f"ML anomaly rate by period: {k['rate_pre']:.2f}% pre-COVID \u2192 {k['rate_covid']:.2f}% COVID \u2192 {k['rate_post']:.2f}% post-COVID \u2014 a monotonic rise, with the post-COVID period recording the highest rate observed."
+    anomaly_timeline_caption = f"ML anomaly rate by period: {k['rate_pre']:.2f}% pre-COVID \u2192 {k['rate_covid']:.2f}% COVID \u2192 {k['rate_post']:.2f}% post-COVID. This is a monotonic rise, with the post-COVID period recording the highest rate observed."
     shap_caption = "SHAP explainability was unavailable for this run." if not shap_summary["total_n"] else (
         f"Across the top {shap_summary['total_n']} highest-scored anomalies, \u201c{shap_summary['top_feature']}\u201d is the "
         f"dominant SHAP driver in {shap_summary['top_n']} of {shap_summary['total_n']} cases "
@@ -782,7 +770,7 @@ def build_dashboard() -> str:
     community_caption = "Community-level anomaly clustering was unavailable for this run." if top_comm["community_id"] is None else (
         f"Partitioning the supplier co-occurrence network into communities, community {top_comm['community_id']} "
         f"(n={top_comm['size']}) shows the highest mean anomaly rate at {top_comm['rate']:.2f}%, well above the "
-        f"{k['anomaly_rate']:.2f}% overall baseline \u2014 evidence that certain buyer/category/month supplier pools carry "
+        f"{k['anomaly_rate']:.2f}% overall baseline, evidence that certain buyer/category/month supplier pools carry "
         f"disproportionate anomaly risk beyond individual supplier centrality."
     )
 
@@ -802,13 +790,13 @@ def build_dashboard() -> str:
         + '</div>'
     )
 
-    # --- Assemble page --------------------------------------------------------
+    # Assemble the self-contained HTML document.
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NHS Procurement Anomaly Detection \u2014 Dashboard</title>
+<title>NHS Procurement Anomaly Detection: Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="{PLOTLY_CDN}"></script>

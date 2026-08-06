@@ -1,17 +1,9 @@
-"""
-Phase 2 — Data Engineering.
+"""Phase 2: source-specific loading and schema harmonisation.
 
-Loads the four raw source files and standardises each into a common schema:
-
-    source, entity, supplier, date, amount, category, sub_category,
-    record_type, transaction_id
-
-Each `load_*` function is source-specific because the four public datasets
-were published with different column names, date formats and (in the case of
-United Lincolnshire Hospitals) badly-parsed multi-row headers baked into the
-CSV during the original FOI export. Centralising the quirks here means every
-downstream stage (EDA, STL, Isolation Forest, SHAP) can work off one clean
-schema instead of re-discovering these issues.
+The four consolidated public sources are mapped to a common procurement schema:
+``source, entity, supplier, date, amount, category, sub_category, record_type,
+transaction_id``. Source-specific handling centralises variation in field
+names, date representations, and embedded header artefacts before analysis.
 """
 from __future__ import annotations
 
@@ -33,12 +25,11 @@ COMMON_COLUMNS = [
 
 
 def _parse_mixed_dates(series: pd.Series) -> pd.Series:
-    """United Lincolnshire Hospitals' raw export mixes ISO timestamps
-    ('2019-01-10 00:00:00.0') with UK-format dates ('05/09/2019') across
-    different monthly source files — a concrete data-quality issue this
-    project's RQ1 investigates. Parse both formats explicitly rather than
-    letting a single `pd.to_datetime` call silently coerce the minority
-    format to NaT."""
+    """Parse Lincolnshire's ISO timestamps and UK-format dates separately.
+
+    Explicit format partitioning prevents minority representations from being
+    coerced to missing values; ``dayfirst=True`` reflects UK reporting practice.
+    """
     s = series.astype(str).str.strip()
     iso_mask = s.str.match(r"^\d{4}-\d{2}-\d{2}")
     parsed = pd.Series(pd.NaT, index=s.index, dtype="datetime64[ns]")
@@ -48,7 +39,7 @@ def _parse_mixed_dates(series: pd.Series) -> pd.Series:
 
 
 def _clean_amount(series: pd.Series) -> pd.Series:
-    """Convert '48,523.68'-style strings (and floats) into numeric GBP."""
+    """Coerce monetary strings and numerics to GBP after removing display symbols."""
     cleaned = (
         series.astype(str)
         .str.replace(",", "", regex=False)
@@ -59,6 +50,11 @@ def _clean_amount(series: pd.Series) -> pd.Series:
 
 
 def load_bradford(path=None) -> pd.DataFrame:
+    """Load Bradford expenditure records into the common procurement schema.
+
+    Records lacking date, amount, or supplier fields are excluded because they
+    cannot support transaction-level temporal or supplier analyses.
+    """
     path = path or config.RAW_FILES["bradford"]
     df = pd.read_csv(path, low_memory=False)
     df = df.dropna(subset=["date", "amount", "supplier"]).copy()
@@ -79,13 +75,15 @@ def load_bradford(path=None) -> pd.DataFrame:
 
 
 def load_lincolnshire(path=None) -> pd.DataFrame:
-    """United Lincolnshire Hospitals — FOI export contains repeated blank/header
-    rows between monthly blocks, so rows must be filtered on real content
-    rather than trusted at face value."""
+    """Load United Lincolnshire Hospitals expenditure into the common schema.
+
+    The consolidated FOI export retains repeated blank/header rows between
+    monthly blocks, requiring content-based exclusion before date parsing.
+    """
     path = path or config.RAW_FILES["lincolnshire"]
     df = pd.read_csv(path, low_memory=False)
     df = df.dropna(subset=["date", "amount", "supplier", "entity"]).copy()
-    # drop stray repeated header rows that survived cleaning (e.g. "SUPPLIER" as a value)
+    # Exclude embedded header labels retained as apparent supplier observations.
     df = df[~df["supplier"].astype(str).str.fullmatch(r"(?i)supplier|expense.*", na=False)]
 
     out = pd.DataFrame({
@@ -104,6 +102,11 @@ def load_lincolnshire(path=None) -> pd.DataFrame:
 
 
 def load_nhs_england(path=None) -> pd.DataFrame:
+    """Load NHS England expenditure records into the common procurement schema.
+
+    Records missing date, amount, or supplier fields are excluded before
+    standardising identifiers and monetary values.
+    """
     path = path or config.RAW_FILES["nhs_england"]
     df = pd.read_csv(path, low_memory=False)
     df = df.dropna(subset=["date", "amount", "supplier"]).copy()
@@ -124,11 +127,12 @@ def load_nhs_england(path=None) -> pd.DataFrame:
 
 
 def load_contracts_finder(path=None) -> pd.DataFrame:
-    """UK Contracts Finder OCDS export. Only the `main.csv` block carries a
-    usable buyer + tender value at the contract-notice level; `awards.csv`
-    and `awards_suppliers.csv` blocks are sparse joins kept out of the
-    anomaly-detection panel but retained in raw form for supplier-network
-    follow-up analysis."""
+    """Load health-sector Contracts Finder notices into the common schema.
+
+    Only ``main.csv`` provides buyer and tender-value fields at notice level.
+    Award and supplier blocks remain in the raw archive for subsequent
+    provenance and network-oriented analyses.
+    """
     path = path or config.RAW_FILES["contracts_finder"]
     df = pd.read_csv(path, low_memory=False)
     main = df[df["_source_file"] == "main.csv"].copy()
@@ -138,7 +142,7 @@ def load_contracts_finder(path=None) -> pd.DataFrame:
     out = pd.DataFrame({
         "source": "UK_Contracts_Finder",
         "entity": main["buyer_name"].str.strip(),
-        "supplier": np.nan,  # buyer-side notice; awarded supplier lives in awards_suppliers.csv
+        "supplier": np.nan,  # Awarded suppliers are recorded separately in awards_suppliers.csv.
         "date": pd.to_datetime(main["date"], errors="coerce", utc=True).dt.tz_localize(None),
         "amount": pd.to_numeric(main["tender_value_amount"], errors="coerce"),
         "category": main["tender_procurementMethod"],
@@ -151,6 +155,7 @@ def load_contracts_finder(path=None) -> pd.DataFrame:
 
 
 def load_all_sources() -> pd.DataFrame:
+    """Load and concatenate all sources under the prescribed common schema."""
     frames = [
         load_bradford(),
         load_lincolnshire(),

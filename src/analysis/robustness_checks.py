@@ -1,38 +1,9 @@
-"""
-Phase 7C — Robustness checks.
+"""Phase 7C: robustness and sensitivity analysis.
 
-Every headline result up to Stage 6 rests on three modelling choices that are
-each, to some degree, arbitrary: the 98th-percentile anomaly-score cut-off,
-the exact calendar boundaries used to split pre/COVID/post periods, and the
-feature set fed into Isolation Forest. Reporting sensitivity of the headline
-findings to reasonable variations in each of these is standard practice for
-unsupervised anomaly-detection studies without ground-truth labels (see e.g.
-Aggarwal, C.C. (2017). "Outlier Analysis", 2nd ed., Springer, ch. 12, on the
-importance of threshold/parameter sensitivity analysis for unsupervised
-outlier ensembles; Emmott et al. (2015), "A Meta-Analysis of the Anomaly
-Detection Problem", arXiv:1503.01158, on benchmarking detector robustness).
-
-Three checks, each re-using artefacts already produced earlier in the
-pipeline rather than duplicating expensive model training where avoidable:
-
-  (a) Threshold sensitivity - re-flag anomalies at 95th/98th/99th percentile
-      cut-offs on the *same* already-computed anomaly_score column (Phase 4),
-      then recompute the period-level anomaly rate and the ML/rule
-      triangulation hypergeometric test (Phase 6C) at each threshold. Checks
-      whether the period ordering and ML/rule overlap significance survive a
-      stricter or looser cut-off.
-  (b) Period-boundary sensitivity - recompute period labels with the COVID
-      start/end boundaries shifted +/- 1 calendar month (applied
-      symmetrically) and recompute the anomaly rate by period under each
-      shifted definition, using the same per-record anomaly scores. Checks
-      whether the period-level ordering is an artefact of the exact
-      boundary dates chosen.
-  (c) Feature-set ablation - retrains Isolation Forest with `is_new_supplier`
-      removed from the feature set (the single most policy-salient/least
-      "generic" feature) and compares the resulting anomaly flags against the
-      baseline (full feature set) via Jaccard index and Spearman rank
-      correlation of the two continuous anomaly-score vectors. Checks whether
-      headline anomalies are highly sensitive to a single engineered feature.
+Evaluates the dependence of Isolation Forest findings on score thresholds,
+COVID-period boundaries, and the new-supplier feature. Threshold and boundary
+checks reuse fixed anomaly scores; the feature ablation retrains the model and
+compares flags and continuous scores with the baseline specification.
 """
 from __future__ import annotations
 
@@ -51,15 +22,17 @@ logger = logging.getLogger(__name__)
 
 
 def _jaccard(a: pd.Series, b: pd.Series) -> float:
+    """Calculate the Jaccard similarity of two binary anomaly indicators."""
     a, b = a.astype(bool), b.astype(bool)
     union = (a | b).sum()
     return float((a & b).sum() / union) if union else np.nan
 
 
 # ---------------------------------------------------------------------------
-# (a) Threshold sensitivity
+# Threshold sensitivity
 # ---------------------------------------------------------------------------
 def threshold_sensitivity() -> pd.DataFrame:
+    """Recompute period rates and rule overlap across score-cutoff percentiles."""
     scores = pd.read_csv(config.ANOMALY_SCORES_PATH, low_memory=False, usecols=["record_id", "period", "anomaly_score"])
     validation = pd.read_csv(config.VALIDATION_PATH, low_memory=False, usecols=["record_id", "rule_flagged"])
     merged = scores.merge(validation, on="record_id", how="left")
@@ -104,9 +77,10 @@ def threshold_sensitivity() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# (b) Period-boundary sensitivity
+# Period-boundary sensitivity
 # ---------------------------------------------------------------------------
 def _assign_period(dates: pd.Series, covid_start: pd.Timestamp, covid_end: pd.Timestamp) -> pd.Series:
+    """Assign observations to study periods under a specified COVID interval."""
     period = pd.Series("pre_covid", index=dates.index)
     period[(dates >= covid_start) & (dates <= covid_end)] = "covid"
     period[dates > covid_end] = "post_covid"
@@ -115,6 +89,7 @@ def _assign_period(dates: pd.Series, covid_start: pd.Timestamp, covid_end: pd.Ti
 
 
 def period_shift_sensitivity() -> pd.DataFrame:
+    """Assess anomaly-rate ordering under symmetric COVID-boundary shifts."""
     panel = pd.read_csv(config.MASTER_PANEL_PATH, low_memory=False, usecols=["record_id", "date"])
     panel["date"] = pd.to_datetime(panel["date"], errors="coerce", format="mixed")
     scores = pd.read_csv(config.ANOMALY_SCORES_PATH, low_memory=False, usecols=["record_id", "is_anomaly"])
@@ -152,9 +127,10 @@ def period_shift_sensitivity() -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# (c) Feature-set ablation
+# Feature-set ablation
 # ---------------------------------------------------------------------------
 def feature_ablation_sensitivity() -> pd.DataFrame:
+    """Compare baseline results with an Isolation Forest excluding new-supplier status."""
     panel = load_trust_panel()
     df = engineer_features(panel)
 

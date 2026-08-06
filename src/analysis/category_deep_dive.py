@@ -1,36 +1,9 @@
-"""
-Phase 7B — Category-level deep dive.
+"""Phase 7B: category-level procurement analysis.
 
-The headline STL/HHI/anomaly results (Phases 3-5) are reported at the
-whole-panel level. This module disaggregates by spend `category` x `period`
-to answer: which categories actually drove the aggregate COVID-19 spend
-shock, and do anomaly/new-supplier/concentration patterns differ materially
-across categories (e.g. PPE and medical-equipment categories are expected a
-priori to show the largest COVID-period spend growth and supplier churn, per
-the National Audit Office's 2020 review of the UK Government's PPE
-procurement, HC 959).
-
-For each (category, period) cell over trust_spend records, this computes:
-  - total_spend, n_transactions, n_suppliers
-  - spend_share_within_period_pct : the category's share of that period's
-    total trust spend (lets us see e.g. "PPE went from 3% of spend pre-COVID
-    to 22% of spend during COVID")
-  - anomaly_rate_pct   : Isolation Forest flag rate within the cell
-  - new_supplier_rate_pct : is_new_supplier flag rate within the cell
-  - hhi                : Herfindahl-Hirschman Index of supplier concentration
-                          within the cell (same HHI definition used
-                          project-wide in Phase 3, i.e. sum of squared supplier
-                          spend shares x 10,000; see Rhoades, 1993, "The
-                          Herfindahl-Hirschman Index", Federal Reserve
-                          Bulletin, 79, 188-189)
-
-A companion ranking table (category_covid_shock_ranking.csv) sorts categories
-by pre-COVID -> COVID spend growth, to directly identify the categories that
-drove the aggregate STL shock (Phase 3) most.
-
-Reference:
-  National Audit Office (2020). "Investigation into government procurement
-  during the COVID-19 pandemic." HC 959, Session 2019-2021.
+Disaggregates trust-spend records by category and period to identify the
+components of aggregate COVID-era expenditure changes. Each cell reports
+spend, supplier participation, anomaly incidence, new-supplier entry, and the
+Herfindahl-Hirschman Index (HHI) of supplier concentration.
 """
 from __future__ import annotations
 
@@ -44,7 +17,7 @@ from src import config
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 
-MIN_CATEGORY_TRANSACTIONS = 20  # exclude near-empty categories from headline ranking (still in full CSV)
+MIN_CATEGORY_TRANSACTIONS = 20  # Restricts headline rankings to analytically substantive category samples.
 
 
 def load_trust_spend_with_flags() -> pd.DataFrame:
@@ -68,6 +41,7 @@ def load_trust_spend_with_flags() -> pd.DataFrame:
 
 
 def _hhi(spend_by_supplier: pd.Series) -> float:
+    """Return the supplier-spend HHI on the conventional 0–10,000 scale."""
     total = spend_by_supplier.sum()
     if total <= 0:
         return np.nan
@@ -76,6 +50,7 @@ def _hhi(spend_by_supplier: pd.Series) -> float:
 
 
 def build_category_period_table(trust: pd.DataFrame) -> pd.DataFrame:
+    """Estimate descriptive procurement metrics at category-by-period granularity."""
     period_totals = trust.groupby("period")["amount"].sum()
 
     rows = []
@@ -101,8 +76,11 @@ def build_category_period_table(trust: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_covid_shock_ranking(table: pd.DataFrame) -> pd.DataFrame:
-    """Rank categories by pre-COVID -> COVID spend growth to identify which
-    categories drove the aggregate STL shock (Phase 3) most."""
+    """Rank categories by pre-COVID-to-COVID expenditure growth.
+
+    The ranking identifies category-level contributions to the aggregate
+    disruption identified through the monthly STL analysis.
+    """
     pivot = table.pivot(index="category", columns="period", values="total_spend").fillna(0.0)
     n_txn = table.groupby("category")["n_transactions"].sum()
 

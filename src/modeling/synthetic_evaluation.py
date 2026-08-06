@@ -1,45 +1,10 @@
 """
-Phase 4 extension — Synthetic anomaly injection evaluation.
+Phase 4 extension: synthetic anomaly-injection evaluation.
 
-Confidential NAO / NHSCFA case-level audit labels are not publicly available
-(see `src/validation/audit_validation.py`), so this module provides a
-complementary, fully quantitative benchmark: known synthetic anomalies with
-literature-motivated fraud/error signatures are injected into a held-out
-evaluation sample, all four detectors from `method_comparison.py` are
-(re)trained on the same pre-COVID data and scored on the injected sample, and
-genuine precision / recall / F1 / average-precision (PR-AUC) are computed
-against the known injection labels.
-
-This is standard practice for evaluating unsupervised anomaly detectors when
-no real ground truth exists (e.g. Emmott et al., 2013's synthetic-anomaly
-benchmarking methodology; see also the "simulation study" approach in
-https://scholarworks.utrgv.edu/mss_fac/560/).
-
-Three literature-motivated synthetic anomaly types are injected:
-  1. invoice_inflation      — an existing supplier's invoice amount is
-                               multiplied 5-15x (mimics an inflated/duplicate
-                               invoice).
-  2. ghost_vendor_burst     — a "new" supplier (never seen before) receives an
-                               unusually large first payment with no prior
-                               transaction history (classic ghost-vendor /
-                               fictitious-supplier red flag).
-  3. round_number_kickback  — the amount is forced to a suspiciously round
-                               figure (kickback/skimming red flag per
-                               NHSCFA guidance).
-
-IMPORTANT CAVEAT (reported in the dissertation, not hidden): precision here
-is a lower bound, because some records in the "normal" background may
-themselves be genuine anomalies the detectors correctly (but not credited
-for) flagging. Recall against the KNOWN injected anomalies is the more
-reliable of the two headline metrics for this reason.
-
-Baseline comparison (methodological rigour check): a trivial, non-learned
-"new supplier + top-2% amount" heuristic is scored on the same benchmark
-alongside the four learned detectors. The question this answers is whether
-Isolation Forest earns its place as an ML layer, or whether a one-line rule
-captures the same signal just as well -- a fair challenge for any project
-that adds a full unsupervised model on top of features an analyst could
-filter on directly. See `fit_new_supplier_amount_baseline` below.
+Because case-level fraud labels are unavailable, the module injects known
+invoice-inflation, ghost-vendor, and round-amount anomalies into an out-of-time
+sample. Pre-COVID-trained detectors are evaluated against injection labels using
+precision, recall, F1, and average precision (PR-AUC); precision is a lower bound.
 """
 from __future__ import annotations
 
@@ -65,17 +30,9 @@ logger = logging.getLogger(__name__)
 
 INJECTION_TYPES = ["invoice_inflation", "ghost_vendor_burst", "round_number_kickback"]
 
-# Naive, non-learned baseline: "is this a new supplier's transaction, and if
-# so, how large is it relative to its category norm?" Ranks candidate records
-# by amount_zscore_category but ONLY among is_new_supplier==1 records (score
-# is floored to BASELINE_SENTINEL otherwise, so an established-supplier
-# transaction can never be flagged by this rule regardless of size) -- this is
-# exactly rule R3 from audit_validation.py, expressed as a continuous,
-# rankable score so it can be benchmarked on equal footing (same percentile
-# threshold, same PR-AUC/F1 metric) as the four learned detectors above,
-# rather than only compared as a binary flag-overlap count. A large finite
-# sentinel (not -inf) is used because average_precision_score requires finite
-# inputs; it is far below any real amount_zscore_category value.
+# Rule-based comparator: rank new suppliers by within-category amount z-score,
+# while assigning established suppliers a finite sentinel. This operationalises
+# audit rule R3 on the same percentile, F1, and PR-AUC basis as learned detectors.
 EVAL_METHOD_NAMES = METHOD_NAMES + ["new_supplier_amount_baseline"]
 BASELINE_SENTINEL = -1e6
 
@@ -98,7 +55,7 @@ def _inject_ghost_vendor_burst(row: pd.Series, rng: np.random.RandomState, categ
     row = row.copy()
     row["is_new_supplier"] = 1
     row["supplier_txn_seq"] = 1
-    row["days_since_last_txn"] = 0.0  # no prior history for this "supplier"
+    row["days_since_last_txn"] = 0.0  # Encodes absent prior transaction history for the synthetic supplier.
     row["amount"] = max(row["amount"], category_p90) * rng.uniform(1.5, 3.0)
     row["injection_type"] = "ghost_vendor_burst"
     return row
@@ -121,8 +78,7 @@ def build_injected_evaluation_set(panel: pd.DataFrame | None = None) -> pd.DataF
         panel = load_trust_panel()
     df = engineer_features(panel)
 
-    # Evaluate on covid + post-covid records only (pre-covid is the training
-    # window for every detector, so injecting there would contaminate training).
+    # Restrict evaluation to COVID/post-COVID records to prevent contamination of the training baseline.
     eval_pool = df[df["period"] != "pre_covid"].copy()
     n_eval = min(config.SYNTHETIC_EVAL_SAMPLE_SIZE, len(eval_pool))
     eval_sample = eval_pool.sample(n=n_eval, random_state=config.RANDOM_STATE).reset_index(drop=True)
@@ -133,7 +89,7 @@ def build_injected_evaluation_set(panel: pd.DataFrame | None = None) -> pd.DataF
     n_inject = int(round(n_eval * config.SYNTHETIC_INJECTION_RATE))
     inject_idx = rng.choice(eval_sample.index, size=n_inject, replace=False)
 
-    # category-level amount stats (for ghost-vendor sizing + z-score recompute)
+    # Derive category-level amount parameters for ghost-vendor sizing and feature recomputation.
     cat_p90 = df.groupby(["source", "category"])["amount"].quantile(0.90)
     cat_log_mean = df.groupby(["source", "category"])["log_amount"].mean()
     cat_log_std = df.groupby(["source", "category"])["log_amount"].std(ddof=0).fillna(1e-9) + 1e-9
@@ -206,11 +162,7 @@ def run_synthetic_evaluation(panel: pd.DataFrame | None = None) -> pd.DataFrame:
         pct = config.AUTOENCODER_ANOMALY_PERCENTILE if method == "autoencoder" else config.ANOMALY_SCORE_PERCENTILE
         threshold = np.percentile(s, pct)
         if method == "new_supplier_amount_baseline" and threshold <= BASELINE_SENTINEL:
-            # Fewer than (100-pct)% of records clear the sentinel floor (i.e.
-            # fewer than that share of records are even new suppliers) --
-            # there is no way to select a top-(100-pct)% tail under this
-            # rule, so flag every record that clears the floor at all
-            # instead of degenerately flagging the whole eval set.
+            # If too few new suppliers exist, flag only scores above the sentinel to avoid universal flags.
             y_pred = (s > BASELINE_SENTINEL).astype(int)
         else:
             y_pred = (s >= threshold).astype(int)

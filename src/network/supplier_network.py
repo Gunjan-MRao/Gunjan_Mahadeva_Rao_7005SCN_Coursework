@@ -1,37 +1,10 @@
 """
-Phase 4 extension (D) — Supplier-buyer network / collusion-indicator analysis.
+Phase 4 extension: buyer-supplier network analysis.
 
-Two complementary graphs are built from `trust_spend` records:
-
-  1. Bipartite buyer-supplier graph (8 NHS trust buyers x ~7,200 suppliers).
-     Degree and betweenness centrality identify structurally dominant "hub"
-     suppliers; hub status is then cross-referenced against the Isolation
-     Forest anomaly flags to test whether structurally central suppliers are
-     disproportionately anomalous.
-
-  2. One-mode supplier-supplier co-occurrence projection: two suppliers are
-     linked if they both transacted with the same buyer, in the same
-     spend category, in the same calendar month (a proxy "tender pool").
-     Groups above 40 suppliers are excluded as they represent generic
-     catch-all categories rather than meaningful competitive pools.
-     `networkx.algorithms.community.greedy_modularity_communities` (Clauset-
-     Newman-Moore modularity maximisation) then clusters suppliers into
-     communities; tight, recurring co-occurrence clusters are the graph-based
-     analogue of the bid-rotation / cartel signatures described in public
-     procurement fraud literature (Wachs & Kertész 2019; NHSCFA 2022).
-
-`python-louvain` / `community` is not installed in this environment, so
-`networkx`'s built-in greedy-modularity algorithm is used instead — both are
-modularity-maximisation heuristics and are treated as interchangeable for
-this exploratory analysis.
-
-References:
-  - Wachs, J. & Kertész, J. (2019). "A network approach to cartel detection
-    in public auction markets." Scientific Reports.
-  - Freeman, L.C. (1977). "A set of measures of centrality based on
-    betweenness." Sociometry, 40(1), 35-41.
-  - Clauset, A., Newman, M.E.J., Moore, C. (2004). "Finding community
-    structure in very large networks." Physical Review E, 70, 066111.
+A bipartite graph estimates supplier degree and betweenness centrality; hubs
+are suppliers serving at least two buyers or in the highest configured
+transaction-volume percentile. A supplier co-occurrence projection is partitioned
+using greedy modularity community detection to identify recurring procurement pools.
 """
 from __future__ import annotations
 
@@ -47,7 +20,7 @@ from src import config
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
 
-MAX_COOCCURRENCE_GROUP_SIZE = 40  # exclude generic catch-all category/month pools
+MAX_COOCCURRENCE_GROUP_SIZE = 40  # Exclude generic buyer-category-month pools that obscure meaningful co-occurrence.
 
 
 def load_trust_records() -> pd.DataFrame:
@@ -80,8 +53,7 @@ def build_bipartite_graph(trust: pd.DataFrame) -> nx.Graph:
 
 def compute_bipartite_centrality(G: nx.Graph) -> pd.DataFrame:
     degree_centrality = nx.degree_centrality(G)
-    # Approximate betweenness via random-source sampling (k) for tractable
-    # runtime on a graph with several thousand nodes; seeded for reproducibility.
+    # Approximate betweenness through seeded source-node sampling for computational tractability.
     k_sample = min(1000, G.number_of_nodes())
     betweenness_centrality = nx.betweenness_centrality(G, k=k_sample, normalized=True, seed=config.RANDOM_STATE)
 
@@ -97,17 +69,9 @@ def compute_bipartite_centrality(G: nx.Graph) -> pd.DataFrame:
         })
     node_df = pd.DataFrame(rows)
 
-    # NOTE: with only 8 buyer (NHS trust) nodes, the vast majority of supplier
-    # nodes have degree=1 (they serve a single trust), so betweenness
-    # centrality trivially collapses to 0 for most of the graph and a simple
-    # percentile cut on betweenness alone is degenerate. Following the
-    # standard treatment of sparse two-mode/bipartite networks (Borgatti &
-    # Everett, 1997, "Network analysis of 2-mode data", Social Networks 19),
-    # "hub" status is instead operationalised via two complementary,
-    # non-degenerate criteria: (a) multi-trust reach — the supplier serves
-    # >=2 of the 8 trusts, a genuine structural bridge — and (b) transaction
-    # volume centrality — the supplier is in the top NETWORK_HUB_PERCENTILE
-    # of suppliers by total transaction count (a weighted-degree measure).
+    # Sparse two-mode structure makes betweenness degenerate for degree-one suppliers.
+    # Define hubs as multi-buyer suppliers (degree >=2) or high-volume suppliers in
+    # the configured top transaction-count percentile, capturing reach and intensity.
     supplier_mask = node_df["node_type"] == "supplier"
     node_df["is_multi_trust_supplier"] = supplier_mask & (node_df["degree"] >= 2)
 
