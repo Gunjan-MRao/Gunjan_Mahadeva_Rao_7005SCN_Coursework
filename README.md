@@ -1,5 +1,9 @@
 # From Manual to Machine: An Intelligent Anomaly Detection System for UK Public Sector Procurement Spend (2019–2024)
 
+[![Tests](https://github.com/Gunjan-MRao/Gunjan_Mahadeva_Rao_7005SCN_Coursework/actions/workflows/test.yml/badge.svg)](https://github.com/Gunjan-MRao/Gunjan_Mahadeva_Rao_7005SCN_Coursework/actions/workflows/test.yml)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 MSc Data Science coursework (module 7005SCN, Coventry University). Supervisor: Dr. Nahid Salimi.
 
 ## Research question

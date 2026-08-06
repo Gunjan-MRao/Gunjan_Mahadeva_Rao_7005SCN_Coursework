@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software or reference this work, please cite it using the
+  metadata below.
+title: >-
+  From Manual to Machine: An Intelligent Anomaly Detection System for UK
+  Public Sector Procurement Spend (2019-2024)
+type: software
+authors:
+  - family-names: Rao
+    given-names: Gunjan Mahadeva
+date-released: "2026"
+repository-code: >-
+  https://github.com/Gunjan-MRao/Gunjan_Mahadeva_Rao_7005SCN_Coursework
+url: >-
+  https://github.com/Gunjan-MRao/Gunjan_Mahadeva_Rao_7005SCN_Coursework
+license: MIT
+keywords:
+  - anomaly detection
+  - public procurement
+  - NHS
+  - fraud detection
+  - explainable AI
+  - unsupervised learning
