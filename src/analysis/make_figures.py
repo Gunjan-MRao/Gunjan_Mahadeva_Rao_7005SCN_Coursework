@@ -351,7 +351,9 @@ def fig_robustness_checks():
     return out
 
 
-def main():
+def run_make_figures():
+    """Generate all report figures. Called both by `python -m src.analysis.make_figures`
+    and as Phase 7F of `python -m src.run_pipeline`."""
     paths = [
         fig_stl_decomposition(),
         fig_hhi_trend(),
@@ -368,6 +370,11 @@ def main():
     ]
     for p in paths:
         print("Saved:", p)
+    return paths
+
+
+# Backward-compatible alias for direct-script usage.
+main = run_make_figures
 
 
 if __name__ == "__main__":

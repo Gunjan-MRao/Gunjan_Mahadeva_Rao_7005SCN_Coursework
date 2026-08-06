@@ -167,10 +167,15 @@ def build_dim_period() -> pd.DataFrame:
     and overall anomaly-rate numbers (Phase 4), for the dashboard's top-level
     KPI cards and period filter."""
     stl = pd.read_csv(config.STL_PATH)
-    scores = pd.read_csv(config.ANOMALY_SCORES_PATH, usecols=["period", "is_anomaly"])
-    anomaly_rate = scores.groupby("period")["is_anomaly"].mean().mul(100).round(3).rename("ml_anomaly_rate_pct")
+    try:
+        scores = pd.read_csv(config.ANOMALY_SCORES_PATH, usecols=["period", "is_anomaly"])
+        anomaly_rate = scores.groupby("period")["is_anomaly"].mean().mul(100).round(3).rename("ml_anomaly_rate_pct")
+        dim = stl.merge(anomaly_rate, on="period", how="left")
+    except FileNotFoundError:
+        logger.warning("Anomaly scores file not found -- dim_period will omit ml_anomaly_rate_pct column.")
+        dim = stl.copy()
+        dim["ml_anomaly_rate_pct"] = np.nan
 
-    dim = stl.merge(anomaly_rate, on="period", how="left")
     label_map = {"pre_covid": "Pre-COVID", "covid": "COVID", "post_covid": "Post-COVID"}
     dim["period_label"] = dim["period"].map(label_map).fillna(dim["period"])
     order = {"pre_covid": 0, "covid": 1, "post_covid": 2}

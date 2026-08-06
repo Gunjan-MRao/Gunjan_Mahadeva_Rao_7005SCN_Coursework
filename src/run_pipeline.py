@@ -37,6 +37,7 @@ from src.analysis.category_deep_dive import run_category_deep_dive
 from src.analysis.robustness_checks import run_robustness_checks
 from src.analysis.bi_export import run_bi_export
 from src.analysis.dashboard import run_dashboard
+from src.analysis.make_figures import run_make_figures
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -131,6 +132,11 @@ def main():
     logger.info("PHASE 7E — Interactive Plotly Dashboard")
     logger.info("=" * 70)
     dashboard_path = run_dashboard()
+
+    logger.info("=" * 70)
+    logger.info("PHASE 7F — Generate Report Figures")
+    logger.info("=" * 70)
+    run_make_figures()
 
     elapsed = time.time() - t0
     logger.info("=" * 70)
