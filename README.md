@@ -6,11 +6,18 @@
 
 This repository documents MSc Data Science coursework for module 7005SCN at Coventry University, supervised by Dr. Nahid Salimi.
 
-## Research question
+## Research questions
 
-> To what extent can unsupervised anomaly detection models trained on pre-COVID NHS procurement data identify anomalous spending patterns during and after COVID-19, and how can explainable AI improve interpretation of the detected anomalies?
+> **RQ1 — Spend intelligence & COVID-19 disruption.**
+> What patterns exist in supplier concentration, spend distribution, and data quality across NHS procurement bodies (2019–2024), and how significantly did COVID-19 disrupt baseline spending behaviours?
 
-The repository provides the end-to-end empirical workflow required to address this question: data engineering, exploratory and shock analysis, unsupervised anomaly detection, SHAP-based explanation, and proxy validation against literature-derived audit red-flag criteria.
+> **RQ2 — Anomaly detection.**
+> Can unsupervised machine-learning models trained exclusively on pre-COVID NHS procurement data reliably detect anomalous spending patterns during and after the pandemic, and how does detection performance vary across methods?
+
+> **RQ3 — Explainability & actionable insight.**
+> To what extent can SHAP-based explainability convert black-box anomaly scores into auditable, prioritised procurement-risk signals, and what operational recommendations follow for NHS procurement efficiency, transparency, and risk management?
+
+The repository provides the end-to-end empirical workflow required to address these questions: data engineering, exploratory and shock analysis, unsupervised anomaly detection, SHAP-based explanation, multi-method benchmarking, supplier network analysis, composite risk scoring, and proxy validation against literature-derived audit red-flag criteria.
 
 ## What this means in practice (for non-technical readers)
 
@@ -261,16 +268,4 @@ Notes:
 - NHS Counter Fraud Authority. (2022). *Preventing Procurement Fraud in the NHS*. https://cfa.nhs.uk/resources/downloads/documents/fraud-reports/Preventing_procurement.pdf
 - NHS Counter Fraud Authority. (2026). *Buying Goods and Services (Quick Reference Guide)*. https://cfa.nhs.uk/resources/downloads/guidance/fraud-awareness/quick-reference-guides/Buying_goods-and-services.pdf
 - Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying Density-Based Local Outliers. *Proceedings of the 2000 ACM SIGMOD International Conference on Management of Data*, 93–104. https://doi.org/10.1145/335191.335388
-- Schölkopf, B., Platt, J. C., Shawe-Taylor, J., Smola, A. J., & Williamson, R. C. (2001). Estimating the Support of a High-Dimensional Distribution. *Neural Computation*, 13(7), 1443–1471. https://is.mpg.de/publications/970
-- Borgatti, S. P., & Everett, M. G. (1997). Network Analysis of 2-Mode Data. *Social Networks*, 19(3), 243–269. https://works.bepress.com/steveborgatti/17/
-- Clauset, A., Newman, M. E. J., & Moore, C. (2004). Finding Community Structure in Very Large Networks. *Physical Review E*, 70, 066111. https://arxiv.org/abs/cond-mat/0408187
-- Freeman, L. C. (1977). A Set of Measures of Centrality Based on Betweenness. *Sociometry*, 40(1), 35–41. https://doi.org/10.2307/3033543
-- Agyemang, E. F. (2024). Anomaly Detection Using Unsupervised Machine Learning Algorithms: A Simulation Study. *Scientific African*. https://scholarworks.utrgv.edu/mss_fac/560/
-- Victor, A. O., Sales, L. A. M., Moreira, R. S., de Moraes, C. E. C., Lima, L. G., Rocha, J. F., Contursi, B. S. N., & Meirelles, T. (2024). Graph Data Mining for Detecting Collusions in Bidding Processes: A Case Study. *Anais Estendidos do XXXIX Simpósio Brasileiro de Bancos de Dados (SBBD 2024)*. https://sol.sbc.org.br/index.php/sbbd_estendido/article/download/30799/30602
-- Lyra, M. (2024). Public Procurement Fraud Detection: A Review Using Network Analysis. https://www.academia.edu/125244008/Public_Procurement_Fraud_Detection_A_Review_Using_Network_Analysis
-- Fazekas, M., Tóth, I. J., & King, L. P. (2016). An Objective Corruption Risk Index Using Public Procurement Data. *European Journal on Criminal Policy and Research*, 22(3), 369–397. https://doi.org/10.1007/s10610-016-9308-z
-- Abdou, A., Basdevant, O., Dávid-Barrett, E., & Fazekas, M. (2022). Assessing Vulnerabilities to Corruption in Public Procurement and Their Price Impact. IMF Working Paper No. 2022/094. https://www.imf.org/en/publications/wp/issues/2022/05/20/assessing-vulnerabilities-to-corruption-in-public-procurement-and-their-price-impact-518197
-- National Audit Office. (2020). Investigation into Government Procurement during the COVID-19 Pandemic. HC 959, Session 2019–2021. https://www.nao.org.uk/wp-content/uploads/2020/11/Investigation-into-government-procurement-during-the-COVID-19-pandemic.pdf
-- Rhoades, S. A. (1993). The Herfindahl-Hirschman Index. *Federal Reserve Bulletin*, 79(3), 188–189.
-- Aggarwal, C. C. (2017). *Outlier Analysis* (2nd ed.). Springer. https://doi.org/10.1007/978-3-319-47578-3
-- Emmott, A., Das, S., Dietterich, T., Fern, A., & Wong, W.-K. (2015). A Meta-Analysis of the Anomaly Detection Problem. arXiv:1503.01158. https://arxiv.org/abs/1503.01158
+- Schölkopf, B., Platt, J. C., Shawe-Taylor, J., Smola, A. J.
