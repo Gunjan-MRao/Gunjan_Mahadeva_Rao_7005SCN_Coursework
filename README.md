@@ -19,9 +19,9 @@ This repository documents MSc Data Science coursework for module 7005SCN at Cove
 
 The repository provides the end-to-end empirical workflow required to address these questions: data engineering, exploratory and shock analysis, unsupervised anomaly detection, SHAP-based explanation, multi-method benchmarking, supplier network analysis, composite risk scoring, and proxy validation against literature-derived audit red-flag criteria.
 
-## What this means in practice (for non-technical readers)
+## What this means in practice?
 
-The subsequent sections are written for a data-science audience. This section states the corresponding operational interpretation for procurement and audit stakeholders without requiring direct examination of the codebase.
+This section states the corresponding operational interpretation for procurement and audit stakeholders.
 
 **The one-sentence finding.** Procurement transactions most frequently depart from the pre-pandemic statistical baseline when they occur early in a buyer–supplier relationship. The anomaly-detection model therefore identifies relationship novelty, rather than payment size or the scale of established suppliers, as the predominant anomaly characteristic; this pattern has become more prevalent and more persistent since COVID-19, with persistence observed beyond the acute period.
 
