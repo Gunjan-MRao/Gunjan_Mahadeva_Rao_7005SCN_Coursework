@@ -8,13 +8,13 @@ This repository documents MSc Data Science coursework for module 7005SCN at Cove
 
 ## Research questions
 
-> **RQ1 — Spend intelligence & COVID-19 disruption.**
+> **RQ1. Spend intelligence & COVID-19 disruption.**
 > What patterns exist in supplier concentration, spend distribution, and data quality across NHS procurement bodies (2019–2024), and how significantly did COVID-19 disrupt baseline spending behaviours?
 
-> **RQ2 — Anomaly detection.**
+> **RQ2. Anomaly detection.**
 > Can unsupervised machine-learning models trained exclusively on pre-COVID NHS procurement data reliably detect anomalous spending patterns during and after the pandemic, and how does detection performance vary across methods?
 
-> **RQ3 — Explainability & actionable insight.**
+> **RQ3. Explainability & actionable insight.**
 > To what extent can SHAP-based explainability convert black-box anomaly scores into auditable, prioritised procurement-risk signals, and what operational recommendations follow for NHS procurement efficiency, transparency, and risk management?
 
 The repository provides the end-to-end empirical workflow required to address these questions: data engineering, exploratory and shock analysis, unsupervised anomaly detection, SHAP-based explanation, multi-method benchmarking, supplier network analysis, composite risk scoring, and proxy validation against literature-derived audit red-flag criteria.
