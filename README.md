@@ -189,9 +189,7 @@ Figures (see `docs/figures/`):
 
 ## Data representation / BI dashboard
 
-In addition to the CSV and figure outputs, the project provides a BI-oriented data representation: a star-schema CSV export (`data/processed/bi_export/`: `fact_transactions.csv` plus `dim_supplier.csv`, `dim_category.csv`, `dim_period.csv`, `dim_month.csv`) and a self-contained interactive dashboard (`reports/nhs_procurement_dashboard.html`) that reproduces a Tableau/Power BI-style multi-panel layout in a browser without requiring BI software.
-
-**Stated limitation:** a native Power BI `.pbix` file is a proprietary binary format that no Python library can generate, and a Tableau `.twbx` file, while technically a buildable zip archive, cannot be validated to open correctly without Tableau installed. The project consequently supplies the CSV export, the functioning HTML dashboard, and [`docs/bi_dashboard_guide.md`](docs/bi_dashboard_guide.md). This is a field-by-field guide for reconstructing the dashboard natively in Power BI Desktop or Tableau Desktop from the exported CSVs.
+In addition to the CSV and figure outputs, the project provides a BI-oriented data representation: a star-schema CSV export (`data/processed/bi_export/`: `fact_transactions.csv` plus `dim_supplier.csv`, `dim_category.csv`, `dim_period.csv`, `dim_month.csv`) and a self-contained interactive dashboard (`reports/nhs_procurement_dashboard.html`) that reproduces a Power BI-style multi-panel layout in a browser without requiring BI software.
 
 ## Reproducing the results
 
@@ -240,10 +238,10 @@ python -m src.data_engineering.build_raw_from_drive --force   # always rebuild
 
 Notes:
 
-- No credentials or API key are needed (the folder is shared "anyone with the link"); `gdown` is the only extra dependency.
+- No credentials are needed (the folder is shared "anyone with the link"); `gdown` is the only extra dependency.
 - Only the files actually used are downloaded (~500MB): the `.csv` publication of each month rather than its `.xls`/`.xlsx` duplicate, and only `main.csv`/`awards.csv`/`awards_suppliers.csv` from each year of the Contracts Finder export (the other 10 files per year are large and unused). Downloads are cached in `data/_raw_staging/` (gitignored), so re-runs only fetch what is missing.
 - Anonymous Drive access is rate-limited, so a first full run may log per-file failures and retries; individual failures are skipped rather than aborting the run, and simply re-running the module fills the gaps.
-- Despite the historical `_clean.csv` filenames, Phase 1's outputs are **consolidated raw**, rather than analytically clean: the stage only concatenates monthly files and standardises column names. All cleaning (dropna, mixed date parsing, amount coercion, deduplication) remains in `loaders.py`/`clean_merge.py`.
+- Despite the `_clean.csv` filenames, Phase 1's outputs are **consolidated raw**, rather than analytically clean: the stage only concatenates monthly files and standardises column names. All cleaning (dropna, mixed date parsing, amount coercion, deduplication) remains in `loaders.py`/`clean_merge.py`.
 
 **Contracts Finder caveat.** The Drive archive contains the *full UK national* Contracts Finder export (~50,000–77,000 notices per year across every public-sector buyer), rather than a health-only extract. Phase 1 therefore applies a keyword filter (`nhs|health|hospital|clinical|ambulance|blood|commissioning support|...` against buyer name, tender title and description) to define a health-sector subset. This is a documented **best-effort reconstruction** of the original bespoke extract rather than a byte-exact replay: it recovers 99.9% of the rows in the original `contracts_clean.csv` but is deliberately broader, admitting adjacent health buyers (Public Health England, DHSC, Health Education England, devolved health boards) excluded by the original extract. Contract-notice row counts consequently differ from the legacy file; trust-spend rows and all Isolation Forest anomaly statistics are unaffected because `load_contracts_finder()` contributes only `record_type == "contract_notice"` rows and the detector is trained and scored on trust spend only. See `docs/dissertation_sections.md` → "Phase 1" for the full quantified comparison and limitation statement.
 
